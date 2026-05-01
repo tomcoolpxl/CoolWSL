@@ -1,1 +1,0 @@
-C:\Users\thraa\github\CoolWSL\CoolWSL.App\CoolWSL.App.csproj;x64
