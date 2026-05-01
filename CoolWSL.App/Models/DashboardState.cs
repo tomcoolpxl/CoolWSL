@@ -16,6 +16,7 @@ public sealed record DashboardState(
     string RefreshStatus,
     string? WarningText,
     string? SuggestedNextStep,
+    string? DefaultDistroName,
     DateTimeOffset? LastUpdatedAt,
     bool IsLoading,
     bool HasLoaded,
@@ -37,6 +38,7 @@ public sealed record DashboardState(
         null,
         null,
         null,
+        null,
         false,
         false,
         Array.Empty<DashboardDistroRow>());
@@ -50,6 +52,12 @@ public sealed record DashboardState(
     public bool HasSuggestedNextStep => !string.IsNullOrWhiteSpace(SuggestedNextStep);
 
     public bool HasWarning => !string.IsNullOrWhiteSpace(WarningText);
+
+    public bool HasDefaultDistro => !string.IsNullOrWhiteSpace(DefaultDistroName);
+
+    public bool CanOpenDefaultDistro => HasDefaultDistro && HasLoaded;
+
+    public bool CanShutdownAll => Distros.Any(static distro => distro.IsRunning);
 
     public static DashboardState Create(DashboardStatusSnapshot snapshot, DateTimeOffset refreshedAt)
     {
@@ -74,6 +82,7 @@ public sealed record DashboardState(
             BuildRefreshStatus(refreshedAt),
             warningText,
             suggestedNextStep,
+            environmentStatus.DefaultDistroName,
             refreshedAt,
             false,
             true,
@@ -267,8 +276,48 @@ public sealed record DashboardState(
             distro.Name,
             distro.StateLabel,
             distro.WslVersion?.ToString(CultureInfo.InvariantCulture) ?? MissingValueLabel,
-            distro.IsDefault ? "Default" : string.Empty);
+            distro.IsDefault ? "Default" : string.Empty,
+            distro.IsSystemManaged ? "System-managed" : string.Empty,
+            BuildCapabilityMessage(distro),
+            distro.IsRunning,
+            distro.IsDefault,
+            distro.IsSystemManaged);
+    }
+
+    private static string BuildCapabilityMessage(WslDistro distro)
+    {
+        if (distro.IsSystemManaged)
+        {
+            return "System-managed distros stay visible, but terminate and set-default actions stay disabled by default.";
+        }
+
+        if (distro.IsRunning)
+        {
+            return "The distro is running and ready for lifecycle actions.";
+        }
+
+        return "The distro is stopped. Start it or open a terminal to launch it.";
     }
 }
 
-public sealed record DashboardDistroRow(string Name, string State, string WslVersion, string DefaultLabel);
+public sealed record DashboardDistroRow(
+    string Name,
+    string State,
+    string WslVersion,
+    string DefaultLabel,
+    string ManagementLabel,
+    string CapabilityMessage,
+    bool IsRunning,
+    bool IsDefault,
+    bool IsSystemManaged)
+{
+    public bool CanOpen => true;
+
+    public bool CanStart => !IsRunning;
+
+    public bool CanTerminate => IsRunning && !IsSystemManaged;
+
+    public bool CanSetDefault => !IsDefault && !IsSystemManaged;
+
+    public bool HasManagementLabel => !string.IsNullOrWhiteSpace(ManagementLabel);
+}

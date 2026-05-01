@@ -1,5 +1,8 @@
 using CoolWSL.Core.Abstractions;
+using CoolWSL.Core.Services;
 using CoolWSL.Core.Models;
+using CoolWSL.Wsl.Commands;
+using CoolWSL.Wsl.Errors;
 using CoolWSL.Wsl.Parsing;
 using CoolWSL.Wsl.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -31,7 +34,7 @@ public sealed class WslDistroServiceTests
                     1,
                     new WslCommandError(WslErrorKind.UnsupportedFeature, "This WSL installation does not support that command.")),
             });
-        var service = new WslDistroService(commandService, new WslListParser(), new WslStatusParser());
+                var service = CreateService(commandService);
 
         var result = await service.GetEnvironmentStatusAsync();
 
@@ -56,7 +59,7 @@ public sealed class WslDistroServiceTests
                     string.Empty,
                     0),
             });
-        var service = new WslDistroService(commandService, new WslListParser(), new WslStatusParser());
+        var service = CreateService(commandService);
 
         var result = await service.GetDistroInventoryAsync();
 
@@ -64,6 +67,56 @@ public sealed class WslDistroServiceTests
         Assert.AreEqual(0, result.Distros.Count);
         Assert.IsFalse(result.IsDegraded);
     }
+
+    [TestMethod]
+    public async Task TerminateDistroAsync_RunsTerminateCommand()
+    {
+        var command = WslCommandFactory.CreateTerminateDistroCommand("Ubuntu Dev");
+        var expectedResult = CommandResult.Succeeded(
+            command,
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch.AddSeconds(1),
+            string.Empty,
+            string.Empty,
+            0);
+        var commandService = new StubWslCommandService(
+            new Dictionary<string, CommandResult>(StringComparer.Ordinal)
+            {
+                [command.CommandText] = expectedResult,
+            });
+        var service = CreateService(commandService);
+
+        var result = await service.TerminateDistroAsync("Ubuntu Dev");
+
+        Assert.AreSame(expectedResult, result);
+    }
+
+    [TestMethod]
+    public async Task RunInDistroAsync_RunsShellCommandWithSelectedTimeout()
+    {
+        var timeout = TimeSpan.FromSeconds(45);
+        var command = WslCommandFactory.CreateRunInDistroCommand("Ubuntu Dev", "echo hello", timeout);
+        var expectedResult = CommandResult.Succeeded(
+            command,
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch.AddSeconds(1),
+            "hello",
+            string.Empty,
+            0);
+        var commandService = new StubWslCommandService(
+            new Dictionary<string, CommandResult>(StringComparer.Ordinal)
+            {
+                [command.CommandText] = expectedResult,
+            });
+        var service = CreateService(commandService);
+
+        var result = await service.RunInDistroAsync("Ubuntu Dev", "echo hello", timeout);
+
+        Assert.AreSame(expectedResult, result);
+    }
+
+    private static WslDistroService CreateService(IWslCommandService commandService)
+        => new(commandService, new WslErrorMapper(), new WslListParser(), new WslStatusParser(), new NullAppLogger(), TimeProvider.System);
 
     private sealed class StubWslCommandService : IWslCommandService
     {

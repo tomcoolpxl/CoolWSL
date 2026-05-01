@@ -39,6 +39,18 @@ public sealed partial class ShellPage : Page
             return;
         }
 
+        if (section == AppSection.Distros)
+        {
+            ContentFrame.Navigate(typeof(DistroPage));
+            return;
+        }
+
+        if (section == AppSection.Diagnostics)
+        {
+            ContentFrame.Navigate(typeof(DiagnosticsPage));
+            return;
+        }
+
         ContentFrame.Navigate(typeof(PlaceholderPage), section);
     }
 }

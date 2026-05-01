@@ -1,5 +1,6 @@
 using CoolWSL.App.Services;
 using CoolWSL.App.ViewModels;
+using CoolWSL.Core.Abstractions;
 using CoolWSL.Core.Models;
 using CoolWSL.Diagnostics.Status;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,6 +15,7 @@ public sealed class DashboardViewModelTests
     {
         var viewModel = new DashboardViewModel(
             new SequenceDashboardStatusService(_ => Task.FromResult(CreateSnapshot("Ubuntu", "2.5.9"))),
+            new StubWslDistroService(),
             new RefreshCoordinator());
 
         await viewModel.RefreshAsync();
@@ -39,6 +41,7 @@ public sealed class DashboardViewModelTests
                     return CreateSnapshot("Ubuntu", "2.4.0");
                 },
                 _ => Task.FromResult(CreateSnapshot("Debian", "2.5.0"))),
+            new StubWslDistroService(),
             new RefreshCoordinator());
 
         var firstRefresh = viewModel.RefreshAsync();
@@ -53,7 +56,33 @@ public sealed class DashboardViewModelTests
         Assert.AreEqual("2.5.0", viewModel.State.WslVersion);
     }
 
-    private static DashboardStatusSnapshot CreateSnapshot(string distroName, string wslVersion)
+    [TestMethod]
+    public async Task StartDistroAsync_SetsActionStatusAndRefreshesInventory()
+    {
+        var viewModel = new DashboardViewModel(
+            new SequenceDashboardStatusService(
+                _ => Task.FromResult(CreateSnapshot("Ubuntu", "2.5.9", isRunning: false)),
+                _ => Task.FromResult(CreateSnapshot("Ubuntu", "2.5.9", isRunning: true))),
+            new StubWslDistroService
+            {
+                StartDistroResult = CommandResult.Succeeded(
+                    new WslCommand("wsl.exe", new[] { "--distribution", "Ubuntu", "--exec", "/bin/sh", "-lc", ":" }),
+                    DateTimeOffset.UnixEpoch,
+                    DateTimeOffset.UnixEpoch.AddSeconds(1),
+                    string.Empty,
+                    string.Empty,
+                    0),
+            },
+            new RefreshCoordinator());
+
+        await viewModel.RefreshAsync();
+        await viewModel.StartDistroAsync("Ubuntu");
+
+        Assert.AreEqual("Started Ubuntu.", viewModel.ActionStatusText);
+        Assert.IsTrue(viewModel.State.Distros.Single().IsRunning);
+    }
+
+    private static DashboardStatusSnapshot CreateSnapshot(string distroName, string wslVersion, bool isRunning = true)
     {
         return new(
             new(
@@ -71,7 +100,7 @@ public sealed class DashboardViewModelTests
                 WslAvailability.Available,
                 new[]
                 {
-                    new WslDistro(distroName, WslDistroState.Running, "Running", 2, true),
+                    new WslDistro(distroName, isRunning ? WslDistroState.Running : WslDistroState.Stopped, isRunning ? "Running" : "Stopped", 2, true),
                 },
                 "Loaded WSL distro inventory."));
     }
@@ -89,5 +118,37 @@ public sealed class DashboardViewModelTests
         {
             return responses.Dequeue().Invoke(cancellationToken);
         }
+    }
+
+    private sealed class StubWslDistroService : IWslDistroService
+    {
+        public CommandResult? StartDistroResult { get; init; }
+
+        public Task<WslDistroInventory> GetDistroInventoryAsync(CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+
+        public Task<WslEnvironmentStatus> GetEnvironmentStatusAsync(CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+
+        public Task<CommandResult> OpenDefaultDistroAsync(CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+
+        public Task<CommandResult> OpenDistroAsync(string distroName, CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+
+        public Task<CommandResult> StartDistroAsync(string distroName, CancellationToken cancellationToken = default)
+            => Task.FromResult(StartDistroResult ?? CommandResult.Succeeded(new WslCommand("wsl.exe", Array.Empty<string>()), DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch, string.Empty, string.Empty, 0));
+
+        public Task<CommandResult> TerminateDistroAsync(string distroName, CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+
+        public Task<CommandResult> SetDefaultDistroAsync(string distroName, CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+
+        public Task<CommandResult> ShutdownAsync(CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+
+        public Task<CommandResult> RunInDistroAsync(string distroName, string commandText, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
     }
 }

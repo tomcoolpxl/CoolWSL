@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:models="using:CoolWSL.App.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <ScrollViewer>
@@ -18,11 +19,19 @@
                     <TextBlock FontSize="28" FontWeight="SemiBold" Text="Dashboard" />
                     <TextBlock
                         Opacity="0.72"
-                        Text="Read-only WSL environment status and distro inventory."
+                        Text="WSL environment status, distro inventory, and safe lifecycle actions."
                         TextWrapping="WrapWholeWords" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="8">
+                    <Button
+                        Content="Open Default Distro"
+                        Click="OnOpenDefaultClick"
+                        IsEnabled="{x:Bind ViewModel.State.CanOpenDefaultDistro, Mode=OneWay}" />
+                    <Button
+                        Content="Shutdown All WSL"
+                        Click="OnShutdownAllClick"
+                        IsEnabled="{x:Bind ViewModel.State.CanShutdownAll, Mode=OneWay}" />
                     <Button
                         Content="Refresh"
                         Click="OnRefreshClick"
@@ -35,6 +44,7 @@
             </Grid>
 
             <TextBlock Text="{x:Bind ViewModel.State.RefreshStatus, Mode=OneWay}" />
+            <TextBlock Text="{x:Bind ViewModel.ActionStatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
 
             <Border Padding="20">
                 <StackPanel Spacing="16">
@@ -80,29 +90,42 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="3*" />
                         </Grid.ColumnDefinitions>
 
                         <TextBlock FontWeight="SemiBold" Text="Name" />
                         <TextBlock Grid.Column="1" FontWeight="SemiBold" Text="State" />
                         <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Version" />
                         <TextBlock Grid.Column="3" FontWeight="SemiBold" Text="Default" />
+                        <TextBlock Grid.Column="4" FontWeight="SemiBold" Text="Actions" />
                     </Grid>
 
                     <ItemsControl ItemsSource="{x:Bind ViewModel.State.Distros, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="models:DashboardDistroRow">
                                 <Grid Margin="0,6,0,6" ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="2*" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="3*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Text="{Binding Name}" TextWrapping="WrapWholeWords" />
-                                    <TextBlock Grid.Column="1" Text="{Binding State}" />
-                                    <TextBlock Grid.Column="2" Text="{Binding WslVersion}" />
-                                    <TextBlock Grid.Column="3" Text="{Binding DefaultLabel}" />
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="{x:Bind Name}" TextWrapping="WrapWholeWords" />
+                                        <TextBlock x:Name="ManagementLabelBlock" x:Load="{x:Bind HasManagementLabel}" Opacity="0.72" Text="{x:Bind ManagementLabel}" TextWrapping="WrapWholeWords" />
+                                        <TextBlock Opacity="0.72" Text="{x:Bind CapabilityMessage}" TextWrapping="WrapWholeWords" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{x:Bind State}" />
+                                    <TextBlock Grid.Column="2" Text="{x:Bind WslVersion}" />
+                                    <TextBlock Grid.Column="3" Text="{x:Bind DefaultLabel}" />
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8">
+                                        <Button Click="OnOpenDistroClick" Content="Open" />
+                                        <Button Click="OnStartDistroClick" Content="Start" IsEnabled="{x:Bind CanStart}" />
+                                        <Button Click="OnTerminateDistroClick" Content="Terminate" IsEnabled="{x:Bind CanTerminate}" />
+                                        <Button Click="OnSetDefaultClick" Content="Set Default" IsEnabled="{x:Bind CanSetDefault}" />
+                                    </StackPanel>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

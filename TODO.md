@@ -2,35 +2,14 @@
 
 ## Current Phase
 
-### Phase 5 - Safe lifecycle actions delivered
-
-- [ ] Add open, start, terminate, set default, and shutdown actions to the dashboard and per-distro header.
-- [ ] Add confirmation dialogs for terminate and shutdown all with clear target and consequence text.
-- [ ] Disable invalid lifecycle actions and surface plain-language error results when an action fails.
-- [ ] Add automated coverage for lifecycle command construction and manual checks for the confirmation flows.
-
-## Remaining Plan Items
-
-### Phase 6 - Per-distro overview and command runner delivered
-
-- [ ] Build the per-distro page header that shows name, state, WSL version, and default indicator.
-- [ ] Add the command runner with run, cancel, timeout, stdout, stderr, exit code, and session history.
-- [ ] Keep command output readable and clearly separated by channel in the UI.
-- [ ] Add automated coverage for run-in-distro behavior and manual checks for success, failure, timeout, and cancellation flows.
-
-### Phase 7 - MVP diagnostics delivered
-
-- [ ] Add the diagnostics page and service that run the required global and per-distro diagnostic checks.
-- [ ] Map diagnostic results to plain-language summaries while keeping raw output visible.
-- [ ] Add retry behavior and failure handling for partial or unsupported diagnostic results.
-- [ ] Add automated coverage for diagnostic result mapping and manual checks for healthy and failing scenarios.
-
 ### Phase 8 - Raw global WSL configuration editor delivered
 
 - [ ] Add the raw .wslconfig editor with load, create-if-missing, save, revert, and conservative validation behavior.
 - [ ] Create backups before every global config overwrite and expose the backup path clearly to the user.
 - [ ] Show clear restart-required messaging without automatically shutting down WSL.
 - [ ] Add automated coverage for parse, serialize, backup, revert, and malformed-config handling.
+
+## Remaining Plan Items
 
 ### Phase 9 - Raw per-distro WSL configuration editor delivered
 

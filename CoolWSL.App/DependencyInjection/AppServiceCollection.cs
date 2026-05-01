@@ -23,10 +23,15 @@ public static class AppServiceCollection
 
         services.AddSingleton<RefreshCoordinator>();
         services.AddSingleton<DashboardViewModel>();
+        services.AddSingleton<CommandRunnerViewModel>();
+        services.AddSingleton<DistroViewModel>();
+        services.AddSingleton<DiagnosticsViewModel>();
         services.AddSingleton<ShellViewModel>();
         services.AddSingleton<MainWindow>();
         services.AddTransient<ShellPage>();
         services.AddTransient<Views.DashboardPage>();
+        services.AddTransient<Views.DistroPage>();
+        services.AddTransient<Views.DiagnosticsPage>();
         services.AddTransient<Views.PlaceholderPage>();
 
         return services.BuildServiceProvider();

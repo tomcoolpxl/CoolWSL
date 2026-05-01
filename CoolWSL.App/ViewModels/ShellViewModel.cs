@@ -8,9 +8,9 @@ public sealed class ShellViewModel
     {
         Sections =
         [
-            new NavigationItem(AppSection.Dashboard, "Dashboard", "Global WSL status and distro inventory."),
-            new NavigationItem(AppSection.Distros, "Distros", "Per-distro management will land in later phases."),
-            new NavigationItem(AppSection.Diagnostics, "Diagnostics", "Global and per-distro diagnostics will appear here."),
+            new NavigationItem(AppSection.Dashboard, "Dashboard", "Global WSL status, distro inventory, and lifecycle actions."),
+            new NavigationItem(AppSection.Distros, "Distros", "Per-distro overview, command runner, and targeted diagnostics."),
+            new NavigationItem(AppSection.Diagnostics, "Diagnostics", "Global WSL diagnostics with raw evidence and per-distro checks."),
             new NavigationItem(AppSection.Logs, "Logs", "Metadata-only activity history will appear here."),
             new NavigationItem(AppSection.Settings, "Settings", "Global app preferences will appear here."),
         ];

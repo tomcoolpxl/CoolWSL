@@ -40,7 +40,15 @@ public sealed class CommandResult
 
     public TimeSpan Duration => EndedAt - StartedAt;
 
-    public bool IsSuccess => Status == CommandExecutionStatus.Succeeded;
+    public bool IsSuccess =>
+        Status == CommandExecutionStatus.Succeeded ||
+        Status == CommandExecutionStatus.Launched;
+
+    public static CommandResult Launched(
+        WslCommand command,
+        DateTimeOffset startedAt,
+        DateTimeOffset endedAt)
+        => new(command, CommandExecutionStatus.Launched, startedAt, endedAt, string.Empty, string.Empty, null, null);
 
     public static CommandResult Succeeded(
         WslCommand command,

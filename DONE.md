@@ -34,3 +34,27 @@
 - Added focused automated coverage for healthy, unavailable, no-distro, degraded, and refresh-race dashboard states plus DI coverage for the new dashboard status service.
 - Verified `dotnet build .\CoolWSL.sln -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, and `dotnet run --project CoolWSL.App/CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` on 2026-05-01.
 - Completed a Windows UI Automation spot check that confirmed the running dashboard exposes readable status text and a keyboard-focusable `Refresh` button.
+
+## Phase 5 - Safe lifecycle actions delivered
+
+- Extended `IWslDistroService`, `WslCommandFactory`, and `WslDistroService` with open-default, open-distro, start, terminate, set-default, shutdown, and in-distro execution operations while preserving shell-safe argument handling.
+- Added dashboard and per-distro lifecycle controls with capability gating for running, default, and system-managed distros plus plain-language action status feedback.
+- Added shared `OperationRequest` and `OperationConfirmationDialog` flows for terminate and shutdown-all confirmations with explicit target and impact text.
+- Added focused automated coverage for lifecycle command construction, service execution, dashboard action refresh behavior, and DI registration.
+- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug`, `dotnet build .\CoolWSL.sln -c Debug`, and `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj` on 2026-05-01.
+
+## Phase 6 - Per-distro overview and command runner delivered
+
+- Added the Distros navigation surface with a per-distro header that shows name, state, WSL version, default status, management status, and lifecycle capability messaging.
+- Added the per-distro command runner with run, cancel, timeout, stdout, stderr, exit code, and per-distro in-memory session history.
+- Fixed the command-runner cancellation status race so a completed cancelled result is not overwritten by the transient cancelling message.
+- Added focused automated coverage for successful, timed-out, and cancelled in-distro command execution flows.
+- Verified `dotnet build .\CoolWSL.sln -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, and a Windows UI Automation spot check that confirmed the Distros page renders and is reachable from shell navigation on 2026-05-01.
+
+## Phase 7 - MVP diagnostics delivered
+
+- Added `IDiagnosticsService`, `DiagnosticsService`, `DiagnosticsSnapshot`, `DiagnosticResult`, `DiagnosticSeverity`, and `DiagnosticSummaryMapper` to collect global WSL diagnostics plus per-distro DNS and internet probes.
+- Added the Diagnostics page and the per-distro diagnostics section on the Distros page with plain-language summaries, raw evidence, retry controls, and conservative handling for unsupported probe tools and degraded WSL metadata.
+- Fixed the WinUI XAML compiler blocker without dropping compiled bindings by bringing all `x:Load` usages on the new pages into compliance with the documented `x:Name` requirement.
+- Added focused automated coverage for diagnostics selection, default-distro fallback, warning/error mapping, and service registration.
+- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug`, `dotnet build .\CoolWSL.sln -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1`, and a Windows UI Automation spot check that confirmed the Diagnostics page renders and is reachable from shell navigation on 2026-05-01.

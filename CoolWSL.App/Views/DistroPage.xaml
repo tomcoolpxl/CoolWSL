@@ -1,0 +1,221 @@
+<Page
+    x:Class="CoolWSL.App.Views.DistroPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:diagnostics="using:CoolWSL.Diagnostics.Models"
+    xmlns:models="using:CoolWSL.App.Models"
+    xmlns:core="using:CoolWSL.Core.Models"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <ScrollViewer>
+        <StackPanel MaxWidth="1040" Padding="32" Spacing="24">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Spacing="4">
+                    <TextBlock FontSize="28" FontWeight="SemiBold" Text="Distros" />
+                    <TextBlock
+                        Opacity="0.72"
+                        Text="Select a distro to manage lifecycle actions, run commands, and inspect targeted diagnostics."
+                        TextWrapping="WrapWholeWords" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="8">
+                    <Button Content="Refresh" Click="OnRefreshClick" />
+                    <ProgressRing Width="20" Height="20" IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="{x:Bind ViewModel.RefreshStatusText, Mode=OneWay}" />
+            <TextBlock Text="{x:Bind ViewModel.ActionStatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+            <TextBlock Text="{x:Bind ViewModel.WarningText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+
+            <Border Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock FontSize="20" FontWeight="SemiBold" Text="Selected distro" />
+                    <ComboBox
+                        DisplayMemberPath="Name"
+                        ItemsSource="{x:Bind ViewModel.Distros, Mode=OneWay}"
+                        PlaceholderText="Choose a distro"
+                        SelectionChanged="OnDistroSelectionChanged"
+                        SelectedItem="{x:Bind ViewModel.SelectedDistro, Mode=OneWay}" />
+                    <TextBlock x:Name="SelectedDistroHeaderBlock" x:Load="{x:Bind ViewModel.HasSelection, Mode=OneWay}" FontSize="24" FontWeight="SemiBold" Text="{x:Bind ViewModel.HeaderName, Mode=OneWay}" />
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <TextBlock Text="{x:Bind ViewModel.HeaderState, Mode=OneWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.HeaderWslVersion, Mode=OneWay}" />
+                        <TextBlock x:Name="DefaultLabelBlock" x:Load="{x:Bind ViewModel.HasDefaultLabel, Mode=OneWay}" Text="{x:Bind ViewModel.HeaderDefault, Mode=OneWay}" />
+                        <TextBlock x:Name="ManagementLabelBlock" x:Load="{x:Bind ViewModel.HasManagementLabel, Mode=OneWay}" Text="{x:Bind ViewModel.HeaderManagementLabel, Mode=OneWay}" />
+                    </StackPanel>
+                    <TextBlock Text="{x:Bind ViewModel.HeaderCapabilityMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Open Terminal" Click="OnOpenTerminalClick" IsEnabled="{x:Bind ViewModel.CanOpenTerminal, Mode=OneWay}" />
+                        <Button Content="Run Command" Click="OnFocusCommandRunnerClick" IsEnabled="{x:Bind ViewModel.CanRunCommand, Mode=OneWay}" />
+                        <Button Content="Start" Click="OnStartClick" IsEnabled="{x:Bind ViewModel.CanStart, Mode=OneWay}" />
+                        <Button Content="Terminate" Click="OnTerminateClick" IsEnabled="{x:Bind ViewModel.CanTerminate, Mode=OneWay}" />
+                        <Button Content="Set Default" Click="OnSetDefaultClick" IsEnabled="{x:Bind ViewModel.CanSetDefault, Mode=OneWay}" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="EmptyStatePanel" x:Load="{x:Bind ViewModel.ShowEmptyState, Mode=OneWay}" Spacing="4">
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="{x:Bind ViewModel.EmptyStateTitle, Mode=OneWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.EmptyStateMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="CommandRunnerSection" Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock FontSize="20" FontWeight="SemiBold" Text="Command runner" />
+                    <TextBlock
+                        Opacity="0.72"
+                        Text="Commands run inside the selected distro, keep stdout and stderr separate, and keep history only for this app session."
+                        TextWrapping="WrapWholeWords" />
+
+                    <Grid ColumnSpacing="12" RowSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox
+                            x:Name="CommandInputBox"
+                            Grid.Column="0"
+                            Header="Command"
+                            PlaceholderText="uname -a"
+                            Text="{x:Bind ViewModel.CommandRunner.CommandText, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="1"
+                            Header="Timeout (seconds)"
+                            Minimum="1"
+                            SmallChange="5"
+                            SpinButtonPlacementMode="Inline"
+                            Value="{x:Bind ViewModel.CommandRunner.TimeoutSeconds, Mode=TwoWay}" />
+                        <Button Grid.Column="2" VerticalAlignment="Bottom" Click="OnRunCommandClick" Content="Run" IsEnabled="{x:Bind ViewModel.CommandRunner.CanRun, Mode=OneWay}" />
+                        <Button Grid.Column="3" VerticalAlignment="Bottom" Click="OnCancelCommandClick" Content="Cancel" IsEnabled="{x:Bind ViewModel.CommandRunner.CanCancel, Mode=OneWay}" />
+                    </Grid>
+
+                    <TextBlock Text="{x:Bind ViewModel.CommandRunner.StatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                    <TextBlock Text="{x:Bind ViewModel.CommandRunner.ExitCodeText, Mode=OneWay}" />
+
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock FontWeight="SemiBold" Text="stdout" />
+                            <TextBox
+                                AcceptsReturn="True"
+                                FontFamily="Consolas"
+                                IsReadOnly="True"
+                                MinHeight="160"
+                                Text="{x:Bind ViewModel.CommandRunner.StandardOutput, Mode=OneWay}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock FontWeight="SemiBold" Text="stderr" />
+                            <TextBox
+                                AcceptsReturn="True"
+                                FontFamily="Consolas"
+                                IsReadOnly="True"
+                                MinHeight="160"
+                                Text="{x:Bind ViewModel.CommandRunner.StandardError, Mode=OneWay}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Session history" />
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.CommandRunner.History, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="core:CommandHistoryEntry">
+                                <Border Margin="0,0,0,12" Padding="12">
+                                    <StackPanel Spacing="8">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="3*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{x:Bind CommandText}" TextWrapping="WrapWholeWords" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind StatusLabel}" />
+                                            <TextBlock Grid.Column="2" Text="{x:Bind ExitCodeLabel}" />
+                                            <Button Grid.Column="3" Click="OnReuseHistoryEntryClick" Content="Reuse" />
+                                        </Grid>
+                                        <TextBlock Opacity="0.72" Text="{x:Bind StartedAt}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Padding="20">
+                <StackPanel Spacing="16">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="Diagnostics" />
+                            <TextBlock
+                                Opacity="0.72"
+                                Text="Global WSL checks and per-distro DNS and internet probes for the selected distro."
+                                TextWrapping="WrapWholeWords" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="8">
+                            <Button Content="Refresh Diagnostics" Click="OnRefreshDiagnosticsClick" IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}" />
+                            <ProgressRing Width="20" Height="20" IsActive="{x:Bind ViewModel.IsDiagnosticsLoading, Mode=OneWay}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="{x:Bind ViewModel.DiagnosticsStatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.DiagnosticsResults, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="diagnostics:DiagnosticResult">
+                                <Border Margin="0,0,0,12" Padding="12">
+                                    <StackPanel Spacing="8">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock FontWeight="SemiBold" Text="{x:Bind Title}" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind SeverityLabel}" />
+                                        </Grid>
+                                        <TextBlock Text="{x:Bind Summary}" TextWrapping="WrapWholeWords" />
+                                        <TextBlock x:Name="DiagnosticDetailsBlock" x:Load="{x:Bind HasDetails}" Opacity="0.72" Text="{x:Bind Details}" TextWrapping="WrapWholeWords" />
+                                        <TextBlock x:Name="DiagnosticSuggestedNextStepBlock" x:Load="{x:Bind HasSuggestedNextStep}" Opacity="0.72" Text="{x:Bind SuggestedNextStep}" TextWrapping="WrapWholeWords" />
+                                        <TextBlock x:Name="DiagnosticCommandTextBlock" x:Load="{x:Bind HasCommandText}" Opacity="0.72" Text="{x:Bind CommandText}" TextWrapping="WrapWholeWords" />
+                                        <TextBox
+                                            x:Name="DiagnosticRawOutputBox"
+                                            x:Load="{x:Bind HasRawOutput}"
+                                            AcceptsReturn="True"
+                                            FontFamily="Consolas"
+                                            IsReadOnly="True"
+                                            MinHeight="120"
+                                            Text="{x:Bind RawOutput}"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

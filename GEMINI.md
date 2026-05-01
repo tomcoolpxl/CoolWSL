@@ -66,6 +66,7 @@ Before marking work as done:
 * `TODO.md` can keep the current phase explicit and still include remaining plan-derived phase checklists as backlog when the user asks for the full set of TODO items from `IMPLEMENTATION_PLAN.md`.
 * Prefer preserving exact `Exact TODO.md entries` wording from `IMPLEMENTATION_PLAN.md` when rebuilding `TODO.md`.
 * WinUI 3 startup can crash in `Microsoft.UI.Xaml.dll` if `App.xaml` omits `XamlControlsResources` while using controls like `NavigationView`; keep the merged dictionary in `App.xaml`.
+* WinUI compiled XAML fails if an element uses `x:Load` without an `x:Name`; on the new Distros and Diagnostics pages, keep deferred elements explicitly named instead of dropping `x:Bind` to work around compiler failures.
 * CoolWSL supports non-interactive startup verification with `COOLWSL_SMOKE_TEST=1` and an optional `COOLWSL_SMOKE_TEST_FILE` marker path. This is the preferred local smoke-launch check.
 * Phase 3 uses `ProcessStartInfo.ArgumentList` for WSL command execution so distro names with spaces and shell metacharacters stay as raw arguments instead of shell-interpreted text.
 * `WslListParser` and `WslStatusParser` must degrade safely when WSL output is unsupported, localized, or missing expected fields instead of guessing inventory or environment details.

@@ -24,4 +24,36 @@ public sealed class WslCommandFactoryTests
         CollectionAssert.AreEqual(new[] { "--terminate", "Ubuntu Dev && calc" }, command.Arguments.ToArray());
         Assert.AreEqual("wsl.exe --terminate \"Ubuntu Dev && calc\"", command.CommandText);
     }
+
+    [TestMethod]
+    public void CreateOpenDefaultDistroCommand_UsesBareWslCommand()
+    {
+        var command = WslCommandFactory.CreateOpenDefaultDistroCommand();
+
+        Assert.AreEqual("wsl.exe", command.FileName);
+        CollectionAssert.AreEqual(Array.Empty<string>(), command.Arguments.ToArray());
+        Assert.AreEqual("wsl.exe", command.CommandText);
+    }
+
+    [TestMethod]
+    public void CreateStartDistroCommand_UsesNoOpShellCommand()
+    {
+        var command = WslCommandFactory.CreateStartDistroCommand("Ubuntu Dev");
+
+        CollectionAssert.AreEqual(
+            new[] { "--distribution", "Ubuntu Dev", "--exec", "/bin/sh", "-lc", ":" },
+            command.Arguments.ToArray());
+        Assert.AreEqual("wsl.exe --distribution \"Ubuntu Dev\" --exec /bin/sh -lc :", command.CommandText);
+    }
+
+    [TestMethod]
+    public void CreateRunInDistroCommand_PreservesRawShellText()
+    {
+        var command = WslCommandFactory.CreateRunInDistroCommand("Ubuntu Dev", "echo \"hi\" && pwd");
+
+        CollectionAssert.AreEqual(
+            new[] { "--distribution", "Ubuntu Dev", "--exec", "/bin/sh", "-lc", "echo \"hi\" && pwd" },
+            command.Arguments.ToArray());
+        Assert.AreEqual("wsl.exe --distribution \"Ubuntu Dev\" --exec /bin/sh -lc \"echo \\\"hi\\\" && pwd\"", command.CommandText);
+    }
 }
