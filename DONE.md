@@ -25,3 +25,12 @@
 - Added `WslErrorMapper` plain-language failure mapping and `WslDistroService` inventory and environment queries backed by the new execution layer.
 - Added focused automated coverage for command building, parser fixtures, timeout handling, cancellation handling, error mapping, service registration, and WSL environment and inventory mapping.
 - Verified `dotnet build .\CoolWSL.sln -c Debug` and `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj` on 2026-05-01.
+
+## Phase 4 - Dashboard inventory slice delivered
+
+- Added a read-only dashboard page, state model, refresh coordinator, and view model that load WSL environment status and distro inventory through a shared dashboard status service.
+- Added dashboard UI for WSL availability, WSL version, kernel version, default WSL version, and distro inventory rows with explicit empty, unavailable, and degraded-state messaging.
+- Kept refresh behavior safe by preserving existing dashboard state during reloads and ignoring superseded refresh results.
+- Added focused automated coverage for healthy, unavailable, no-distro, degraded, and refresh-race dashboard states plus DI coverage for the new dashboard status service.
+- Verified `dotnet build .\CoolWSL.sln -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, and `dotnet run --project CoolWSL.App/CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` on 2026-05-01.
+- Completed a Windows UI Automation spot check that confirmed the running dashboard exposes readable status text and a keyboard-focusable `Refresh` button.

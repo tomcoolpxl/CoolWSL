@@ -33,6 +33,12 @@ public sealed partial class ShellPage : Page
             return;
         }
 
+        if (section == AppSection.Dashboard)
+        {
+            ContentFrame.Navigate(typeof(DashboardPage));
+            return;
+        }
+
         ContentFrame.Navigate(typeof(PlaceholderPage), section);
     }
 }

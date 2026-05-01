@@ -2,21 +2,14 @@
 
 ## Current Phase
 
-### Phase 4 - Dashboard inventory slice delivered
-
-- [ ] Add the dashboard page and view model that load WSL environment status and distro inventory.
-- [ ] Show distro name, running state, WSL version, and default marker with explicit empty and unavailable states.
-- [ ] Implement refresh behavior that keeps the UI usable during load and partial failure conditions.
-- [ ] Add automated coverage for dashboard state mapping and manual accessibility checks for the dashboard surface.
-
-## Remaining Plan Items
-
 ### Phase 5 - Safe lifecycle actions delivered
 
 - [ ] Add open, start, terminate, set default, and shutdown actions to the dashboard and per-distro header.
 - [ ] Add confirmation dialogs for terminate and shutdown all with clear target and consequence text.
 - [ ] Disable invalid lifecycle actions and surface plain-language error results when an action fails.
 - [ ] Add automated coverage for lifecycle command construction and manual checks for the confirmation flows.
+
+## Remaining Plan Items
 
 ### Phase 6 - Per-distro overview and command runner delivered
 

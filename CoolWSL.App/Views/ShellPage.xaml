@@ -15,7 +15,7 @@
             <NavigationView.Header>
                 <StackPanel Spacing="4">
                     <TextBlock FontSize="28" FontWeight="SemiBold" Text="{x:Bind ViewModel.Title}" />
-                    <TextBlock Opacity="0.72" Text="A WSL control center scaffold for Windows 11." />
+                    <TextBlock Opacity="0.72" Text="Read-only WSL inventory and status for Windows 11." />
                 </StackPanel>
             </NavigationView.Header>
 

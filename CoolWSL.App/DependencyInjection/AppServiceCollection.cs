@@ -1,4 +1,5 @@
 using CoolWSL.App.ViewModels;
+using CoolWSL.App.Services;
 using CoolWSL.App.Views;
 using CoolWSL.Configuration.DependencyInjection;
 using CoolWSL.Core.DependencyInjection;
@@ -20,9 +21,12 @@ public static class AppServiceCollection
             .AddCoolWslConfiguration()
             .AddCoolWslDiagnostics();
 
+        services.AddSingleton<RefreshCoordinator>();
+        services.AddSingleton<DashboardViewModel>();
         services.AddSingleton<ShellViewModel>();
         services.AddSingleton<MainWindow>();
         services.AddTransient<ShellPage>();
+        services.AddTransient<Views.DashboardPage>();
         services.AddTransient<Views.PlaceholderPage>();
 
         return services.BuildServiceProvider();
