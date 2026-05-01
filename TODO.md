@@ -2,21 +2,14 @@
 
 ## Current Phase
 
-### Phase 1 - Delivery baseline and packaging decision ratified
-
-- [ ] Choose packaged or unpackaged WinUI 3 delivery and record the implications for file access, elevation, install and update flow, and release packaging.
-- [ ] Lock the target .NET SDK, Windows App SDK version, minimum Windows 11 build, and minimum WSL feature floor.
-- [ ] Decide baseline handling for WSL1 distros, Docker Desktop distros, admin-only actions, and default log retention.
-- [ ] Refresh README.md, REQUIREMENTS.md, DESIGN.md, and any architecture note with the approved delivery baseline.
-
-## Remaining Plan Items
-
 ### Phase 2 - Buildable WinUI solution skeleton established
 
 - [ ] Create CoolWSL.sln and the initial CoolWSL.App, CoolWSL.Core, CoolWSL.Wsl, CoolWSL.Configuration, CoolWSL.Diagnostics, and CoolWSL.Tests projects.
 - [ ] Wire the WinUI app entry point, main window, shell page, navigation frame, and dependency injection bootstrap.
 - [ ] Add baseline shared models and service-registration boundaries without implementing WSL behavior.
 - [ ] Add the initial smoke tests and document local build and test commands in README.md.
+
+## Remaining Plan Items
 
 ### Phase 3 - Safe WSL execution and parsing foundation implemented
 

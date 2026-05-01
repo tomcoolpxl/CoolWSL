@@ -4,7 +4,7 @@ A WSL Control Center for Windows 11.
 
 ## Purpose
 
-CoolWSL is a Windows 11 desktop application for managing WSL2 distributions, inspecting their status, editing supported configuration files, running diagnostics, and performing safe lifecycle operations.
+CoolWSL is a Windows 11 desktop application for managing WSL distributions, with WSL2 as the full-featured baseline and explicit degraded behavior for WSL1 and partially supported environments.
 
 The application should provide a clear overview of the local WSL environment while also offering a focused per-distro management mode.
 
@@ -40,11 +40,20 @@ CoolWSL should not:
 
 ## Target Platform
 
-- Windows 11
-- WSL2
-- WinUI 3
-- C#
-- .NET
+- Windows 11 version 24H2 (build 26100) or later with current cumulative updates
+- Microsoft Store-distributed WSL 0.67.6 or later
+- packaged WinUI 3 desktop app using single-project MSIX
+- C# on .NET 10 LTS
+- Windows App SDK 2.0.1 or later 2.0.x servicing patch
+
+## Delivery Baseline
+
+- CoolWSL ships as a packaged WinUI 3 desktop app using single-project MSIX.
+- Windows App SDK deployment is framework-dependent on the stable 2.0 line.
+- The initial scaffold targets `net10.0-windows10.0.26100.0`.
+- App-owned logs, settings, temp files, and future persistent profiles live under `%LocalAppData%\CoolWSL\`.
+- Exports and backups must always use explicit user-selected locations.
+- The first supported release stays unelevated and disables admin-only actions with clear guidance.
 
 ## Supported Backends
 
@@ -137,6 +146,12 @@ The distro list must support:
 - Handling no distros installed.
 - Handling WSL not installed.
 - Handling old WSL versions with reduced feature availability.
+- Showing WSL1 distros with explicit reduced-capability messaging.
+- Labeling Docker Desktop distros distinctly when they can be identified safely.
+
+WSL1 distros remain first-class inventory items, but any WSL2-only feature must be disabled with a plain-language explanation.
+
+Docker Desktop distros must never be the default target for destructive or config-editing flows in the initial release.
 
 ## MVP Per-Distro Overview
 
@@ -193,6 +208,8 @@ The MVP should provide:
 - Clear notice when restart is required.
 
 The app must not silently restart WSL after config changes.
+
+The UI must clearly state that `.wslconfig` applies only to WSL2 distributions.
 
 ## MVP Per-Distro Configuration
 
@@ -251,6 +268,10 @@ CoolWSL must keep an application log containing:
 - Export operations.
 
 Logs must avoid storing sensitive command output by default unless the user enables it.
+
+Logs must be written under `%LocalAppData%\CoolWSL\Logs`.
+
+Metadata-only logs are retained for 30 days by default.
 
 ## Version 1.0 Requirements
 
@@ -521,6 +542,8 @@ CoolWSL must:
 - Show affected distro before running an operation.
 - Show raw command output for failed operations.
 - Prefer refusing unsupported actions over using undocumented workarounds.
+- Disable admin-only actions until an explicit elevation model is approved.
+- Treat identified Docker Desktop distros as system-managed and protect them from destructive flows by default.
 
 ## Destructive Operations
 
@@ -743,13 +766,18 @@ Version 1.0 is acceptable when:
 
 ## Open Questions
 
-- Should CoolWSL support WSL1 distros or only display them?
-- Should Docker Desktop WSL distros be hidden by default?
-- Should command output be stored at all?
+Phase 1 resolved the delivery baseline as follows:
+
+- CoolWSL is WSL2-first, but WSL1 distros remain visible and only documented shared actions stay enabled.
+- Docker Desktop distros remain visible, are labeled as system-managed when identifiable, and stay out of destructive and config-editing flows by default.
+- Command output is not stored by default; metadata-only logs are retained for 30 days unless the user changes retention later.
+- Admin-only actions are disabled with guidance instead of prompting for elevation in the initial release.
+
+Remaining open questions:
+
 - Should exports be managed as first-class backups?
 - Should CoolWSL support scheduled backups?
 - Should there be a portable mode?
-- Should admin-only actions be disabled or prompt for elevation?
 - Should the app expose raw command history?
 - Should per-distro settings be editable while the distro is stopped only?
 - Should the app support remote WSL instances in the future?

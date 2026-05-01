@@ -13,15 +13,15 @@ Key constraints that shape the plan:
 - Supported backends only: wsl.exe, wslapi.dll where justified, %UserProfile%\.wslconfig, /etc/wsl.conf, and documented Windows process and performance APIs.
 - Safety-first UX for destructive operations, config writes, exports, imports, and any action that can affect boot, networking, or data.
 - Documentation-driven workflow: TODO.md must be refreshed from the active phase before implementation starts, and DONE.md may only contain verified work.
-- Local-only deployment is assumed for this plan; no cloud service or backend is in scope.
+- Packaged MSIX local and direct distribution is the ratified baseline; no cloud service or backend is in scope.
 
 ## Assumptions
 
 - Project name is CoolWSL.
 - Project type is a Windows 11 WinUI 3 desktop application written in C# on .NET.
 - Short delivery goal is to ship a safe local WSL control center that covers the documented MVP and then the 1.0 enhancements.
-- Existing authoritative docs are README.md, REQUIREMENTS.md, DESIGN.md, TODO.md, and DONE.md. No separate ARCHITECTURE.md exists yet.
-- Deployment target is local-only Windows desktop distribution. Microsoft Store or enterprise distribution may be added later, but is not assumed for initial delivery.
+- Existing authoritative docs are README.md, REQUIREMENTS.md, DESIGN.md, TODO.md, DONE.md, and ARCHITECTURE.md.
+- Deployment target is packaged MSIX for local and direct Windows desktop distribution. Microsoft Store submission may be added later, but is not assumed for initial delivery.
 - Overall risk tolerance is medium, but tolerance for data loss, config corruption, and misleading diagnostics is low.
 - Review cadence is one phase per review cycle. A phase must fit in one review package that can be built, tested, and manually checked in a single cycle.
 - The initial repository does not yet contain the WinUI solution or project files described in REQUIREMENTS.md.
@@ -1411,19 +1411,20 @@ The following must be true before the project is considered complete:
 
 ## Open questions
 
-### Blocking unknowns
+### Resolved in Phase 1
 
-- Should CoolWSL ship as a packaged WinUI 3 app or an unpackaged WinUI 3 app?
-- Should the delivery model be framework-dependent or self-contained for the Windows App SDK runtime?
-- What exact .NET SDK, Windows App SDK, Windows 11 build floor, and WSL version floor are required for the first supported release?
-- Should WSL1 distros be read-only, partially manageable, or fully manageable wherever commands succeed?
-- Should admin-only operations be disabled when elevation is unavailable or should the app prompt for elevation?
-- What is the approved local storage location for logs, backups, settings, and command profiles under the chosen packaging model?
+- CoolWSL ships as a packaged WinUI 3 desktop app using single-project MSIX.
+- Windows App SDK deployment is framework-dependent on the stable 2.0 line, starting with 2.0.1 and keeping later servicing updates in the same major line.
+- The scaffold targets `.NET 10` LTS and `net10.0-windows10.0.26100.0`.
+- Minimum supported OS is Windows 11 24H2 (build 26100) with current updates.
+- Minimum WSL floor is Microsoft Store WSL 0.67.6+, with later features gated by capability detection.
+- WSL1 distros remain visible and only documented shared actions stay enabled.
+- Docker Desktop distros remain visible, are labeled as system-managed when identifiable, and stay out of destructive, default-distro, and config-editing flows by default.
+- Admin-only actions are disabled with guidance in the initial release; no self-elevation is planned in early phases.
+- App-owned logs, settings, temp files, and future persistent profiles live under `%LocalAppData%\CoolWSL\`, while exports and backups remain user-directed.
 
-### Non-blocking unknowns
+### Remaining non-blocking unknowns
 
-- Should Docker Desktop distros be hidden by default or only labeled distinctly?
-- Should command output ever be stored by default, or only when the user opts in?
 - Should exports become first-class managed backups with retention policies or remain explicit one-off operations?
 - Should the app expose raw command history beyond the current session?
 - Should per-distro settings be editable while the distro is stopped, or only when the app can verify a safe save path?

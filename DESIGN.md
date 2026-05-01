@@ -12,6 +12,14 @@ The UI is structured around two primary contexts:
 
 The design should feel closer to a "control center" than a traditional settings application.
 
+## Delivery Baseline
+
+- Packaged WinUI 3 desktop app delivered as signed MSIX.
+- WSL2-first UX with explicit degraded states for WSL1 and older WSL surfaces.
+- Docker Desktop distros stay visible, but they are treated as system-managed targets.
+- The app remains unelevated in the first release; admin-only actions are disabled and explained.
+- Logs are metadata-only by default and retain 30 days unless the user changes retention later.
+
 ---
 
 ## Design Principles
@@ -174,6 +182,8 @@ Rules:
 - Default distro must be visually distinct.
 - Running state must be clearly indicated.
 - Avoid icon-only actions without labels.
+- WSL1 rows must show reduced-capability messaging for WSL2-only features.
+- Docker-managed distros must show a system-managed badge and omit destructive inline actions.
 
 ---
 
@@ -468,6 +478,8 @@ Must support:
 - filtering
 - copying
 - clearing logs
+- metadata-first entries by default
+- retention messaging for the 30-day default
 
 ---
 
@@ -514,6 +526,9 @@ Buttons must be disabled when:
 - action is not valid
 - WSL unavailable
 - distro not running when required
+- action would require elevation in the current release
+
+Disabled controls must explain why when the target is WSL1, system-managed, or blocked by an admin-only requirement.
 
 ---
 
