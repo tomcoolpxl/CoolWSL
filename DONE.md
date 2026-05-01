@@ -16,3 +16,12 @@
 - Verified `dotnet build .\CoolWSL.sln -c Debug`, `dotnet build .\CoolWSL.sln -c Release`, and `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Release` on 2026-05-01.
 - Fixed the startup crash caused by missing `XamlControlsResources`, and added an automated Debug smoke-launch mode that writes a marker file and exits cleanly after first window activation.
 - Refreshed README.md with local prerequisites, build and test commands, and the non-interactive smoke-launch command.
+
+## Phase 3 - Safe WSL execution and parsing foundation implemented
+
+- Added the core WSL command, result, distro, and environment models plus `IWslCommandService` and `IWslDistroService` abstractions for later UI slices.
+- Implemented `WslCommandService` with shell-safe argument passing via `ProcessStartInfo.ArgumentList`, stdout and stderr capture, exit code handling, timeout and cancellation handling, and metadata-only command logging.
+- Implemented WSL command builders and parsers for `wsl --list --verbose`, `wsl --status`, and `wsl --version` with explicit degraded behavior for unsupported or unrecognized output.
+- Added `WslErrorMapper` plain-language failure mapping and `WslDistroService` inventory and environment queries backed by the new execution layer.
+- Added focused automated coverage for command building, parser fixtures, timeout handling, cancellation handling, error mapping, service registration, and WSL environment and inventory mapping.
+- Verified `dotnet build .\CoolWSL.sln -c Debug` and `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj` on 2026-05-01.

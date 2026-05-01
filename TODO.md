@@ -2,21 +2,14 @@
 
 ## Current Phase
 
-### Phase 3 - Safe WSL execution and parsing foundation implemented
-
-- [ ] Implement the process execution wrapper with timeout, cancellation, stdout and stderr capture, exit code handling, and metadata-only logging.
-- [ ] Implement safe WSL argument building and distro-list, status, and version parsers with explicit degraded modes.
-- [ ] Map common WSL execution failures to plain-language error results without relying on undocumented behavior.
-- [ ] Add unit tests for command building, parser fixtures, timeout handling, cancellation handling, and error mapping.
-
-## Remaining Plan Items
-
 ### Phase 4 - Dashboard inventory slice delivered
 
 - [ ] Add the dashboard page and view model that load WSL environment status and distro inventory.
 - [ ] Show distro name, running state, WSL version, and default marker with explicit empty and unavailable states.
 - [ ] Implement refresh behavior that keeps the UI usable during load and partial failure conditions.
 - [ ] Add automated coverage for dashboard state mapping and manual accessibility checks for the dashboard surface.
+
+## Remaining Plan Items
 
 ### Phase 5 - Safe lifecycle actions delivered
 
