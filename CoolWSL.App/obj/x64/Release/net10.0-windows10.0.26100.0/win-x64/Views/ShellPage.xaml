@@ -1,0 +1,34 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="CoolWSL.App.Views.ShellPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Grid>
+        <NavigationView x:ConnectionId='2'
+            x:Name="RootNavigationView"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            PaneDisplayMode="Left"
+                                                 >
+            <NavigationView.Header>
+                <StackPanel Spacing="4">
+                    <TextBlock x:ConnectionId='3' FontSize="28" FontWeight="SemiBold"                                 />
+                    <TextBlock Opacity="0.72" Text="A WSL control center scaffold for Windows 11." />
+                </StackPanel>
+            </NavigationView.Header>
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Dashboard" Tag="Dashboard" />
+                <NavigationViewItem Content="Distros" Tag="Distros" />
+                <NavigationViewItem Content="Diagnostics" Tag="Diagnostics" />
+                <NavigationViewItem Content="Logs" Tag="Logs" />
+                <NavigationViewItem Content="Settings" Tag="Settings" />
+            </NavigationView.MenuItems>
+
+            <Frame x:ConnectionId='4' x:Name="ContentFrame" />
+        </NavigationView>
+    </Grid>
+</Page>
+

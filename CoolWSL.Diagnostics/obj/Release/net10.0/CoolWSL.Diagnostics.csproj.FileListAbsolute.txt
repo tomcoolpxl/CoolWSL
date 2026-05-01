@@ -1,0 +1,16 @@
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\bin\Release\net10.0\CoolWSL.Diagnostics.deps.json
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\bin\Release\net10.0\CoolWSL.Diagnostics.dll
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\bin\Release\net10.0\CoolWSL.Diagnostics.pdb
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\bin\Release\net10.0\CoolWSL.Core.dll
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\bin\Release\net10.0\CoolWSL.Core.pdb
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\CoolWSL.Diagnostics.csproj.AssemblyReference.cache
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\CoolWSL.Diagnostics.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\CoolWSL.Diagnostics.AssemblyInfoInputs.cache
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\CoolWSL.Diagnostics.AssemblyInfo.cs
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\CoolWSL.Diagnostics.csproj.CoreCompileInputs.cache
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\CoolWSL.Diagnostics.sourcelink.json
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\CoolWSL..7080CE53.Up2Date
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\CoolWSL.Diagnostics.dll
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\refint\CoolWSL.Diagnostics.dll
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\CoolWSL.Diagnostics.pdb
+C:\Users\thraa\github\CoolWSL\CoolWSL.Diagnostics\obj\Release\net10.0\ref\CoolWSL.Diagnostics.dll

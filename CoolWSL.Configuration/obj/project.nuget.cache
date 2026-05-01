@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "x9Zl8gAcskE=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\thraa\\github\\CoolWSL\\CoolWSL.Configuration\\CoolWSL.Configuration.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\thraa\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.0\\microsoft.extensions.dependencyinjection.abstractions.10.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

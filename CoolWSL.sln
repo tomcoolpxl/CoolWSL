@@ -1,0 +1,52 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolWSL.App", "CoolWSL.App\CoolWSL.App.csproj", "{FDE84884-904C-4D34-9C47-08858CDE616A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolWSL.Core", "CoolWSL.Core\CoolWSL.Core.csproj", "{9887306D-D5D0-43C3-8314-EC2345B11F65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolWSL.Wsl", "CoolWSL.Wsl\CoolWSL.Wsl.csproj", "{23378D84-5FF9-4D70-9711-F495A70727C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolWSL.Configuration", "CoolWSL.Configuration\CoolWSL.Configuration.csproj", "{2B4A3D6D-67BF-4C68-BE11-309F7AF5FA6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolWSL.Diagnostics", "CoolWSL.Diagnostics\CoolWSL.Diagnostics.csproj", "{50E8E58D-C2B3-4B39-8A8B-06EC8C12A414}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolWSL.Tests", "CoolWSL.Tests\CoolWSL.Tests.csproj", "{A70A13F1-BB51-4BC2-B08E-71960DA1A75B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FDE84884-904C-4D34-9C47-08858CDE616A}.Debug|x64.ActiveCfg = Debug|x64
+		{FDE84884-904C-4D34-9C47-08858CDE616A}.Debug|x64.Build.0 = Debug|x64
+		{FDE84884-904C-4D34-9C47-08858CDE616A}.Release|x64.ActiveCfg = Release|x64
+		{FDE84884-904C-4D34-9C47-08858CDE616A}.Release|x64.Build.0 = Release|x64
+		{9887306D-D5D0-43C3-8314-EC2345B11F65}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9887306D-D5D0-43C3-8314-EC2345B11F65}.Debug|x64.Build.0 = Debug|Any CPU
+		{9887306D-D5D0-43C3-8314-EC2345B11F65}.Release|x64.ActiveCfg = Release|Any CPU
+		{9887306D-D5D0-43C3-8314-EC2345B11F65}.Release|x64.Build.0 = Release|Any CPU
+		{23378D84-5FF9-4D70-9711-F495A70727C5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{23378D84-5FF9-4D70-9711-F495A70727C5}.Debug|x64.Build.0 = Debug|Any CPU
+		{23378D84-5FF9-4D70-9711-F495A70727C5}.Release|x64.ActiveCfg = Release|Any CPU
+		{23378D84-5FF9-4D70-9711-F495A70727C5}.Release|x64.Build.0 = Release|Any CPU
+		{2B4A3D6D-67BF-4C68-BE11-309F7AF5FA6E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2B4A3D6D-67BF-4C68-BE11-309F7AF5FA6E}.Debug|x64.Build.0 = Debug|Any CPU
+		{2B4A3D6D-67BF-4C68-BE11-309F7AF5FA6E}.Release|x64.ActiveCfg = Release|Any CPU
+		{2B4A3D6D-67BF-4C68-BE11-309F7AF5FA6E}.Release|x64.Build.0 = Release|Any CPU
+		{50E8E58D-C2B3-4B39-8A8B-06EC8C12A414}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{50E8E58D-C2B3-4B39-8A8B-06EC8C12A414}.Debug|x64.Build.0 = Debug|Any CPU
+		{50E8E58D-C2B3-4B39-8A8B-06EC8C12A414}.Release|x64.ActiveCfg = Release|Any CPU
+		{50E8E58D-C2B3-4B39-8A8B-06EC8C12A414}.Release|x64.Build.0 = Release|Any CPU
+		{A70A13F1-BB51-4BC2-B08E-71960DA1A75B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A70A13F1-BB51-4BC2-B08E-71960DA1A75B}.Debug|x64.Build.0 = Debug|Any CPU
+		{A70A13F1-BB51-4BC2-B08E-71960DA1A75B}.Release|x64.ActiveCfg = Release|Any CPU
+		{A70A13F1-BB51-4BC2-B08E-71960DA1A75B}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
