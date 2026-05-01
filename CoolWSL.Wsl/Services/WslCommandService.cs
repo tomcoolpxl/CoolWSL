@@ -110,6 +110,8 @@ public sealed class WslCommandService : IWslCommandService
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
+            StandardOutputEncoding = command.StandardOutputEncoding,
+            StandardErrorEncoding = command.StandardErrorEncoding,
         };
 
         foreach (var argument in command.Arguments)

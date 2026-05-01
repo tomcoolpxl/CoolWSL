@@ -1,8 +1,16 @@
+using System.Text;
+
 namespace CoolWSL.Core.Models;
 
 public sealed class WslCommand
 {
-    public WslCommand(string fileName, IEnumerable<string> arguments, TimeSpan? timeout = null, string? description = null)
+    public WslCommand(
+        string fileName,
+        IEnumerable<string> arguments,
+        TimeSpan? timeout = null,
+        string? description = null,
+        Encoding? standardOutputEncoding = null,
+        Encoding? standardErrorEncoding = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         ArgumentNullException.ThrowIfNull(arguments);
@@ -11,6 +19,8 @@ public sealed class WslCommand
         Arguments = arguments.ToArray();
         Timeout = timeout;
         Description = description;
+        StandardOutputEncoding = standardOutputEncoding;
+        StandardErrorEncoding = standardErrorEncoding;
     }
 
     public string FileName { get; }
@@ -20,6 +30,10 @@ public sealed class WslCommand
     public TimeSpan? Timeout { get; }
 
     public string? Description { get; }
+
+    public Encoding? StandardOutputEncoding { get; }
+
+    public Encoding? StandardErrorEncoding { get; }
 
     public string CommandText => string.Join(" ", new[] { QuoteForDisplay(FileName) }.Concat(Arguments.Select(QuoteForDisplay)));
 

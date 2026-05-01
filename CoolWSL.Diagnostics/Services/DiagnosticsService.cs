@@ -2,6 +2,7 @@ using CoolWSL.Core.Abstractions;
 using CoolWSL.Core.Models;
 using CoolWSL.Diagnostics.Mappers;
 using CoolWSL.Diagnostics.Models;
+using System.Text;
 
 namespace CoolWSL.Diagnostics.Services;
 
@@ -10,6 +11,7 @@ public sealed class DiagnosticsService : IDiagnosticsService
     private const string DnsProbeCommand = "if command -v getent >/dev/null 2>&1; then getent hosts learn.microsoft.com; elif command -v nslookup >/dev/null 2>&1; then nslookup learn.microsoft.com; elif command -v ping >/dev/null 2>&1; then ping -c 1 learn.microsoft.com; else echo 'No supported DNS test tool was found.' >&2; exit 127; fi";
     private const string InternetProbeCommand = "if command -v curl >/dev/null 2>&1; then curl -I -sS --max-time 10 https://learn.microsoft.com >/dev/null; elif command -v wget >/dev/null 2>&1; then wget -q --spider --timeout=10 https://learn.microsoft.com; elif command -v ping >/dev/null 2>&1; then ping -c 1 1.1.1.1; else echo 'No supported internet test tool was found.' >&2; exit 127; fi";
     private static readonly TimeSpan DiagnosticTimeout = TimeSpan.FromSeconds(20);
+    private static readonly Encoding HostWslEncoding = Encoding.Unicode;
 
     private readonly IWslCommandService commandService;
     private readonly IWslDistroService distroService;
@@ -84,11 +86,11 @@ public sealed class DiagnosticsService : IDiagnosticsService
     }
 
     private static WslCommand CreateStatusCommand()
-        => new("wsl.exe", new[] { "--status" }, TimeSpan.FromSeconds(10), "Read WSL status for diagnostics");
+        => new("wsl.exe", new[] { "--status" }, TimeSpan.FromSeconds(10), "Read WSL status for diagnostics", HostWslEncoding, HostWslEncoding);
 
     private static WslCommand CreateVersionCommand()
-        => new("wsl.exe", new[] { "--version" }, TimeSpan.FromSeconds(10), "Read WSL version for diagnostics");
+        => new("wsl.exe", new[] { "--version" }, TimeSpan.FromSeconds(10), "Read WSL version for diagnostics", HostWslEncoding, HostWslEncoding);
 
     private static WslCommand CreateInventoryCommand()
-        => new("wsl.exe", new[] { "--list", "--verbose" }, TimeSpan.FromSeconds(10), "Read distro inventory for diagnostics");
+        => new("wsl.exe", new[] { "--list", "--verbose" }, TimeSpan.FromSeconds(10), "Read distro inventory for diagnostics", HostWslEncoding, HostWslEncoding);
 }

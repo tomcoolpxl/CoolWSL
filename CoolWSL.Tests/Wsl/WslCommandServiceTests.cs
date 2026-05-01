@@ -3,6 +3,7 @@ using CoolWSL.Core.Services;
 using CoolWSL.Wsl.Errors;
 using CoolWSL.Wsl.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text;
 
 namespace CoolWSL.Tests.Wsl;
 
@@ -57,6 +58,29 @@ public sealed class WslCommandServiceTests
 
         Assert.AreEqual(CommandExecutionStatus.Cancelled, result.Status);
         Assert.AreEqual(WslErrorKind.Cancelled, result.Error?.Kind);
+    }
+
+    [TestMethod]
+    public async Task ExecuteAsync_UsesConfiguredUnicodeEncodingForRedirectedOutput()
+    {
+        var service = CreateService();
+        var command = new WslCommand(
+            "pwsh",
+            [
+                "-NoProfile",
+                "-Command",
+                "[Console]::OutputEncoding = [System.Text.Encoding]::Unicode; [Console]::Out.Write('Default Distribution: archlinux`r`nDefault Version: 2`r`n')"
+            ],
+            TimeSpan.FromSeconds(10),
+            standardOutputEncoding: Encoding.Unicode,
+            standardErrorEncoding: Encoding.Unicode);
+
+        var result = await service.ExecuteAsync(command);
+
+        Assert.AreEqual(CommandExecutionStatus.Succeeded, result.Status);
+        StringAssert.Contains(result.StandardOutput, "Default Distribution: archlinux");
+        StringAssert.Contains(result.StandardOutput, "Default Version: 2");
+        Assert.IsFalse(result.StandardOutput.Contains('\0'));
     }
 
     private static WslCommandService CreateService()

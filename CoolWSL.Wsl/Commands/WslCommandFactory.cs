@@ -1,4 +1,5 @@
 using CoolWSL.Core.Models;
+using System.Text;
 
 namespace CoolWSL.Wsl.Commands;
 
@@ -7,6 +8,7 @@ public static class WslCommandFactory
     private static readonly TimeSpan DefaultQueryTimeout = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan DefaultMutationTimeout = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan DefaultCommandTimeout = TimeSpan.FromSeconds(30);
+    private static readonly Encoding HostWslEncoding = Encoding.Unicode;
 
     public static WslCommand CreateListVerboseCommand(TimeSpan? timeout = null)
         => CreateQueryCommand("List registered WSL distributions", timeout, "--list", "--verbose");
@@ -68,10 +70,22 @@ public static class WslCommandFactory
     }
 
     private static WslCommand CreateQueryCommand(string description, TimeSpan? timeout, params string[] arguments)
-        => new("wsl.exe", arguments, timeout ?? DefaultQueryTimeout, description);
+        => new(
+            "wsl.exe",
+            arguments,
+            timeout ?? DefaultQueryTimeout,
+            description,
+            HostWslEncoding,
+            HostWslEncoding);
 
     private static WslCommand CreateMutationCommand(string description, TimeSpan? timeout, params string[] arguments)
-        => new("wsl.exe", arguments, timeout ?? DefaultMutationTimeout, description);
+        => new(
+            "wsl.exe",
+            arguments,
+            timeout ?? DefaultMutationTimeout,
+            description,
+            HostWslEncoding,
+            HostWslEncoding);
 
     private static WslCommand CreateCommandCommand(string description, string distroName, string commandText, TimeSpan? timeout)
         => new(
