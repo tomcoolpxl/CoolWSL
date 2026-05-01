@@ -61,6 +61,13 @@ Before marking work as done:
 * Run all required checks/tests
 * Update documentation if the change impacts scope or structure
 
+## Repository Notes
+
+* `TODO.md` can keep the current phase explicit and still include remaining plan-derived phase checklists as backlog when the user asks for the full set of TODO items from `IMPLEMENTATION_PLAN.md`.
+* Prefer preserving exact `Exact TODO.md entries` wording from `IMPLEMENTATION_PLAN.md` when rebuilding `TODO.md`.
+* WinUI 3 startup can crash in `Microsoft.UI.Xaml.dll` if `App.xaml` omits `XamlControlsResources` while using controls like `NavigationView`; keep the merged dictionary in `App.xaml`.
+* CoolWSL supports non-interactive startup verification with `COOLWSL_SMOKE_TEST=1` and an optional `COOLWSL_SMOKE_TEST_FILE` marker path. This is the preferred local smoke-launch check.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
@@ -115,8 +122,3 @@ For multi-step tasks, state a brief plan:
 3. [Step] → verify: [check]
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-- TODO.md can keep the current phase explicit and still include remaining plan-derived phase checklists as backlog when the user asks for the full set of TODO items from IMPLEMENTATION_PLAN.md.
-- Prefer preserving exact "Exact TODO.md entries" wording from IMPLEMENTATION_PLAN.md when rebuilding TODO.md.
-- WinUI 3 startup can crash in Microsoft.UI.Xaml.dll if App.xaml omits XamlControlsResources while using controls like NavigationView; keep the merged dictionary in App.xaml.
-- CoolWSL now supports non-interactive startup verification with COOLWSL_SMOKE_TEST=1 and an optional COOLWSL_SMOKE_TEST_FILE marker path, which is the preferred local smoke-launch check.
