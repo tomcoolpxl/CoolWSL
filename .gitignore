@@ -1,0 +1,10 @@
+.vs/
+TestResults/
+AppPackages/
+BundleArtifacts/
+
+**/bin/
+**/obj/
+
+*.user
+*.suo

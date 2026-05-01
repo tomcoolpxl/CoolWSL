@@ -2,21 +2,14 @@
 
 ## Current Phase
 
-### Phase 2 - Buildable WinUI solution skeleton established
-
-- [ ] Create CoolWSL.sln and the initial CoolWSL.App, CoolWSL.Core, CoolWSL.Wsl, CoolWSL.Configuration, CoolWSL.Diagnostics, and CoolWSL.Tests projects.
-- [ ] Wire the WinUI app entry point, main window, shell page, navigation frame, and dependency injection bootstrap.
-- [ ] Add baseline shared models and service-registration boundaries without implementing WSL behavior.
-- [ ] Add the initial smoke tests and document local build and test commands in README.md.
-
-## Remaining Plan Items
-
 ### Phase 3 - Safe WSL execution and parsing foundation implemented
 
 - [ ] Implement the process execution wrapper with timeout, cancellation, stdout and stderr capture, exit code handling, and metadata-only logging.
 - [ ] Implement safe WSL argument building and distro-list, status, and version parsers with explicit degraded modes.
 - [ ] Map common WSL execution failures to plain-language error results without relying on undocumented behavior.
 - [ ] Add unit tests for command building, parser fixtures, timeout handling, cancellation handling, and error mapping.
+
+## Remaining Plan Items
 
 ### Phase 4 - Dashboard inventory slice delivered
 

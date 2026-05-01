@@ -4,7 +4,7 @@ WSL Control Center for Windows 11.
 
 ## Status
 
-Phase 1 delivery baseline is ratified. The repository is still documentation-first, and Phase 2 will scaffold the initial WinUI solution.
+Phase 2 solution skeleton is implemented and verified. The repository now contains the WinUI 3 shell, project boundaries, baseline smoke tests, and an automated Debug smoke-launch path for non-interactive startup verification.
 
 ## Approved Delivery Baseline
 
@@ -23,5 +23,34 @@ Phase 1 delivery baseline is ratified. The repository is still documentation-fir
 - App-owned logs, settings, temp files, and future persistent profiles live under `%LocalAppData%\CoolWSL\`.
 - Exports and user backups remain explicit, user-chosen locations rather than package-owned storage.
 - The initial release stays unelevated. Admin-only operations are disabled and explained instead of triggering self-elevation.
+
+## Local Prerequisites
+
+- Windows 11 24H2 (build 26100) or later.
+- .NET 10 SDK.
+- Windows App Runtime `2.0.1` x64.
+- Developer Mode or another sideload-enabled policy if you want to register the Release MSIX package locally.
+
+## Local Validation
+
+```powershell
+dotnet restore .\CoolWSL.sln
+dotnet build .\CoolWSL.sln -c Debug
+dotnet build .\CoolWSL.sln -c Release
+dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Release
+
+$marker = Join-Path $env:TEMP 'coolwsl-smoke-marker.txt'
+Remove-Item $marker -ErrorAction SilentlyContinue
+$env:COOLWSL_SMOKE_TEST = '1'
+$env:COOLWSL_SMOKE_TEST_FILE = $marker
+
+Start-Process -FilePath .\CoolWSL.App\bin\Debug\net10.0-windows10.0.26100.0\win-x64\CoolWSL.App.exe -PassThru | Wait-Process
+Get-Content $marker
+
+Remove-Item Env:COOLWSL_SMOKE_TEST
+Remove-Item Env:COOLWSL_SMOKE_TEST_FILE
+```
+
+Debug runs as an unpackaged native WinUI 3 desktop app so startup can be verified non-interactively. Release keeps single-project MSIX packaging enabled for the signed sideload delivery path.
 
 See `ARCHITECTURE.md` for the full decision record and rationale.
