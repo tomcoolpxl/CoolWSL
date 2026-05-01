@@ -1,0 +1,117 @@
+# CoolWSL
+
+A WSL Control Center for Windows 11.
+
+## Project Rules
+
+This repository is dedicated to building **CoolWSL** throughout the course.
+Do not start or switch to a different project unless explicitly instructed by the course.
+
+## Authoritative Files
+
+The following files define the source of truth for the project:
+
+* `REQUIREMENTS.md` – scope and acceptance criteria
+* `IMPLEMENTATION_PLAN.md` – phases and work ordering
+* `TODO.md` – current actionable tasks
+* `DONE.md` – completed and verified work
+
+## Workflow Rules
+
+### Task Management
+
+* Each item in `TODO.md` must be small enough to complete within one review cycle.
+* Always derive `TODO.md` items from the current phase in `IMPLEMENTATION_PLAN.md`.
+* Update `TODO.md` **before** starting any new implementation work.
+* After completing work, update both `TODO.md` and `DONE.md`.
+
+### Completion Criteria
+
+Move a task to `DONE.md` only when all of the following are true:
+
+* Implementation is complete
+* Required checks/tests pass
+* Changes have been reviewed
+* Documentation is updated if needed
+
+`DONE.md` must contain **only verified and complete work**.
+
+### File Maintenance
+
+* Update `REQUIREMENTS.md` when scope or acceptance criteria change.
+* Update `IMPLEMENTATION_PLAN.md` when task order, phases, or grouping changes.
+
+### Change Control
+
+* Ask before:
+
+  * Large refactors
+  * Changing directory structure
+  * Removing or altering tests
+
+### Context Handling
+
+* For narrow or focused tasks, include the relevant authoritative files in the prompt instead of rewriting context.
+
+### Pre-Completion Checklist
+
+Before marking work as done:
+
+* Review the diff
+* Run all required checks/tests
+* Update documentation if the change impacts scope or structure
+
+## 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
