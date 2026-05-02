@@ -9,6 +9,42 @@
 - [ ] Show clear restart-required messaging without automatically shutting down WSL.
 - [ ] Add automated coverage for parse, serialize, backup, revert, and malformed-config handling.
 
+## UX Rebuild Track
+
+Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A and B have shipped (see `DONE.md`); the items below cover the remaining phases C through G.
+
+### UX Phase C - Dashboard rebuild
+
+- [ ] Replace naked `Border` cards on `DashboardPage` with `CardBorderStyle` and replace `Opacity`-based secondary text with `SecondaryTextStyle` / `TertiaryTextStyle`.
+- [ ] Replace the distro inventory `ListView` with an `ItemsRepeater` so wheel events bubble to the page-level `ScrollViewer` and the page no longer nests scroll regions.
+- [ ] Collapse the per-row Open / Start / Terminate / Set Default button stack into a single primary action plus an overflow menu, or move full lifecycle into the distro detail page.
+- [ ] Remove `IsTabStop="True"` and `AllowFocusOnInteraction="True"` from the page-level `ScrollViewer` and verify mouse-wheel scrolling and high-DPI rendering on a window short enough to require scrolling.
+
+### UX Phase D - Distro detail rebuild
+
+- [ ] Replace the existing `DistroPage` layout with a single page that contains a header, status pill, and a `Pivot` (Overview, Terminal, Configuration, Diagnostics).
+- [ ] Move lifecycle actions and capability messaging into the Overview pivot using `SettingsCard` rows.
+- [ ] Redesign the command runner inside the Terminal pivot with a single output area, stdout / stderr colour distinction, copy and clear toolbar, and a virtualised collapsible history.
+- [ ] Move per-distro diagnostics into the Diagnostics pivot fed by `IDiagnosticsService.GetSnapshotAsync(selectedDistroName)`.
+
+### UX Phase E - Diagnostics rebuild
+
+- [ ] Replace `DiagnosticsPage` with a severity-grouped `ItemsRepeater` of `SettingsExpander` rows (Errors, Warnings, OK) sourced from `IDiagnosticsService`.
+- [ ] Show a single Refresh action at the top of the page and a `LastUpdatedAt` caption.
+- [ ] Remove the duplicate per-distro diagnostics rendering from the old `DistroPage` once UX Phase D ships.
+
+### UX Phase F - Settings and Logs pages
+
+- [ ] Replace `PlaceholderPage` for `Settings` with a real settings page using `SettingsExpander` groups (WSL, Appearance, Behaviour, Diagnostics, About).
+- [ ] Reintroduce `Logs` in the rail and replace `PlaceholderPage` with a real log viewer once `IAppLogger` is implemented (currently `NullAppLogger`).
+
+### UX Phase G - Accessibility pass
+
+- [ ] Ensure `AutomationProperties.Name` on every per-distro action button includes the distro name in its label.
+- [ ] Add a polite live region announcement for command results and diagnostic refresh outcomes.
+- [ ] Audit Tab order on every page and remove residual `IsTabStop` / `AllowFocusOnInteraction` properties from page-level `ScrollViewer`s.
+- [ ] Run a high-contrast smoke check and confirm card surfaces and status indicator colours remain readable.
+
 ## Remaining Plan Items
 
 ### Phase 9 - Raw per-distro WSL configuration editor delivered

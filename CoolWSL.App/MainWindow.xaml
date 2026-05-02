@@ -4,54 +4,39 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="32" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border
-            Grid.Row="0"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="0,0,0,1">
-            <Grid x:Name="AppTitleBar" Height="48">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition x:Name="LeftInsetColumn" Width="0" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition x:Name="RightInsetColumn" Width="0" />
-                </Grid.ColumnDefinitions>
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="LeftInsetColumn" Width="0" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="RightInsetColumn" Width="0" />
+            </Grid.ColumnDefinitions>
 
-                <Border
-                    Grid.Column="1"
-                    Width="28"
-                    Height="28"
-                    Margin="16,0,12,0"
-                    VerticalAlignment="Center"
-                    Background="{ThemeResource AccentFillColorDefaultBrush}"
-                    CornerRadius="14">
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        FontWeight="SemiBold"
-                        Text="C" />
-                </Border>
+            <FontIcon
+                Grid.Column="1"
+                Margin="12,0,8,0"
+                VerticalAlignment="Center"
+                FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                FontSize="14"
+                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                Glyph="&#xEC7A;" />
 
-                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="0">
-                    <TextBlock
-                        x:Name="TitleBarTitleTextBlock"
-                        FontSize="14"
-                        FontWeight="SemiBold"
-                        Text="CoolWSL" />
-                    <TextBlock
-                        x:Name="TitleBarSubtitleTextBlock"
-                        Opacity="0.72"
-                        Text="Windows 11 WSL control center" />
-                </StackPanel>
-            </Grid>
-        </Border>
+            <TextBlock
+                x:Name="TitleBarTitleTextBlock"
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                Style="{ThemeResource CaptionTextBlockStyle}"
+                Text="CoolWSL" />
+        </Grid>
 
         <Grid x:Name="RootGrid" Grid.Row="1" />
+
+        <Grid x:Name="StatusBarHost" Grid.Row="2" />
     </Grid>
 </Window>

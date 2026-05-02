@@ -11,24 +11,38 @@
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
             PaneDisplayMode="Left"
+            OpenPaneLength="260"
             Background="Transparent"
             SelectionChanged="OnSelectionChanged">
-            <NavigationView.Header>
-                <StackPanel Spacing="4" Background="Transparent">
-                    <TextBlock FontSize="28" FontWeight="SemiBold" Text="{x:Bind ViewModel.Title}" />
-                    <TextBlock Opacity="0.72" Text="WSL inventory, lifecycle actions, command execution, and diagnostics for Windows 11." />
-                </StackPanel>
-            </NavigationView.Header>
 
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="Dashboard" Tag="Dashboard" />
-                <NavigationViewItem Content="Distros" Tag="Distros" />
-                <NavigationViewItem Content="Diagnostics" Tag="Diagnostics" />
-                <NavigationViewItem Content="Logs" Tag="Logs" />
-                <NavigationViewItem Content="Settings" Tag="Settings" />
+                <NavigationViewItem Content="Dashboard" Tag="Dashboard">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE80F;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Diagnostics" Tag="Diagnostics">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE9D9;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItemHeader x:Name="DistrosHeader" Content="Distros" />
+                <NavigationViewItem x:Name="DistrosLoadingItem" Content="Loading…" IsEnabled="False" SelectsOnInvoked="False">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE895;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
-            <Frame x:Name="ContentFrame" Background="Transparent" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.HorizontalScrollMode="Disabled" />
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Content="Settings" Tag="Settings">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <Frame x:Name="ContentFrame" Background="Transparent" />
         </NavigationView>
     </Grid>
 </Page>

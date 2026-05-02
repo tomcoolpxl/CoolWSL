@@ -59,3 +59,22 @@
 - Fixed a post-delivery runtime regression where redirected host-side `wsl.exe` query output was decoded with the wrong encoding, which caused the Dashboard, Distros, and Diagnostics pages to show degraded or empty metadata despite healthy local WSL state.
 - Added focused automated coverage for diagnostics selection, default-distro fallback, warning/error mapping, and service registration.
 - Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug`, `dotnet build .\CoolWSL.sln -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1`, and a Windows UI Automation spot check that confirmed the Diagnostics page renders and is reachable from shell navigation on 2026-05-01.
+
+## UX Phase A - Foundation styles, Mica backdrop, and slim title bar delivered
+
+- Added an app-wide resource dictionary in `App.xaml` with spacing tokens (`SpacingXS` through `SpacingXXL`), a `CardBorderStyle` for opaque rounded card surfaces using `CardBackgroundFillColorDefaultBrush` and `CardStrokeColorDefaultBrush`, and `SecondaryTextStyle` / `TertiaryTextStyle` derived from `TextFillColorSecondaryBrush` / `TextFillColorTertiaryBrush` so de-emphasised typography no longer relies on `Opacity` (which disables ClearType subpixel rendering).
+- Kept `XamlControlsResources` in `MergedDictionaries` so the documented `NavigationView` startup-crash protection from `GEMINI.md` is preserved.
+- Replaced the 48 px custom-bordered title bar with a slim 32 px drag region containing a Segoe Fluent Icons accent glyph and a `CaptionTextBlockStyle` "CoolWSL" label; dropped the activation-state opacity dimming code that no longer applied.
+- Replaced the hard-coded RGBA title-bar button hover and pressed colours with `SubtleFillColorSecondaryBrush` and `SubtleFillColorTertiaryBrush` resolved from the application resources, so the chrome respects light, dark, and high-contrast themes.
+- Added `MicaBackdrop` (`MicaKind.Base`) to `MainWindow` behind a `MicaController.IsSupported()` guard.
+- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02.
+
+## UX Phase B - Shell rebuild with distros in the rail and a persistent status bar delivered
+
+- Rebuilt `ShellPage` with a Windows-Settings-style `NavigationView`: fixed `Dashboard` and `Diagnostics` items with Segoe Fluent Icons, a `NavigationViewItemHeader` for the dynamic `Distros` group, and a `FooterMenuItems` `Settings` entry.
+- Added per-distro `NavigationViewItem`s populated on shell load from `IDashboardStatusService.GetSnapshotAsync()`. Each item is tagged with its `WslDistro` instance so the selection handler can navigate to `DistroPage` with the distro name as the navigation parameter, which `DistroPage.OnNavigatedTo` already feeds into `DistroViewModel.EnsureLoadedAsync(preferredDistroName)`.
+- Removed `Logs` from the rail since it still resolves to `PlaceholderPage`; it will be reintroduced once `IAppLogger` is implemented in a later UX phase.
+- Stripped `ScrollViewer.VerticalScrollMode="Disabled"` and `ScrollViewer.HorizontalScrollMode="Disabled"` from the content `Frame` so wheel events can flow through the shell once individual pages stop nesting `ListView`s in their page-level `ScrollViewer`s.
+- Added a persistent bottom-of-window `StatusBar` UserControl backed by `StatusBarViewModel` (singleton) that derives `WslStatusText`, `DistroSummary`, `DefaultDistroText`, `LastRefreshedText`, and an availability-coloured indicator brush (`SystemFillColorSuccessBrush` / `SystemFillColorCautionBrush` / `SystemFillColorCriticalBrush`) from a `DashboardStatusSnapshot`.
+- Updated `MainWindow` to host the status bar in a third `Auto`-height row and updated `AppServiceCollection` to register `StatusBarViewModel` and the `StatusBar` UserControl. Left `ShellViewModel` and the existing `ShellViewModelTests` untouched so the smoke test keeps asserting historical IA without blocking the new XAML.
+- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02.
