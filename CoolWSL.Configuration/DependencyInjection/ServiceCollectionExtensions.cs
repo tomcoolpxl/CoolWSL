@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using CoolWSL.Configuration.Services;
+using CoolWSL.Core.Abstractions;
 
 namespace CoolWSL.Configuration.DependencyInjection;
 
@@ -9,6 +11,7 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddSingleton<ConfigurationModuleMarker>();
+        services.AddSingleton<IWslGlobalConfigService, WslGlobalConfigService>();
 
         return services;
     }

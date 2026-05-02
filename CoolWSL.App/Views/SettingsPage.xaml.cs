@@ -62,6 +62,31 @@ public sealed partial class SettingsPage : Page
         await ViewModel.ShutdownAllAsync();
     }
 
+    private void OnGlobalConfigTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        ViewModel.UpdateGlobalConfigContent(GlobalConfigEditorBox.Text);
+    }
+
+    private void OnCreateGlobalConfigClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.CreateGlobalConfig();
+    }
+
+    private void OnRevertGlobalConfigClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.RevertGlobalConfig();
+    }
+
+    private async void OnSaveGlobalConfigClick(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.SaveGlobalConfigAsync();
+    }
+
     private void OnOpenLogsClick(object sender, RoutedEventArgs e)
     {
         Frame?.Navigate(typeof(LogsPage));

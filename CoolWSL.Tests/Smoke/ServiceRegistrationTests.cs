@@ -22,6 +22,7 @@ public sealed class ServiceRegistrationTests
         Assert.IsNotNull(services);
         Assert.IsNotNull(services.GetService<IAppLogger>());
         Assert.IsNotNull(services.GetService<IAppLogReader>());
+        Assert.IsNotNull(services.GetService<IWslGlobalConfigService>());
         Assert.IsNotNull(services.GetService<IWslCommandService>());
         Assert.IsNotNull(services.GetService<IWslDistroService>());
         Assert.IsNotNull(services.GetService<IDashboardStatusService>());

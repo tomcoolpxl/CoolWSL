@@ -131,3 +131,13 @@
 - Replaced the remaining `PlaceholderPage` `<ScrollView>` with the app-standard vertical `<ScrollViewer>` so any future placeholder route keeps the same mouse-wheel and focus behavior as the rebuilt pages.
 - Updated `REQUIREMENTS.md`, `ARCHITECTURE.md`, and `DESIGN.md` so the documented shell and requirements now describe Dashboard, Logs, Settings, and dynamic distro entries as the current fixed navigation model.
 - Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore -m:1 /p:UseSharedCompilation=false`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj --no-restore -m:1 /p:UseSharedCompilation=false` (51 passed), and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore --no-build` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02 (UX Phase F).
+
+## Phase 8 - Raw global WSL configuration editor delivered
+
+- Added `IWslGlobalConfigService` and `WslGlobalConfigService` for `%UserProfile%\.wslconfig` read, conservative validation, backup-before-overwrite save, and missing-file handling.
+- Added raw `.wslconfig` editing to the Settings WSL section with file path, existence state, create-file draft, save, revert, validation output, backup path output, and restart-required messaging that does not automatically shut down WSL.
+- Kept raw text as the source of truth so comments, unknown sections, unknown keys, ordering, and whitespace are preserved on save unless the user changes them.
+- Added metadata logging for successful global config saves without logging file contents.
+- Added automated coverage for valid config parsing, malformed syntax, unknown-key preservation warnings, missing-file reads, raw serialization without normalization, backup creation, malformed save blocking, Settings revert behavior, and save disabling for malformed editor content.
+- Verified current WSL configuration behavior against Microsoft Learn's WSL advanced settings documentation on 2026-05-02: `.wslconfig` lives under the user profile, applies globally to WSL 2, and changes require WSL restart/shutdown semantics.
+- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore -m:1 /p:UseSharedCompilation=false`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj --no-restore -m:1 /p:UseSharedCompilation=false -v:q` (60 passed), and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore --no-build` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02.

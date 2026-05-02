@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-### Phase 8 - Raw global WSL configuration editor delivered
+### Phase 9 - Raw per-distro WSL configuration editor delivered
 
-- [ ] Add the raw .wslconfig editor with load, create-if-missing, save, revert, and conservative validation behavior.
-- [ ] Create backups before every global config overwrite and expose the backup path clearly to the user.
-- [ ] Show clear restart-required messaging without automatically shutting down WSL.
-- [ ] Add automated coverage for parse, serialize, backup, revert, and malformed-config handling.
+- [ ] Add the raw /etc/wsl.conf editor for a selected distro with load, save, and conservative validation behavior.
+- [ ] Create per-distro backups before overwrite where feasible and expose the save limitations when a backup is not possible.
+- [ ] Warn clearly when a save changes boot, systemd, or networking behavior and when a distro restart is required.
+- [ ] Add automated coverage for parse, serialize, warning, and save-path behavior plus manual checks for permissions and stopped-distro cases.
 
 ## UX Rebuild Track
 
@@ -21,13 +21,6 @@ Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through F have shipp
 - [ ] Run a high-contrast smoke check and confirm card surfaces and status indicator colours remain readable.
 
 ## Remaining Plan Items
-
-### Phase 9 - Raw per-distro WSL configuration editor delivered
-
-- [ ] Add the raw /etc/wsl.conf editor for a selected distro with load, save, and conservative validation behavior.
-- [ ] Create per-distro backups before overwrite where feasible and expose the save limitations when a backup is not possible.
-- [ ] Warn clearly when a save changes boot, systemd, or networking behavior and when a distro restart is required.
-- [ ] Add automated coverage for parse, serialize, warning, and save-path behavior plus manual checks for permissions and stopped-distro cases.
 
 ### Phase 10 - Distro export workflow delivered
 
