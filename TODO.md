@@ -11,13 +11,7 @@
 
 ## UX Rebuild Track
 
-Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through D have shipped (see `DONE.md`); the items below cover the remaining phases E through G.
-
-### UX Phase E - Diagnostics rebuild
-
-- [ ] Replace `DiagnosticsPage` with a severity-grouped `ItemsRepeater` of `SettingsExpander` rows (Errors, Warnings, OK) sourced from `IDiagnosticsService`.
-- [ ] Show a single Refresh action at the top of the page and a `LastUpdatedAt` caption.
-- [ ] Remove the duplicate per-distro diagnostics rendering from the old `DistroPage` once UX Phase D ships.
+Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through E have shipped (see `DONE.md`); the items below cover the remaining phases F and G.
 
 ### UX Phase F - Settings and Logs pages
 

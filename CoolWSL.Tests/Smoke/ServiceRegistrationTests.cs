@@ -28,7 +28,6 @@ public sealed class ServiceRegistrationTests
         Assert.IsNotNull(services.GetService<DashboardViewModel>());
         Assert.IsNotNull(services.GetService<CommandRunnerViewModel>());
         Assert.IsNotNull(services.GetService<DistroViewModel>());
-        Assert.IsNotNull(services.GetService<DiagnosticsViewModel>());
         Assert.IsNotNull(services.GetService<ShellViewModel>());
         Assert.IsNotNull(services.GetService<WslModuleMarker>());
         Assert.IsNotNull(services.GetService<ConfigurationModuleMarker>());

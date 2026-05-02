@@ -3,6 +3,8 @@
 > Audience: anyone touching the WinUI 3 layer of CoolWSL.
 > Scope: visual design, information architecture, interaction patterns, accessibility, and a concrete plan to rebuild the UI on top of the existing (solid) backend services.
 > Status: the backend (CoolWSL.Wsl, CoolWSL.Diagnostics, CoolWSL.Core) is reusable. Only the **CoolWSL.App** layer needs to be rewritten.
+>
+> **Decision update — 2026-05-02 (UX Phase E):** the sidebar `Diagnostics` destination proposed in §5.2, §6.6, and Phase E of §9 was dropped. The per-distro Diagnostics pivot (delivered in UX Phase D) already renders the full `IDiagnosticsService.GetSnapshotAsync(distroName)` result set — including the global checks (`wsl --status`, `wsl --version`, inventory, default distro, host note) — with the selected distro as context. The shell now has only Dashboard and Settings as fixed global destinations, plus the dynamic Distros group. Treat the §5.2 layout sketch, the §6.6 "Diagnostics" page spec, and the §9 "Phase E — rebuild Diagnostics" entry as historical; the authoritative IA lives in `REQUIREMENTS.md`, `ARCHITECTURE.md` (ADR 0002), and `DESIGN.md`.
 
 ---
 

@@ -21,11 +21,6 @@
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE80F;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Diagnostics" Tag="Diagnostics">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE9D9;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
                 <NavigationViewItemHeader x:Name="DistrosHeader" Content="Distros" />
                 <NavigationViewItem x:Name="DistrosLoadingItem" Content="Loading…" IsEnabled="False" SelectsOnInvoked="False">
                     <NavigationViewItem.Icon>

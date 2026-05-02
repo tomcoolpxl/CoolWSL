@@ -109,9 +109,6 @@ public sealed partial class ShellPage : Page
             case "Dashboard":
                 ContentFrame.Navigate(typeof(DashboardPage));
                 break;
-            case "Diagnostics":
-                ContentFrame.Navigate(typeof(DiagnosticsPage));
-                break;
             case "Settings":
                 ContentFrame.Navigate(typeof(PlaceholderPage), AppSection.Settings);
                 break;

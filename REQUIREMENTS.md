@@ -81,7 +81,7 @@ CoolWSL should avoid:
 
 CoolWSL should use a single shell with:
 
-- fixed left-rail destinations for Dashboard, Diagnostics, and Settings
+- fixed left-rail destinations for Dashboard and Settings
 - a dynamic Distros group where each distro is its own first-class navigation item
 - a persistent bottom status bar showing WSL availability, default distro, running-distro count, and last refresh time
 - a Windows 11-native visual language built from real cards, Fluent icons, theme brushes, and standard window chrome
@@ -125,7 +125,7 @@ Diagnostics
 
 ## Global Destinations
 
-Diagnostics should have one primary home in the shell and may be summarized elsewhere.
+Diagnostics live inside the per-distro detail page as the Diagnostics pivot. Global checks (`wsl --status`, `wsl --version`, inventory, default distro) are surfaced inside that pivot alongside per-distro probes; the dashboard may summarize top findings but the shell does not expose a separate Diagnostics destination.
 
 Settings should remain a fixed global destination for application settings and global WSL configuration.
 
@@ -165,7 +165,7 @@ The shutdown action must clearly warn that it affects all running WSL distros.
 
 The shell navigation must support:
 
-- Fixed top-level destinations for Dashboard, Diagnostics, and Settings.
+- Fixed top-level destinations for Dashboard and Settings.
 - A Distros group bound to all registered distros.
 - Selecting a distro as a first-class navigation action.
 - Distinguishing running and stopped distros with clear state indicators.
@@ -276,8 +276,7 @@ The MVP should provide:
 
 The MVP diagnostics experience must include:
 
-- A dedicated Diagnostics page for global WSL and host-side results.
-- A Diagnostics pivot within each distro detail page for per-distro checks.
+- A Diagnostics pivot within each distro detail page that owns the full diagnostics view, covering both per-distro probes and global checks for the chosen distro context.
 - `wsl --status`
 - `wsl --version` where available
 - Distro list diagnostics
@@ -288,7 +287,7 @@ The MVP diagnostics experience must include:
 
 Diagnostics should be presented in plain language, with raw command output available.
 
-The dashboard may surface only a compact summary of top findings. Full diagnostic detail should have one primary home rather than being duplicated across multiple pages.
+The dashboard may surface only a compact summary of top findings. Full diagnostic detail lives in the per-distro Diagnostics pivot rather than being duplicated across multiple shell destinations.
 
 ## MVP Export
 
@@ -748,10 +747,10 @@ Version 1.0 may extend this with Services, Filesystem, Networking, and Logs as a
 
 Diagnostics should:
 
-- have one primary home for full results
+- live in the per-distro Diagnostics pivot as the only full-results home
 - present results in a severity-first or otherwise easy-to-triage structure
 - keep raw output available on demand
-- allow the dashboard to summarize top findings without duplicating the full page
+- allow the dashboard to summarize top findings without duplicating the full pivot
 
 ## Visual UX
 
@@ -806,7 +805,7 @@ The MVP is acceptable when:
 
 - The app starts on Windows 11.
 - It detects whether WSL is available.
-- It uses a fixed shell with Dashboard, Diagnostics, Settings, and per-distro navigation items.
+- It uses a fixed shell with Dashboard, Settings, and per-distro navigation items.
 - It lists registered distros.
 - It shows running or stopped state.
 - It shows the default distro.
@@ -822,7 +821,7 @@ The MVP is acceptable when:
 - It provides mouse-wheel and keyboard scrolling that works on the main content pages.
 - It can read and edit `.wslconfig`.
 - It can read and edit `/etc/wsl.conf`.
-- It can run basic diagnostics with one primary diagnostics page and per-distro diagnostics in the distro detail experience.
+- It can run basic diagnostics inside the per-distro Diagnostics pivot, which owns both global and per-distro checks.
 - It can export a distro.
 - It logs operations safely.
 - It avoids undocumented WSL internals.
