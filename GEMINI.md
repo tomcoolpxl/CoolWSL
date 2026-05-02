@@ -71,7 +71,8 @@ Before marking work as done:
 * CoolWSL supports non-interactive startup verification with `COOLWSL_SMOKE_TEST=1` and an optional `COOLWSL_SMOKE_TEST_FILE` marker path. This is the preferred local smoke-launch check.
 * Phase 3 uses `ProcessStartInfo.ArgumentList` for WSL command execution so distro names with spaces and shell metacharacters stay as raw arguments instead of shell-interpreted text.
 * `WslListParser` and `WslStatusParser` must degrade safely when WSL output is unsupported, localized, or missing expected fields instead of guessing inventory or environment details.
-* Agent shell commands on this Windows machine should run PowerShell with `login=false` / no profile loading. The user's PowerShell profile writes outside the workspace and probes console/CIM state, which causes sandbox access-denied noise before the intended command runs.
+- Agent shell commands on this Windows machine should run PowerShell with `login=false` / no profile loading. The user's PowerShell profile writes outside the workspace and probes console/CIM state, which causes sandbox access-denied noise before the intended command runs.
+- EXTRA1 introduces a lossless INI document model under CoolWSL.Core/Models/Configuration. Both the per-distro and (later) global config services should round-trip user input byte-for-byte; never serialize via System.Configuration or other lossy libraries.
 
 ## 1. Think Before Coding
 

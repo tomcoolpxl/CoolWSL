@@ -28,18 +28,18 @@ public sealed class DistroViewModel : INotifyPropertyChanged
     public DistroViewModel(
         IDashboardStatusService dashboardStatusService,
         IWslDistroService distroService,
-        CommandRunnerViewModel commandRunner,
+        DistroSettingsViewModel settings,
         DistroPageDiagnosticsViewModel diagnostics)
     {
         this.dashboardStatusService = dashboardStatusService;
         this.distroService = distroService;
-        CommandRunner = commandRunner;
+        Settings = settings;
         Diagnostics = diagnostics;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public CommandRunnerViewModel CommandRunner { get; }
+    public DistroSettingsViewModel Settings { get; }
 
     public DistroPageDiagnosticsViewModel Diagnostics { get; }
 
@@ -370,7 +370,7 @@ public sealed class DistroViewModel : INotifyPropertyChanged
     private void SetSelectedDistro(DistroSelectionItem? value)
     {
         selectedDistro = value;
-        CommandRunner.SetSelectedDistro(value?.Name);
+        Settings.SetSelectedDistro(value?.Name);
         Diagnostics.SetSelectedDistro(value?.Name);
 
         foreach (var name in SelectionPropertyNames)

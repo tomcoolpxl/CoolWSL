@@ -86,3 +86,11 @@ Date: 2026-05-02
 - `REQUIREMENTS.md`
 - `DESIGN.md`
 - `IMPLEMENTATION_PLAN.md`
+
+2026-05-02: Per EXTRA1, the per-distro pivot composition is reduced to
+Overview, Settings, Diagnostics. The Terminal pivot was removed. The
+"Open terminal" lifecycle card on the Overview pivot remains the
+sanctioned terminal entry point. The Configuration pivot was renamed to
+Settings to match the Windows 11 system vocabulary; disambiguation from
+the global Settings destination is provided by the distro header and a
+"<DistroName> settings - /etc/wsl.conf" sub-header inside the pivot.

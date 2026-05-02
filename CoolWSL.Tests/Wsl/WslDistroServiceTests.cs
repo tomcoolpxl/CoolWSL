@@ -155,5 +155,10 @@ public sealed class WslDistroServiceTests
 
             return Task.FromResult(result);
         }
+
+        public Task<CommandResult> ExecuteWithStdinAsync(WslCommand command, string stdin, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

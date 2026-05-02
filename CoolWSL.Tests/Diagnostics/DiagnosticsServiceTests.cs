@@ -121,7 +121,12 @@ public sealed class DiagnosticsServiceTests
                 }
             }
 
-            throw new AssertFailedException($"No stubbed command result exists for {command.CommandText}.");
+            throw new AssertFailedException($"No stubbed result exists for {command.CommandText}.");
+        }
+
+        public Task<CommandResult> ExecuteWithStdinAsync(WslCommand command, string stdin, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

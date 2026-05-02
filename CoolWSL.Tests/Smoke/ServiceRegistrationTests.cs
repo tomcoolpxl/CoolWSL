@@ -5,6 +5,7 @@ using CoolWSL.Core.Abstractions;
 using CoolWSL.Diagnostics.DependencyInjection;
 using CoolWSL.Diagnostics.Services;
 using CoolWSL.Diagnostics.Status;
+using CoolWSL.Configuration.Services;
 using CoolWSL.Wsl.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,7 +29,7 @@ public sealed class ServiceRegistrationTests
         Assert.IsNotNull(services.GetService<IDashboardStatusService>());
         Assert.IsNotNull(services.GetService<IDiagnosticsService>());
         Assert.IsNotNull(services.GetService<DashboardViewModel>());
-        Assert.IsNotNull(services.GetService<CommandRunnerViewModel>());
+        Assert.IsNotNull(services.GetService<DistroSettingsViewModel>());
         Assert.IsNotNull(services.GetService<DistroViewModel>());
         Assert.IsNotNull(services.GetService<LogsViewModel>());
         Assert.IsNotNull(services.GetService<SettingsViewModel>());

@@ -5,4 +5,6 @@ namespace CoolWSL.Core.Abstractions;
 public interface IWslCommandService
 {
     Task<CommandResult> ExecuteAsync(WslCommand command, CancellationToken cancellationToken = default);
+
+    Task<CommandResult> ExecuteWithStdinAsync(WslCommand command, string stdin, CancellationToken cancellationToken = default);
 }

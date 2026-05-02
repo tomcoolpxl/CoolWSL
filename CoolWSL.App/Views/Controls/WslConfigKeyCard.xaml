@@ -1,0 +1,37 @@
+<UserControl
+    x:Class="CoolWSL.App.Views.Controls.WslConfigKeyCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:CoolWSL.App.ViewModels"
+    mc:Ignorable="d">
+    <Border Style="{StaticResource CardBorderStyle}" Padding="16">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="4">
+                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.Label, Mode=OneWay}" />
+                <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind ViewModel.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                <TextBlock x:Name="CapabilityWarningText" Foreground="{ThemeResource SystemFillColorCautionBrush}" x:Load="{x:Bind ViewModel.IsGated, Mode=OneWay}" Text="{x:Bind ViewModel.CapabilityWarning, Mode=OneWay}" />
+                <TextBlock x:Name="ProbeResultText" Foreground="{ThemeResource SystemFillColorSuccessBrush}" Text="{x:Bind ViewModel.ProbeResult.Status, Mode=OneWay}" x:Load="{x:Bind ViewModel.HasProbeResult, Mode=OneWay}" />
+            </StackPanel>
+            
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="150">
+                <ToggleSwitch 
+                    x:Name="BoolToggle"
+                    x:Load="{x:Bind ViewModel.IsBoolean, Mode=OneWay}"
+                    IsOn="{x:Bind ViewModel.BooleanValue, Mode=TwoWay}"
+                    IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}" />
+                    
+                <TextBox 
+                    x:Name="StringBox"
+                    x:Load="{x:Bind ViewModel.IsString, Mode=OneWay}"
+                    Text="{x:Bind ViewModel.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

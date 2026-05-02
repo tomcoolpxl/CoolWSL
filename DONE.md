@@ -141,3 +141,14 @@
 - Added automated coverage for valid config parsing, malformed syntax, unknown-key preservation warnings, missing-file reads, raw serialization without normalization, backup creation, malformed save blocking, Settings revert behavior, and save disabling for malformed editor content.
 - Verified current WSL configuration behavior against Microsoft Learn's WSL advanced settings documentation on 2026-05-02: `.wslconfig` lives under the user profile, applies globally to WSL 2, and changes require WSL restart/shutdown semantics.
 - Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore -m:1 /p:UseSharedCompilation=false`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj --no-restore -m:1 /p:UseSharedCompilation=false -v:q` (60 passed), and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore --no-build` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02.
+
+## Phase E1.6 - Runtime validation probes and global summary card
+
+- Implemented `ProbeAsync` in `WslDistroConfigService` running explicit verification commands via `wsl --exec`.
+- Updated `DistroSettingsViewModel` to orchestrate validation probe execution and apply results to `DistroSettingsRowViewModel`.
+- Added the Global WSL settings summary card at the top of the Settings pivot with read-only indicators and a fallback handoff to the official WSL Settings app.
+
+## Phase E1.7 - Polish and smoke verification
+
+- Verified all `dotnet build` and `dotnet test` output passes clean on 2026-05-02.
+- Verified `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` finishes successfully on 2026-05-02.

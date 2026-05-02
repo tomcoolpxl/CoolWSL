@@ -21,7 +21,7 @@ public static class AppServiceCollection
             .AddCoolWslDiagnostics();
 
         services.AddSingleton<DashboardViewModel>();
-        services.AddSingleton<CommandRunnerViewModel>();
+        services.AddSingleton<DistroSettingsViewModel>();
         services.AddSingleton<DistroPageDiagnosticsViewModel>();
         services.AddSingleton<DistroViewModel>();
         services.AddSingleton<LogsViewModel>();

@@ -12,7 +12,9 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<ConfigurationModuleMarker>();
         services.AddSingleton<IWslGlobalConfigService, WslGlobalConfigService>();
-
+        services.AddSingleton<IWslDistroConfigService>(sp => new WslDistroConfigService(
+            sp.GetRequiredService<IWslDistroFileService>(),
+            sp.GetRequiredService<IWslDistroService>()));
         return services;
     }
 }

@@ -24,10 +24,26 @@ public sealed class WslCommandService : IWslCommandService
 
     public async Task<CommandResult> ExecuteAsync(WslCommand command, CancellationToken cancellationToken = default)
     {
+        return await ExecuteInternalAsync(command, null, cancellationToken);
+    }
+
+    public async Task<CommandResult> ExecuteWithStdinAsync(WslCommand command, string stdin, CancellationToken cancellationToken = default)
+    {
+        return await ExecuteInternalAsync(command, stdin, cancellationToken);
+    }
+
+    private async Task<CommandResult> ExecuteInternalAsync(WslCommand command, string? stdin, CancellationToken cancellationToken)
+    {
         ArgumentNullException.ThrowIfNull(command);
 
         var startedAt = timeProvider.GetUtcNow();
-        using var process = new Process { StartInfo = CreateStartInfo(command) };
+        var startInfo = CreateStartInfo(command);
+        if (stdin is not null)
+        {
+            startInfo.RedirectStandardInput = true;
+        }
+
+        using var process = new Process { StartInfo = startInfo };
 
         try
         {
@@ -41,6 +57,12 @@ public sealed class WslCommandService : IWslCommandService
         {
             var endAt = timeProvider.GetUtcNow();
             return CreateLaunchFailure(command, startedAt, endAt, exception);
+        }
+
+        if (stdin is not null)
+        {
+            await process.StandardInput.WriteAsync(stdin).ConfigureAwait(false);
+            process.StandardInput.Close();
         }
 
         var outputTask = process.StandardOutput.ReadToEndAsync();

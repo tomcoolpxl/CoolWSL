@@ -118,8 +118,7 @@ The MVP detail page should be organized as:
 
 ```text
 Overview
-Terminal
-Configuration
+Settings
 Diagnostics
 ```
 
@@ -219,23 +218,7 @@ The command runner must be reachable directly from the Terminal pivot and should
 
 ## MVP Command Runner
 
-The command runner must:
-
-- Run a command inside a selected distro.
-- Capture stdout.
-- Capture stderr.
-- Capture exit code.
-- Support cancellation.
-- Support timeout.
-- Preserve command history for the session.
-- Clearly show whether the command succeeded or failed.
-- Present one primary output surface, with stderr visually distinguished without requiring a permanent side-by-side split.
-
-Nice to have in MVP:
-
-- Run as root.
-- Copy or clear output.
-- Save output to file.
+This section is superseded by EXTRA1's "Open terminal" overview card and the validation runner. The `IWslDistroService.RunInDistroAsync` interface stays in the codebase as a service-level primitive for probes.
 
 ## MVP Global Configuration
 
@@ -430,20 +413,7 @@ The raw editor should remain available.
 
 ## 1.0 Per-Distro Settings UI
 
-CoolWSL should provide structured controls for supported `/etc/wsl.conf` settings:
-
-- default user
-- automount
-- Windows path interop
-- hostname
-- generated hosts
-- generated resolv.conf
-- boot command
-- systemd
-- GPU support
-- timezone sync
-
-The raw editor should remain available.
+Delivered by EXTRA1 ahead of Phase 12. Structured controls cover the seven officially documented sections; raw editor is preserved.
 
 ## 1.0 Command Profiles
 
@@ -738,8 +708,7 @@ The distro detail page should use this structure in MVP:
 
 ```text
 Overview
-Terminal
-Configuration
+Settings
 Diagnostics
 ```
 

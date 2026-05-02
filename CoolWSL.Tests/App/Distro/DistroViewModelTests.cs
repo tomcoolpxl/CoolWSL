@@ -163,9 +163,11 @@ public sealed class DistroViewModelTests
         IDashboardStatusService dashboardService,
         IDiagnosticsService diagnosticsService)
     {
-        var commandRunner = new CommandRunnerViewModel(new StubWslDistroService());
+        var mockConfigService = new Moq.Mock<CoolWSL.Core.Abstractions.IWslDistroConfigService>();
+        var mockGlobalConfigService = new Moq.Mock<CoolWSL.Core.Abstractions.IWslGlobalConfigService>();
+        var settingsVm = new DistroSettingsViewModel(mockConfigService.Object, dashboardService, mockGlobalConfigService.Object);
         var diagnosticsVm = new DistroPageDiagnosticsViewModel(diagnosticsService);
-        return new DistroViewModel(dashboardService, new StubWslDistroService(), commandRunner, diagnosticsVm);
+        return new DistroViewModel(dashboardService, new StubWslDistroService(), settingsVm, diagnosticsVm);
     }
 
     private sealed class SequenceDashboardStatusService : IDashboardStatusService

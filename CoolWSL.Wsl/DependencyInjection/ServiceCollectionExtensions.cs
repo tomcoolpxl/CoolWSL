@@ -17,6 +17,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<WslStatusParser>();
         services.AddSingleton<IWslCommandService, WslCommandService>();
         services.AddSingleton<IWslDistroService, WslDistroService>();
+        services.AddSingleton<IWslDistroFileService, WslDistroFileService>();
         services.AddSingleton<WslModuleMarker>();
 
         return services;

@@ -73,39 +73,38 @@ public sealed partial class DistroPage : Page
         await ViewModel.SetDefaultDistroAsync();
     }
 
-    private async void OnRunCommandClick(object sender, RoutedEventArgs e)
+    private async void OnReloadSettingsClick(object sender, RoutedEventArgs e)
     {
-        await ViewModel.CommandRunner.RunAsync();
+        await ViewModel.Settings.LoadAsync();
     }
 
-    private void OnCancelCommandClick(object sender, RoutedEventArgs e)
+    private async void OnVerifySettingsClick(object sender, RoutedEventArgs e)
     {
-        ViewModel.CommandRunner.Cancel();
+        await ViewModel.Settings.VerifyAsync();
     }
 
-    private void OnCopyStdoutClick(object sender, RoutedEventArgs e)
+    private async void OnSaveSettingsClick(object sender, RoutedEventArgs e)
     {
-        CopyToClipboard(ViewModel.CommandRunner.StandardOutput);
+        await ViewModel.Settings.SaveAsync();
     }
 
-    private void OnCopyStderrClick(object sender, RoutedEventArgs e)
+    private async void OnSaveAndTerminateClick(object sender, RoutedEventArgs e)
     {
-        CopyToClipboard(ViewModel.CommandRunner.StandardError);
-    }
-
-    private void OnClearOutputClick(object sender, RoutedEventArgs e)
-    {
-        ViewModel.CommandRunner.ClearOutput();
-    }
-
-    private void OnReuseHistoryEntryClick(object sender, RoutedEventArgs e)
-    {
-        if ((sender as FrameworkElement)?.DataContext is CommandHistoryEntry entry)
+        await ViewModel.Settings.SaveAsync();
+        if (ViewModel.Settings.Errors.Count == 0)
         {
-            ViewModel.CommandRunner.ReuseHistoryEntry(entry);
-            CommandInputBox.StartBringIntoView();
-            CommandInputBox.Focus(FocusState.Programmatic);
+            await ViewModel.TerminateDistroAsync();
         }
+    }
+
+    private void OnRevertSettingsClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.Settings.Revert();
+    }
+
+    private void OnOpenWslSettingsClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.Settings.OpenWslSettings();
     }
 
     private async void OnRefreshDiagnosticsClick(object sender, RoutedEventArgs e)

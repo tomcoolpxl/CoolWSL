@@ -2,12 +2,16 @@
 
 ## Current Phase
 
-### Phase 9 - Raw per-distro WSL configuration editor delivered
+### Current Phase: EXTRA1
 
-- [ ] Add the raw /etc/wsl.conf editor for a selected distro with load, save, and conservative validation behavior.
-- [ ] Create per-distro backups before overwrite where feasible and expose the save limitations when a backup is not possible.
-- [ ] Warn clearly when a save changes boot, systemd, or networking behavior and when a distro restart is required.
-- [ ] Add automated coverage for parse, serialize, warning, and save-path behavior plus manual checks for permissions and stopped-distro cases.
+- [ ] Phase E1.0: Pivot rename + Terminal removal + scaffolding
+- [ ] Phase E1.1: Distro filesystem service + lossless INI document
+- [ ] Phase E1.2: Per-distro config service (read, validate, save, backup)
+- [ ] Phase E1.3: Static + capability validation
+- [ ] Phase E1.4: Settings pivot UI - raw editor + restart messaging
+- [ ] Phase E1.5: Settings pivot UI - structured editor over the same model
+- [ ] Phase E1.6: Runtime validation probes + global `.wslconfig` summary card
+- [ ] Phase E1.7: Polish, accessibility audit, smoke verification
 
 ## UX Rebuild Track
 
@@ -22,6 +26,20 @@ Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through F have shipp
 
 ## Remaining Plan Items
 
+### Superseded by EXTRA1
+
+#### Phase 9 - Raw per-distro WSL configuration editor delivered
+- [ ] Add the raw /etc/wsl.conf editor for a selected distro with load, save, and conservative validation behavior.
+- [ ] Create per-distro backups before overwrite where feasible and expose the save limitations when a backup is not possible.
+- [ ] Warn clearly when a save changes boot, systemd, or networking behavior and when a distro restart is required.
+- [ ] Add automated coverage for parse, serialize, warning, and save-path behavior plus manual checks for permissions and stopped-distro cases.
+
+#### Phase 12 - Structured per-distro settings UI delivered
+- [ ] Add structured controls for the supported /etc/wsl.conf settings while keeping the raw editor available.
+- [ ] Reuse and expose explicit warnings for boot, systemd, and networking changes.
+- [ ] Gate unsupported per-distro settings and preserve round-trip integrity for raw content.
+- [ ] Add automated coverage for mapping and warning logic plus manual checks for structured distro-editing flows.
+
 ### Phase 10 - Distro export workflow delivered
 
 - [ ] Add the export workflow with distro selection, destination selection, and explicit start action.
@@ -35,13 +53,6 @@ Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through F have shipp
 - [ ] Gate unsupported controls by Windows and WSL version instead of allowing invalid edits.
 - [ ] Preserve round-trip integrity between structured and raw .wslconfig representations.
 - [ ] Add automated coverage for mapping, validation, and feature gating plus manual checks for structured editing flows.
-
-### Phase 12 - Structured per-distro settings UI delivered
-
-- [ ] Add structured controls for the supported /etc/wsl.conf settings while keeping the raw editor available.
-- [ ] Reuse and expose explicit warnings for boot, systemd, and networking changes.
-- [ ] Gate unsupported per-distro settings and preserve round-trip integrity for raw content.
-- [ ] Add automated coverage for mapping and warning logic plus manual checks for structured distro-editing flows.
 
 ### Phase 13 - Systemd service management delivered
 
