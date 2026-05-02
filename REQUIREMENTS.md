@@ -222,7 +222,7 @@ This section is superseded by EXTRA1's "Open terminal" overview card and the val
 
 ## MVP Global Configuration
 
-CoolWSL must support reading and editing:
+CoolWSL must support reading:
 
 ```text
 %UserProfile%\.wslconfig
@@ -230,11 +230,10 @@ CoolWSL must support reading and editing:
 
 The MVP should provide:
 
-- Raw text editor.
-- Basic validation.
-- Backup before save.
-- Save changes.
-- Revert changes.
+- Read-only visibility of the current file contents when the file exists.
+- Clear missing-file state when `.wslconfig` is absent.
+- Basic validation messaging for malformed content.
+- Explicit handoff to the official WSL Settings app for editing.
 - Clear notice when restart is required.
 
 The app must not silently restart WSL after config changes.
@@ -790,7 +789,7 @@ The MVP is acceptable when:
 - It can run a command inside a distro.
 - It can show stdout, stderr, and exit code.
 - It provides mouse-wheel and keyboard scrolling that works on the main content pages.
-- It can read and edit `.wslconfig`.
+- It can read `.wslconfig` and hand off to the official WSL Settings app.
 - It can read and edit `/etc/wsl.conf`.
 - It can run basic diagnostics inside the per-distro Diagnostics pivot, which owns both global and per-distro checks.
 - It can export a distro.

@@ -16,7 +16,19 @@
                 <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.Label, Mode=OneWay}" />
                 <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind ViewModel.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
                 <TextBlock x:Name="CapabilityWarningText" Foreground="{ThemeResource SystemFillColorCautionBrush}" x:Load="{x:Bind ViewModel.IsGated, Mode=OneWay}" Text="{x:Bind ViewModel.CapabilityWarning, Mode=OneWay}" />
-                <TextBlock x:Name="ProbeResultText" Foreground="{ThemeResource SystemFillColorSuccessBrush}" Text="{x:Bind ViewModel.ProbeResult.Status, Mode=OneWay}" x:Load="{x:Bind ViewModel.HasProbeResult, Mode=OneWay}" />
+                <TextBlock
+                    x:Name="ProbeResultText"
+                    Style="{StaticResource SecondaryTextStyle}"
+                    Text="{x:Bind ViewModel.ProbeStatusText, Mode=OneWay}"
+                    TextWrapping="WrapWholeWords"
+                    x:Load="{x:Bind ViewModel.HasProbeResult, Mode=OneWay}" />
+                <TextBlock
+                    x:Name="ProbeEvidenceText"
+                    x:Load="{x:Bind ViewModel.HasProbeEvidence, Mode=OneWay}"
+                    Style="{StaticResource TertiaryTextStyle}"
+                    FontFamily="Consolas"
+                    Text="{x:Bind ViewModel.ProbeEvidenceText, Mode=OneWay}"
+                    TextWrapping="WrapWholeWords" />
             </StackPanel>
             
             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="150">

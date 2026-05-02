@@ -153,6 +153,17 @@
 - Verified all `dotnet build` and `dotnet test` output passes clean on 2026-05-02.
 - Verified `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` finishes successfully on 2026-05-02.
 
+## UX fix pass - layout stability, clearer distro labels, and settings simplification delivered
+
+- Stabilized the main page content hosts by centering the Dashboard, Settings, Logs, and Distro-page pivot content inside named width-bound containers, which removes the prior drift between unconstrained and max-width layouts.
+- Replaced raw per-distro WSL version integers with explicit `WSL 1` / `WSL 2` labels so the dashboard tiles and distro header no longer show stray standalone numbers.
+- Hardened dashboard distro-tile navigation by tagging each tile with the distro name and using that explicit target for both rail selection and direct `DistroPage` fallback navigation.
+- Reworked per-distro configuration verification so probe results render in plain language, show evidence when available, and clear automatically on reload or edit instead of leaving stale `NotEffective` text behind.
+- Simplified the global WSL settings surface so the Settings page now shows `.wslconfig` read-only when present, states clearly when the file is missing, and routes editing through the official WSL Settings app instead of exposing create, revert, and save controls in CoolWSL.
+- Removed the redundant Diagnostics and Logs cards from Settings so those workflows remain in their dedicated destinations rather than being duplicated on the global settings surface.
+- Verified the updated global-settings guidance against Microsoft Learn on 2026-05-03, which recommends using the WSL Settings app for `.wslconfig` changes and confirms that `.wslconfig` applies to WSL 2 only and takes effect after WSL restarts.
+- Verified `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug --filter "FullyQualifiedName~DashboardStateTests|FullyQualifiedName~DistroSelectionItemTests"`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug --filter "FullyQualifiedName~SettingsViewModelTests|FullyQualifiedName~DistroSettingsViewModelTests|FullyQualifiedName~DistroSettingsRowViewModelTests"`, and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-build` with `COOLWSL_SMOKE_TEST=1` on 2026-05-03.
+
 ## Code review remediation - CODE_REVIEW findings resolved
 
 - Reordered `WslCommandService` redirected output reads ahead of stdin writes so large stdin payloads cannot deadlock behind unread stdout/stderr, and added focused stdin regression coverage.

@@ -58,7 +58,10 @@ public sealed partial class DashboardPage : Page
 
     private void OnDistroTileClick(object sender, RoutedEventArgs e)
     {
-        if ((sender as FrameworkElement)?.DataContext is not DashboardDistroRow row)
+        var row = (sender as FrameworkElement)?.DataContext as DashboardDistroRow;
+        var distroName = (sender as FrameworkElement)?.Tag as string ?? row?.Name;
+
+        if (string.IsNullOrWhiteSpace(distroName))
         {
             return;
         }
@@ -70,7 +73,7 @@ public sealed partial class DashboardPage : Page
             {
                 if (item is NavigationViewItem nvi &&
                     nvi.Tag is WslDistro distro &&
-                    string.Equals(distro.Name, row.Name, StringComparison.Ordinal))
+                    string.Equals(distro.Name, distroName, StringComparison.Ordinal))
                 {
                     navigationView.SelectedItem = nvi;
                     return;
@@ -78,7 +81,7 @@ public sealed partial class DashboardPage : Page
             }
         }
 
-        Frame?.Navigate(typeof(DistroPage), row.Name);
+        Frame?.Navigate(typeof(DistroPage), distroName);
     }
 
     private NavigationView? FindParentNavigationView()

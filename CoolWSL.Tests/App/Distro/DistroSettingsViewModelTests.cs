@@ -39,7 +39,7 @@ public sealed class DistroSettingsViewModelTests
         await WaitUntilAsync(() => configService.CancelledReadCount == 1);
 
         Assert.AreEqual("[user]\ndefault=debian\n", viewModel.RawText);
-        Assert.AreEqual("Memory: 4GB | Networking: NAT | GUI apps: on", viewModel.GlobalWslSummary);
+        Assert.AreEqual("Global .wslconfig: memory 4GB, networking NAT, GUI apps on.", viewModel.GlobalWslSummary);
         Assert.IsTrue(viewModel.StatusMessage.StartsWith("Loaded at ", StringComparison.Ordinal));
         Assert.AreEqual("debian", viewModel.Rows.Single(row => row.KeyId == "user.default").Value);
     }

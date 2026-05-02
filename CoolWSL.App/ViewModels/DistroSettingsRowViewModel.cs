@@ -81,6 +81,7 @@ public sealed class DistroSettingsRowViewModel : INotifyPropertyChanged
 
     public void Refresh(IniDocument document, WslDistroCapabilityContext capabilities)
     {
+        ProbeResult = null;
         var entry = document.Section(schema.Section)?.Entry(schema.Key);
         currentValue = entry?.EffectiveValue;
         IsModified = false;
@@ -118,11 +119,29 @@ public sealed class DistroSettingsRowViewModel : INotifyPropertyChanged
                 probeResult = value; 
                 OnPropertyChanged(); 
                 OnPropertyChanged(nameof(HasProbeResult));
+                OnPropertyChanged(nameof(ProbeStatusText));
+                OnPropertyChanged(nameof(HasProbeEvidence));
+                OnPropertyChanged(nameof(ProbeEvidenceText));
             } 
         }
     }
 
     public bool HasProbeResult => probeResult != null;
+
+    public string ProbeStatusText => ProbeResult?.Status switch
+    {
+        WslConfigProbeStatus.Effective => "Verified in the current distro session.",
+        WslConfigProbeStatus.NotEffective => "Not active in the current distro session yet. Restart the distro if you just changed this setting.",
+        WslConfigProbeStatus.Skipped => "Verification was skipped for this setting.",
+        WslConfigProbeStatus.Unknown => "Verification could not confirm this setting.",
+        _ => string.Empty,
+    };
+
+    public bool HasProbeEvidence =>
+        ProbeResult is { Evidence.Length: > 0 } &&
+        !string.Equals(ProbeResult.Evidence, "(no output)", StringComparison.Ordinal);
+
+    public string ProbeEvidenceText => ProbeResult?.Evidence ?? string.Empty;
 
     public void ApplyProbeResult(WslConfigProbeResult? result)
     {

@@ -240,7 +240,7 @@ public sealed record DashboardState(
         return new(
             distro.Name,
             distro.StateLabel,
-            distro.WslVersion?.ToString(CultureInfo.InvariantCulture) ?? MissingValueLabel,
+            FormatDistroWslVersion(distro.WslVersion),
             distro.IsDefault ? "Default" : string.Empty,
             distro.IsSystemManaged ? "System-managed" : string.Empty,
             BuildCapabilityMessage(distro),
@@ -248,6 +248,11 @@ public sealed record DashboardState(
             distro.IsDefault,
             distro.IsSystemManaged);
     }
+
+    private static string FormatDistroWslVersion(int? wslVersion)
+        => wslVersion.HasValue
+            ? string.Create(CultureInfo.InvariantCulture, $"WSL {wslVersion.Value}")
+            : "WSL version not reported";
 
     private static string BuildCapabilityMessage(WslDistro distro)
         => DistroCapabilityHelper.BuildCapabilityMessage(distro);

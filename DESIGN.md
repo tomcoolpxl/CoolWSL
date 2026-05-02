@@ -343,18 +343,19 @@ Recommended groups:
 - WSL
 - Appearance
 - Behavior
-- Diagnostics
 - About
 
 MVP content belongs here:
 
-- `.wslconfig` editor
+- read-only `.wslconfig` viewer plus official WSL Settings handoff
 - theme selection
 - confirmation behavior
 - command timeout defaults
 - logging behavior
 
 Settings content should use settings cards, descriptive copy, and clear restart-required messaging rather than free-form stacked controls.
+
+Settings should not duplicate the dedicated Logs route or the per-distro Diagnostics pivot.
 
 ---
 

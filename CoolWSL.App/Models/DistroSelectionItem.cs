@@ -33,7 +33,7 @@ public sealed record DistroSelectionItem(
         return new(
             distro.Name,
             distro.StateLabel,
-            distro.WslVersion?.ToString() ?? "Not reported",
+            FormatWslVersionLabel(distro.WslVersion),
             distro.IsDefault ? "Default distro" : "Not default",
             distro.IsSystemManaged ? "System-managed" : string.Empty,
             BuildCapabilityMessage(distro),
@@ -41,6 +41,9 @@ public sealed record DistroSelectionItem(
             distro.IsRunning,
             distro.IsSystemManaged);
     }
+
+    private static string FormatWslVersionLabel(int? wslVersion)
+        => wslVersion.HasValue ? $"WSL {wslVersion.Value}" : "WSL version not reported";
 
     private static string BuildCapabilityMessage(WslDistro distro)
         => DistroCapabilityHelper.BuildCapabilityMessage(distro);

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using CoolWSL.App.Helpers;
 using CoolWSL.Core.Abstractions;
 using CoolWSL.Core.Models;
 using CoolWSL.Diagnostics.Status;
@@ -260,6 +261,16 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool HasGlobalConfigFile => globalConfigExists;
+
+    public bool ShowGlobalConfigMissingState => hasGlobalConfigLoaded && !globalConfigExists;
+
+    public bool HasGlobalConfigValidationIssues => globalConfigValidation.Issues.Count > 0;
+
+    public string GlobalConfigRecommendedText => HasGlobalConfigFile
+        ? "Shown read-only in CoolWSL. Microsoft recommends editing global WSL settings in the official WSL Settings app."
+        : "No global .wslconfig file is present. WSL is using built-in defaults. Microsoft recommends creating and editing global settings in the official WSL Settings app.";
+
     public bool HasGlobalConfigChanges => !string.Equals(GlobalConfigContent, originalGlobalConfigContent, StringComparison.Ordinal);
 
     public bool HasGlobalConfigRestartNotice => HasGlobalConfigChanges || globalConfigSaveRequiresRestart;
@@ -326,6 +337,18 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             "Shut down all running WSL distros.",
             refreshAfterSuccess: true);
 
+    public void OpenWslSettings()
+    {
+        try
+        {
+            WslSettingsLauncher.Open();
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+        {
+            ActionStatusText = $"Could not open the official WSL Settings app: {ex.Message}";
+        }
+    }
+
     public async Task SaveGlobalConfigAsync()
     {
         if (!CanSaveGlobalConfig)
@@ -350,7 +373,10 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             logger.LogInfo("Configuration", $"Saved .wslconfig; Backup={(result.BackupPath ?? "none")}");
             ApplyGlobalConfigValidation(result.Validation);
             OnPropertyChanged(nameof(HasGlobalConfigChanges));
+            OnPropertyChanged(nameof(HasGlobalConfigFile));
             OnPropertyChanged(nameof(HasGlobalConfigRestartNotice));
+            OnPropertyChanged(nameof(ShowGlobalConfigMissingState));
+            OnPropertyChanged(nameof(GlobalConfigRecommendedText));
             OnPropertyChanged(nameof(CanCreateGlobalConfig));
         }
         catch (Exception ex)
@@ -429,11 +455,14 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         GlobalConfigContent = document.Content;
         GlobalConfigPathText = document.Path;
         GlobalConfigStateText = document.Exists
-            ? $"Loaded {document.LoadedAt:t}."
-            : "File does not exist. WSL is using global defaults.";
+            ? $"Loaded {document.LoadedAt:t}. This file is shown read-only here."
+            : "No global .wslconfig file was found. WSL is using built-in defaults.";
         GlobalConfigBackupPathText = "No backup created in this session.";
         GlobalConfigRestartNotice = "Global .wslconfig settings apply only to WSL 2 distributions and take effect after WSL restarts.";
         ApplyGlobalConfigValidation(document.Validation);
+        OnPropertyChanged(nameof(HasGlobalConfigFile));
+        OnPropertyChanged(nameof(ShowGlobalConfigMissingState));
+        OnPropertyChanged(nameof(GlobalConfigRecommendedText));
         OnPropertyChanged(nameof(CanCreateGlobalConfig));
     }
 
@@ -441,6 +470,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         globalConfigValidation = validation;
         GlobalConfigValidationText = FormatValidation(validation);
+        OnPropertyChanged(nameof(HasGlobalConfigValidationIssues));
         OnPropertyChanged(nameof(CanSaveGlobalConfig));
     }
 

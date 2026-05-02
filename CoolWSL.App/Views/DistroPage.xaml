@@ -16,7 +16,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Padding="32,32,32,8" Spacing="12">
+        <StackPanel Grid.Row="0" MaxWidth="964" HorizontalAlignment="Center" Padding="32,32,32,8" Spacing="12">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -115,6 +115,8 @@
             x:Name="EmptyStateCard"
             x:Load="{x:Bind ViewModel.ShowEmptyState, Mode=OneWay}"
             Margin="32,12,32,32"
+            MaxWidth="900"
+            HorizontalAlignment="Center"
             VerticalAlignment="Top"
             Style="{StaticResource CardBorderStyle}">
             <StackPanel Spacing="8">
@@ -135,7 +137,8 @@
 
             <PivotItem Header="Overview">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel HorizontalAlignment="Stretch" MaxWidth="900" Padding="12,16,12,32" Spacing="12">
+                    <Grid x:Name="OverviewContentHost" MaxWidth="900" HorizontalAlignment="Center">
+                    <StackPanel Width="{Binding ActualWidth, ElementName=OverviewContentHost}" Padding="12,16,12,32" Spacing="12">
 
                         <Border Style="{StaticResource CardBorderStyle}">
                             <Grid ColumnSpacing="14">
@@ -258,12 +261,14 @@
                             Text="{x:Bind ViewModel.HeaderCapabilityMessage, Mode=OneWay}"
                             TextWrapping="WrapWholeWords" />
                     </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </PivotItem>
 
             <PivotItem Header="Settings">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel HorizontalAlignment="Stretch" MaxWidth="900" Padding="12,16,12,32" Spacing="12">
+                    <Grid x:Name="DistroSettingsContentHost" MaxWidth="900" HorizontalAlignment="Center">
+                    <StackPanel Width="{Binding ActualWidth, ElementName=DistroSettingsContentHost}" Padding="12,16,12,32" Spacing="12">
                         
                         <Border Style="{StaticResource CardBorderStyle}" Padding="16">
                             <Grid>
@@ -276,7 +281,7 @@
                                     <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind ViewModel.Settings.GlobalWslSummary, Mode=OneWay}" />
                                     <TextBlock Style="{StaticResource TertiaryTextStyle}" Text="Settings applied at the WSL VM level affect every distro." />
                                 </StackPanel>
-                                <Button Grid.Column="1" Content="Open WSL Settings" Click="OnOpenWslSettingsClick" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Content="Open official WSL Settings" Click="OnOpenWslSettingsClick" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
 
@@ -392,12 +397,14 @@
                         </Border>
 
                     </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </PivotItem>
 
             <PivotItem Header="Diagnostics">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel HorizontalAlignment="Stretch" MaxWidth="900" Padding="12,16,12,32" Spacing="12">
+                    <Grid x:Name="DiagnosticsContentHost" MaxWidth="900" HorizontalAlignment="Center">
+                    <StackPanel Width="{Binding ActualWidth, ElementName=DiagnosticsContentHost}" Padding="12,16,12,32" Spacing="12">
 
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
@@ -489,6 +496,7 @@
                             </ItemsRepeater.ItemTemplate>
                         </ItemsRepeater>
                     </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </PivotItem>
 

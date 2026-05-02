@@ -12,7 +12,8 @@
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Disabled"
         HorizontalScrollBarVisibility="Disabled">
-        <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Padding="32" Spacing="20">
+        <Grid x:Name="SettingsContentHost" MaxWidth="920" HorizontalAlignment="Center">
+        <StackPanel Width="{Binding ActualWidth, ElementName=SettingsContentHost}" Padding="32" Spacing="20">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -23,7 +24,7 @@
                     <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="Settings" />
                     <TextBlock
                         Style="{StaticResource SecondaryTextStyle}"
-                        Text="Application preferences, WSL defaults, diagnostics, logs, and product information."
+                        Text="WSL defaults, app preferences, and product information."
                         TextWrapping="WrapWholeWords" />
                 </StackPanel>
 
@@ -136,78 +137,43 @@
 
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
                                         <Button
-                                            AutomationProperties.Name="Create global WSL config file"
-                                            Click="OnCreateGlobalConfigClick"
-                                            IsEnabled="{x:Bind ViewModel.CanCreateGlobalConfig, Mode=OneWay}">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE710;" />
-                                                <TextBlock Text="Create file" />
-                                            </StackPanel>
-                                        </Button>
-                                        <Button
-                                            AutomationProperties.Name="Revert global WSL config edits"
-                                            Click="OnRevertGlobalConfigClick"
-                                            IsEnabled="{x:Bind ViewModel.CanRevertGlobalConfig, Mode=OneWay}">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE72B;" />
-                                                <TextBlock Text="Revert" />
-                                            </StackPanel>
-                                        </Button>
-                                        <Button
-                                            AutomationProperties.Name="Save global WSL config file"
-                                            Click="OnSaveGlobalConfigClick"
-                                            IsEnabled="{x:Bind ViewModel.CanSaveGlobalConfig, Mode=OneWay}"
+                                            AutomationProperties.Name="Open official WSL Settings"
+                                            Click="OnOpenWslSettingsClick"
                                             Style="{ThemeResource AccentButtonStyle}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE74E;" />
-                                                <TextBlock Text="Save" />
+                                                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE713;" />
+                                                <TextBlock Text="Open official WSL Settings" />
                                             </StackPanel>
                                         </Button>
-                                    </StackPanel>
-                                </Grid>
-
-                                <TextBlock
-                                    x:Name="GlobalConfigRestartBlock"
-                                    x:Load="{x:Bind ViewModel.HasGlobalConfigRestartNotice, Mode=OneWay}"
-                                    Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                                    Text="{x:Bind ViewModel.GlobalConfigRestartNotice, Mode=OneWay}"
-                                    TextWrapping="WrapWholeWords" />
-
-                                <TextBox
-                                    x:Name="GlobalConfigEditorBox"
-                                    AcceptsReturn="True"
-                                    AutomationProperties.Name="Raw global WSL config editor"
-                                    FontFamily="Consolas"
-                                    MinHeight="260"
-                                    Text="{x:Bind ViewModel.GlobalConfigContent, Mode=OneWay}"
-                                    TextChanged="OnGlobalConfigTextChanged"
-                                    TextWrapping="NoWrap" />
-
-                                <Grid ColumnSpacing="12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <StackPanel Spacing="6">
-                                        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Validation" />
-                                        <TextBlock
-                                            Text="{x:Bind ViewModel.GlobalConfigValidationText, Mode=OneWay}"
-                                            TextWrapping="WrapWholeWords" />
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Column="1" Spacing="6">
-                                        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Backup" />
-                                        <TextBlock
-                                            FontFamily="Consolas"
-                                            Text="{x:Bind ViewModel.GlobalConfigBackupPathText, Mode=OneWay}"
-                                            TextWrapping="WrapWholeWords" />
                                     </StackPanel>
                                 </Grid>
 
                                 <TextBlock
                                     Style="{StaticResource SecondaryTextStyle}"
-                                    Text="This editor preserves raw comments, unknown keys, and ordering. Blocking syntax errors prevent save; warnings are preserved so advanced WSL settings are not silently removed."
+                                    Text="{x:Bind ViewModel.GlobalConfigRecommendedText, Mode=OneWay}"
+                                    TextWrapping="WrapWholeWords" />
+
+                                <TextBox
+                                    x:Name="GlobalConfigViewerBox"
+                                    x:Load="{x:Bind ViewModel.HasGlobalConfigFile, Mode=OneWay}"
+                                    AcceptsReturn="True"
+                                    AutomationProperties.Name="Read-only global WSL config viewer"
+                                    FontFamily="Consolas"
+                                    IsReadOnly="True"
+                                    MinHeight="260"
+                                    Text="{x:Bind ViewModel.GlobalConfigContent, Mode=OneWay}"
+                                    TextWrapping="NoWrap" />
+
+                                <TextBlock
+                                    x:Name="GlobalConfigValidationBlock"
+                                    x:Load="{x:Bind ViewModel.HasGlobalConfigValidationIssues, Mode=OneWay}"
+                                    Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                    Text="{x:Bind ViewModel.GlobalConfigValidationText, Mode=OneWay}"
+                                    TextWrapping="WrapWholeWords" />
+
+                                <TextBlock
+                                    Style="{StaticResource SecondaryTextStyle}"
+                                    Text="Global `.wslconfig` changes affect WSL 2 only and take effect after WSL restarts. Microsoft recommends making those changes in WSL Settings rather than editing the file manually."
                                     TextWrapping="WrapWholeWords" />
                             </StackPanel>
                         </Border>
@@ -291,54 +257,6 @@
                 <Expander>
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="12">
-                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE9D9;" />
-                            <StackPanel Spacing="2">
-                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Diagnostics" />
-                                <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Diagnostic surfaces and evidence policy." />
-                            </StackPanel>
-                        </StackPanel>
-                    </Expander.Header>
-                    <StackPanel Spacing="12" Padding="0,12,0,0">
-                        <TextBlock
-                            Text="Full diagnostics live in each distro detail page under the Diagnostics pivot."
-                            TextWrapping="WrapWholeWords" />
-                        <TextBlock
-                            Style="{StaticResource SecondaryTextStyle}"
-                            Text="Diagnostic output remains visible as raw evidence on the selected distro, including global checks collected with that distro as context."
-                            TextWrapping="WrapWholeWords" />
-                    </StackPanel>
-                </Expander>
-            </Border>
-
-            <Border Style="{StaticResource CardBorderStyle}">
-                <Expander>
-                    <Expander.Header>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8A5;" />
-                            <StackPanel Spacing="2">
-                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Logs" />
-                                <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Metadata-only command and app events." />
-                            </StackPanel>
-                        </StackPanel>
-                    </Expander.Header>
-                    <StackPanel Spacing="12" Padding="0,12,0,0">
-                        <TextBlock
-                            Text="Logs store command metadata only. Command stdout and stderr remain outside the log by default."
-                            TextWrapping="WrapWholeWords" />
-                        <Button AutomationProperties.Name="Open logs" Click="OnOpenLogsClick" HorizontalAlignment="Left">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE8A5;" />
-                                <TextBlock Text="Open logs" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Expander>
-            </Border>
-
-            <Border Style="{StaticResource CardBorderStyle}">
-                <Expander>
-                    <Expander.Header>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
                             <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE946;" />
                             <StackPanel Spacing="2">
                                 <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="About" />
@@ -381,5 +299,6 @@
                 </Expander>
             </Border>
         </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>

@@ -43,6 +43,8 @@ public sealed class DashboardStateTests
         Assert.IsTrue(state.HasDistroRows);
         Assert.AreEqual(2, state.Distros.Count);
         Assert.AreEqual("Default", state.Distros[0].DefaultLabel);
+        Assert.AreEqual("WSL 2", state.Distros[0].WslVersion);
+        Assert.AreEqual("WSL 1", state.Distros[1].WslVersion);
         Assert.AreEqual("2 registered distros. 1 running.", state.DistroSectionSummary);
         Assert.IsFalse(state.IsLoading);
         Assert.IsTrue(state.HasLoaded);

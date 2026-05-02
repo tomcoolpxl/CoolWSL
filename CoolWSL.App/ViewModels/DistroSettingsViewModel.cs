@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using CoolWSL.App.Helpers;
 using CoolWSL.App.Services;
 using CoolWSL.Core.Abstractions;
 using CoolWSL.Core.Models;
@@ -178,23 +179,13 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
 
     public void OpenWslSettings()
     {
-        Exception? lastException = null;
-        foreach (var target in new[] { "wslsettings:", "wslsettings.exe", "ms-settings:" })
+        try
         {
-            try
-            {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = target, UseShellExecute = true });
-                return;
-            }
-            catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
-            {
-                lastException = ex;
-            }
+            WslSettingsLauncher.Open();
         }
-
-        if (lastException is not null)
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
         {
-            throw lastException;
+            StatusMessage = $"Could not open the official WSL Settings app: {ex.Message}";
         }
     }
 
@@ -334,6 +325,9 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
         var memory = globalIni.Section("wsl2")?.Entry("memory")?.EffectiveValue ?? "50% of host";
         var networking = globalIni.Section("wsl2")?.Entry("networkingMode")?.EffectiveValue ?? "NAT";
         var gui = globalIni.Section("wsl2")?.Entry("guiApplications")?.EffectiveValue == "false" ? "off" : "on";
+        var globalSummary = globalConfigTask.Result.Exists
+            ? $"Global .wslconfig: memory {memory}, networking {networking}, GUI apps {gui}."
+            : $"No global .wslconfig file. WSL is using defaults: memory {memory}, networking {networking}, GUI apps {gui}.";
 
         var snapshot = snapshotTask.Result;
         var distroStatus = snapshot.DistroInventory.Distros.FirstOrDefault(d => d.Name == distroName);
@@ -344,7 +338,7 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
             distroStatus?.IsSystemManaged ?? false,
             Array.Empty<string>());
 
-        return ($"Memory: {memory} | Networking: {networking} | GUI apps: {gui}", capabilities);
+        return (globalSummary, capabilities);
     }
 
     private void ApplyDocument(WslDistroConfigDocument document, WslDistroCapabilityContext capabilities)

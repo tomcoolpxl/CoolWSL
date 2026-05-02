@@ -13,7 +13,8 @@
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Disabled"
         HorizontalScrollBarVisibility="Disabled">
-        <StackPanel MaxWidth="1040" HorizontalAlignment="Stretch" Padding="32" Spacing="20">
+        <Grid x:Name="DashboardContentHost" MaxWidth="1040" HorizontalAlignment="Center">
+        <StackPanel Width="{Binding ActualWidth, ElementName=DashboardContentHost}" Padding="32" Spacing="20">
 
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
@@ -162,6 +163,7 @@
                         <Button
                             AutomationProperties.Name="{x:Bind OpenAutomationName}"
                             Click="OnDistroTileClick"
+                            Tag="{x:Bind Name}"
                             Style="{StaticResource TileButtonStyle}">
                             <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
@@ -222,5 +224,6 @@
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>
         </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>

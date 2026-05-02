@@ -13,7 +13,8 @@
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Disabled"
         HorizontalScrollBarVisibility="Disabled">
-        <StackPanel MaxWidth="1040" HorizontalAlignment="Stretch" Padding="32" Spacing="20">
+        <Grid x:Name="LogsContentHost" MaxWidth="1040" HorizontalAlignment="Center">
+        <StackPanel Width="{Binding ActualWidth, ElementName=LogsContentHost}" Padding="32" Spacing="20">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -136,5 +137,6 @@
                 </StackPanel>
             </Border>
         </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>
