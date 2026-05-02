@@ -67,7 +67,7 @@
 - Replaced the 48 px custom-bordered title bar with a slim 32 px drag region containing a Segoe Fluent Icons accent glyph and a `CaptionTextBlockStyle` "CoolWSL" label; dropped the activation-state opacity dimming code that no longer applied.
 - Replaced the hard-coded RGBA title-bar button hover and pressed colours with `SubtleFillColorSecondaryBrush` and `SubtleFillColorTertiaryBrush` resolved from the application resources, so the chrome respects light, dark, and high-contrast themes.
 - Added `MicaBackdrop` (`MicaKind.Base`) to `MainWindow` behind a `MicaController.IsSupported()` guard.
-- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02.
+- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02 (UX Phase A).
 
 ## UX Phase B - Shell rebuild with distros in the rail and a persistent status bar delivered
 
@@ -77,4 +77,15 @@
 - Stripped `ScrollViewer.VerticalScrollMode="Disabled"` and `ScrollViewer.HorizontalScrollMode="Disabled"` from the content `Frame` so wheel events can flow through the shell once individual pages stop nesting `ListView`s in their page-level `ScrollViewer`s.
 - Added a persistent bottom-of-window `StatusBar` UserControl backed by `StatusBarViewModel` (singleton) that derives `WslStatusText`, `DistroSummary`, `DefaultDistroText`, `LastRefreshedText`, and an availability-coloured indicator brush (`SystemFillColorSuccessBrush` / `SystemFillColorCautionBrush` / `SystemFillColorCriticalBrush`) from a `DashboardStatusSnapshot`.
 - Updated `MainWindow` to host the status bar in a third `Auto`-height row and updated `AppServiceCollection` to register `StatusBarViewModel` and the `StatusBar` UserControl. Left `ShellViewModel` and the existing `ShellViewModelTests` untouched so the smoke test keeps asserting historical IA without blocking the new XAML.
+- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02 (UX Phase B).
+
+## UX Phase C - Dashboard rebuild delivered
+
+- Replaced the naked `Border` "cards" on `DashboardPage` with `CardBorderStyle` (opaque `CardBackgroundFillColorDefaultBrush`, 1 px stroke, 8 px corner radius) so ClearType subpixel text rendering is restored on the dashboard surfaces.
+- Replaced every `Opacity="0.72"` text on the dashboard with `SecondaryTextStyle` and `TertiaryTextStyle` so de-emphasised typography no longer forces compositor rasterisation and respects high-contrast theme brushes.
+- Replaced the distro inventory `ListView` with an `ItemsRepeater` (`StackLayout`, 8 px spacing) so mouse-wheel events bubble to the page-level `ScrollViewer` instead of being swallowed by a nested list scroll viewer.
+- Collapsed the per-row Open / Start / Terminate / Set Default button stack into a single full-width clickable distro tile styled by a new shared `TileButtonStyle`. Clicking the tile updates the rail `NavigationView.SelectedItem` (so the rail highlights the chosen distro and `ShellPage` performs the navigation) with a `Frame.Navigate(typeof(DistroPage), name)` fallback when the rail cannot be located.
+- Re-laid out the dashboard top-to-bottom: page header with refresh button and progress ring, last-refresh caption, hero status card (availability label, summary, optional warning, optional suggested next step, a divider, and the WSL / kernel / default-WSL-version detail grid), action status text, primary `AccentButtonStyle` "Open default terminal" plus regular "Shutdown all WSL" buttons (each with a Segoe Fluent glyph), distro section header and summary, optional empty-state card, and the new tile repeater.
+- Each distro tile renders the distro name in `BodyStrongTextBlockStyle`, optional Default and management badges next to it, the existing capability message in `SecondaryTextStyle`, a rounded state pill backed by `ControlFillColorSecondaryBrush` + `CardStrokeColorDefaultBrush`, and the WSL version on the right. The tile button surfaces `OpenAutomationName` for screen readers.
+- Removed `IsTabStop="True"` and `AllowFocusOnInteraction="True"` from the page-level `ScrollViewer` so the scroll surface is no longer a Tab stop and no longer steals focus on click. Set `HorizontalScrollMode="Disabled"` and `HorizontalScrollBarVisibility="Disabled"` since the page is vertical-only.
 - Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj`, and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02.

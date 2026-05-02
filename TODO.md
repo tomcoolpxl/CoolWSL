@@ -11,14 +11,7 @@
 
 ## UX Rebuild Track
 
-Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A and B have shipped (see `DONE.md`); the items below cover the remaining phases C through G.
-
-### UX Phase C - Dashboard rebuild
-
-- [ ] Replace naked `Border` cards on `DashboardPage` with `CardBorderStyle` and replace `Opacity`-based secondary text with `SecondaryTextStyle` / `TertiaryTextStyle`.
-- [ ] Replace the distro inventory `ListView` with an `ItemsRepeater` so wheel events bubble to the page-level `ScrollViewer` and the page no longer nests scroll regions.
-- [ ] Collapse the per-row Open / Start / Terminate / Set Default button stack into a single primary action plus an overflow menu, or move full lifecycle into the distro detail page.
-- [ ] Remove `IsTabStop="True"` and `AllowFocusOnInteraction="True"` from the page-level `ScrollViewer` and verify mouse-wheel scrolling and high-DPI rendering on a window short enough to require scrolling.
+Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through C have shipped (see `DONE.md`); the items below cover the remaining phases D through G.
 
 ### UX Phase D - Distro detail rebuild
 

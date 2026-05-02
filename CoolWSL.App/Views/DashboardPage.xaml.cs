@@ -5,6 +5,7 @@ using CoolWSL.Core.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace CoolWSL.App.Views;
 
@@ -55,56 +56,43 @@ public sealed partial class DashboardPage : Page
         await ViewModel.ShutdownAsync();
     }
 
-    private async void OnOpenDistroClick(object sender, RoutedEventArgs e)
+    private void OnDistroTileClick(object sender, RoutedEventArgs e)
     {
-        if (GetRow(sender) is not { } row)
+        if ((sender as FrameworkElement)?.DataContext is not DashboardDistroRow row)
         {
             return;
         }
 
-        await ViewModel.OpenDistroAsync(row.Name);
+        var navigationView = FindParentNavigationView();
+        if (navigationView is not null)
+        {
+            foreach (var item in navigationView.MenuItems)
+            {
+                if (item is NavigationViewItem nvi &&
+                    nvi.Tag is WslDistro distro &&
+                    string.Equals(distro.Name, row.Name, StringComparison.Ordinal))
+                {
+                    navigationView.SelectedItem = nvi;
+                    return;
+                }
+            }
+        }
+
+        Frame?.Navigate(typeof(DistroPage), row.Name);
     }
 
-    private async void OnStartDistroClick(object sender, RoutedEventArgs e)
+    private NavigationView? FindParentNavigationView()
     {
-        if (GetRow(sender) is not { } row)
+        DependencyObject? parent = this;
+        while (parent is not null)
         {
-            return;
+            parent = VisualTreeHelper.GetParent(parent);
+            if (parent is NavigationView nav)
+            {
+                return nav;
+            }
         }
-
-        await ViewModel.StartDistroAsync(row.Name);
-    }
-
-    private async void OnTerminateDistroClick(object sender, RoutedEventArgs e)
-    {
-        if (GetRow(sender) is not { } row)
-        {
-            return;
-        }
-
-        var request = new OperationRequest(
-            $"Terminate {row.Name}?",
-            "Terminate",
-            row.Name,
-            "This immediately stops the selected distro and any running processes inside it.",
-            "Cancel is the safe default if you are not sure that the distro can be stopped right now.");
-
-        if (!await ConfirmAsync(request))
-        {
-            return;
-        }
-
-        await ViewModel.TerminateDistroAsync(row.Name);
-    }
-
-    private async void OnSetDefaultClick(object sender, RoutedEventArgs e)
-    {
-        if (GetRow(sender) is not { } row)
-        {
-            return;
-        }
-
-        await ViewModel.SetDefaultDistroAsync(row.Name);
+        return null;
     }
 
     private async Task<bool> ConfirmAsync(OperationRequest request)
@@ -116,7 +104,4 @@ public sealed partial class DashboardPage : Page
 
         return await dialog.ShowAsync() == ContentDialogResult.Primary;
     }
-
-    private static DashboardDistroRow? GetRow(object sender)
-        => (sender as FrameworkElement)?.DataContext as DashboardDistroRow;
 }

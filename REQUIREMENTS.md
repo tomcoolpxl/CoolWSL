@@ -6,7 +6,7 @@ A WSL Control Center for Windows 11.
 
 CoolWSL is a Windows 11 desktop application for managing WSL distributions, with WSL2 as the full-featured baseline and explicit degraded behavior for WSL1 and partially supported environments.
 
-The application should provide a clear overview of the local WSL environment while also offering a focused per-distro management mode.
+The application should provide a clear overview of the local WSL environment while also offering a focused per-distro detail experience.
 
 CoolWSL should avoid brittle or undocumented implementation techniques. It should rely on supported WSL commands, documented configuration files, and safe Windows APIs.
 
@@ -14,8 +14,9 @@ CoolWSL should avoid brittle or undocumented implementation techniques. It shoul
 
 CoolWSL should:
 
-- Provide a single overview dashboard for the local WSL environment.
-- Provide a separate per-distro view for detailed management.
+- Provide a Windows 11-native application shell with fixed global destinations and distro-first navigation.
+- Provide a single overview dashboard plus dedicated per-distro detail pages for focused management.
+- Provide a persistent status bar for global WSL state and refresh recency.
 - Support common WSL lifecycle actions.
 - Show distro status, version, default state, and basic health information.
 - Edit supported WSL configuration files safely.
@@ -78,9 +79,14 @@ CoolWSL should avoid:
 
 ## User Experience Model
 
-CoolWSL should have two primary modes:
+CoolWSL should use a single shell with:
 
-## Dashboard Mode
+- fixed left-rail destinations for Dashboard, Diagnostics, and Settings
+- a dynamic Distros group where each distro is its own first-class navigation item
+- a persistent bottom status bar showing WSL availability, default distro, running-distro count, and last refresh time
+- a Windows 11-native visual language built from real cards, Fluent icons, theme brushes, and standard window chrome
+
+## Dashboard
 
 The dashboard is the main landing page.
 
@@ -94,9 +100,11 @@ It should answer:
 - Are global WSL settings pending restart?
 - What quick actions are available?
 
-## Per-Distro Mode
+## Distro Detail
 
-The per-distro view should answer:
+Selecting a distro from the rail should open its dedicated detail page.
+
+It should answer:
 
 - What is the state of this distro?
 - What configuration applies to it?
@@ -105,6 +113,23 @@ The per-distro view should answer:
 - Is networking working?
 - Is disk usage concerning?
 - What safe actions can I perform?
+
+The MVP detail page should be organized as:
+
+```text
+Overview
+Terminal
+Configuration
+Diagnostics
+```
+
+## Global Destinations
+
+Diagnostics should have one primary home in the shell and may be summarized elsewhere.
+
+Settings should remain a fixed global destination for application settings and global WSL configuration.
+
+Logs, backups, and other secondary workflows may be reached from Settings or contextual actions rather than occupying first-class shell positions in MVP.
 
 ## MVP Requirements
 
@@ -116,32 +141,35 @@ The dashboard must show:
 - WSL version where available.
 - WSL kernel version where available.
 - Default WSL version where available.
-- List of registered distros.
+- Plain-language environment summary.
+- List or tile surface of registered distros.
 - Distro name.
 - Distro running state.
 - Distro WSL version.
 - Default distro marker.
-- Quick action buttons.
+- Quick global actions.
+- Compact health or diagnostic summary with links to the full Diagnostics page.
 
 Required actions:
 
 - Refresh status.
 - Open default distro.
-- Open selected distro.
-- Terminate selected distro.
-- Set selected distro as default.
+- Navigate to selected distro detail.
 - Shutdown all WSL instances.
+
+Lifecycle actions such as start, terminate, and set default must remain available, but they should live on the distro detail page or in a per-distro overflow surface rather than forcing four inline actions onto every dashboard row.
 
 The shutdown action must clearly warn that it affects all running WSL distros.
 
-## MVP Distro List
+## MVP Shell Navigation
 
-The distro list must support:
+The shell navigation must support:
 
-- Listing all registered distros.
-- Distinguishing running and stopped distros.
-- Showing WSL version 1 or 2 where available.
-- Showing the default distro.
+- Fixed top-level destinations for Dashboard, Diagnostics, and Settings.
+- A Distros group bound to all registered distros.
+- Selecting a distro as a first-class navigation action.
+- Distinguishing running and stopped distros with clear state indicators.
+- Showing the default distro clearly.
 - Handling distro names with spaces.
 - Handling no distros installed.
 - Handling WSL not installed.
@@ -149,19 +177,33 @@ The distro list must support:
 - Showing WSL1 distros with explicit reduced-capability messaging.
 - Labeling Docker Desktop distros distinctly when they can be identified safely.
 
+Selecting a distro should open its dedicated detail page. The MVP should not require a separate top-level Distros page before a user can act on a distro.
+
 WSL1 distros remain first-class inventory items, but any WSL2-only feature must be disabled with a plain-language explanation.
 
 Docker Desktop distros must never be the default target for destructive or config-editing flows in the initial release.
 
-## MVP Per-Distro Overview
+## MVP Status Bar
 
-Each distro page must show:
+The persistent status bar must show:
+
+- WSL version or availability state.
+- Default distro.
+- Running distro count.
+- Last refresh time.
+
+It must remain visible across Dashboard, Diagnostics, Settings, and distro detail pages and degrade safely when data is unavailable.
+
+## MVP Distro Detail
+
+Each distro detail page must show:
 
 - Distro name.
 - Running state.
 - WSL version.
 - Whether it is the default distro.
-- Basic command actions.
+- Capability messaging when the distro is WSL1 or system-managed.
+- A pivot with Overview, Terminal, Configuration, and Diagnostics.
 
 Required actions:
 
@@ -170,6 +212,8 @@ Required actions:
 - Terminate distro.
 - Set as default.
 - Run command.
+
+The command runner must be reachable directly from the Terminal pivot and should not be buried below unrelated lifecycle content.
 
 ## MVP Command Runner
 
@@ -183,11 +227,12 @@ The command runner must:
 - Support timeout.
 - Preserve command history for the session.
 - Clearly show whether the command succeeded or failed.
+- Present one primary output surface, with stderr visually distinguished without requiring a permanent side-by-side split.
 
 Nice to have in MVP:
 
 - Run as root.
-- Copy output.
+- Copy or clear output.
 - Save output to file.
 
 ## MVP Global Configuration
@@ -229,8 +274,10 @@ The MVP should provide:
 
 ## MVP Diagnostics
 
-The MVP diagnostics page must include:
+The MVP diagnostics experience must include:
 
+- A dedicated Diagnostics page for global WSL and host-side results.
+- A Diagnostics pivot within each distro detail page for per-distro checks.
 - `wsl --status`
 - `wsl --version` where available
 - Distro list diagnostics
@@ -240,6 +287,8 @@ The MVP diagnostics page must include:
 - Basic host-to-WSL notes
 
 Diagnostics should be presented in plain language, with raw command output available.
+
+The dashboard may surface only a compact summary of top findings. Full diagnostic detail should have one primary home rather than being duplicated across multiple pages.
 
 ## MVP Export
 
@@ -640,10 +689,30 @@ The UI should support:
 - high contrast mode
 - scalable text
 - clear focus states
-- accessible labels for action buttons
+- accessible labels for action buttons that include the affected distro when applicable
+- live announcements for long-running operation results and command completion
+- page scrolling that works predictably with mouse, keyboard, and assistive technology
 - confirmation dialogs that are readable and specific
 
 ## UX Requirements
+
+## Shell UX
+
+The main shell should use this structure:
+
+```text
+Dashboard
+Diagnostics
+Settings
+Distros
+    Ubuntu
+    Debian
+    docker-desktop
+```
+
+The shell should also include a persistent bottom status bar.
+
+Logs, backups, and other secondary workflows should be entered from Settings or contextual actions until they justify first-class navigation.
 
 ## Dashboard UX
 
@@ -654,40 +723,45 @@ The dashboard should prioritize:
 - warnings
 - quick actions
 
-The distro table should include:
+The distro surface should prefer tiles or simple card rows over an action-dense table.
 
-```text
-Name
-State
-Version
-Default
-Actions
-```
+Each dashboard distro item should:
 
-Common actions should be visible inline.
+- show name, state, version, and default status clearly
+- use a primary click or tap action to open the distro detail page
+- keep secondary lifecycle actions in the detail page or an overflow surface
 
-## Per-Distro UX
+## Distro Detail UX
 
-The per-distro page should use this structure:
+The distro detail page should use this structure in MVP:
 
 ```text
 Overview
-Services
-Filesystem
-Config
-Networking
-Commands
-Logs
-```
-
-MVP may only implement:
-
-```text
-Overview
-Config
-Commands
+Terminal
+Configuration
 Diagnostics
 ```
+
+Version 1.0 may extend this with Services, Filesystem, Networking, and Logs as additional pivots or secondary routes without changing the primary shell model.
+
+## Diagnostics UX
+
+Diagnostics should:
+
+- have one primary home for full results
+- present results in a severity-first or otherwise easy-to-triage structure
+- keep raw output available on demand
+- allow the dashboard to summarize top findings without duplicating the full page
+
+## Visual UX
+
+The app should:
+
+- use real card surfaces instead of transparent content containers
+- use theme brushes instead of opacity-based typography for secondary text
+- use Fluent-style icons and standard Windows 11 title-bar behavior
+- support a Windows 11 backdrop treatment such as Mica when it does not compromise text clarity
+- keep page scrolling natural and avoid dead mouse-wheel zones caused by nested scroll surfaces
 
 ## Confirmation UX
 
@@ -701,6 +775,8 @@ Confirmation dialogs must include:
 - cancel as the default option for dangerous operations
 
 ## Status UX
+
+The shell must maintain a persistent status bar that surfaces WSL availability, default distro, running-distro count, and refresh recency independently of the active page.
 
 Long-running operations must show:
 
@@ -730,18 +806,23 @@ The MVP is acceptable when:
 
 - The app starts on Windows 11.
 - It detects whether WSL is available.
+- It uses a fixed shell with Dashboard, Diagnostics, Settings, and per-distro navigation items.
 - It lists registered distros.
 - It shows running or stopped state.
 - It shows the default distro.
+- It shows a persistent status bar with global WSL state and last refresh information.
+- The dashboard presents a summary card, distro inventory surface, quick actions, and a diagnostics summary.
+- Each distro opens in a detail page with Overview, Terminal, Configuration, and Diagnostics.
 - It can open a distro.
 - It can terminate a distro.
 - It can set the default distro.
 - It can shutdown WSL with confirmation.
 - It can run a command inside a distro.
 - It can show stdout, stderr, and exit code.
+- It provides mouse-wheel and keyboard scrolling that works on the main content pages.
 - It can read and edit `.wslconfig`.
 - It can read and edit `/etc/wsl.conf`.
-- It can run basic diagnostics.
+- It can run basic diagnostics with one primary diagnostics page and per-distro diagnostics in the distro detail experience.
 - It can export a distro.
 - It logs operations safely.
 - It avoids undocumented WSL internals.
@@ -787,12 +868,12 @@ Remaining open questions:
 Build first:
 
 - Dashboard
-- Distro list
+- Shell navigation with distro entries
 - Open distro
 - Terminate distro
 - Shutdown all WSL
 - Set default distro
-- Per-distro overview
+- Per-distro detail shell
 - Command runner
 - Raw `.wslconfig` editor
 - Raw `/etc/wsl.conf` editor
