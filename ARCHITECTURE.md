@@ -43,3 +43,46 @@ Date: 2026-05-01
 - Windows app distribution-path guidance
 - WSL basic commands and WSL configuration docs
 - Windows 11 lifecycle and release-health pages
+
+## ADR 0002 - UX Shell Architecture Baseline
+
+Date: 2026-05-02
+
+### Decision
+
+- CoolWSL uses a single WinUI shell with fixed global destinations for Dashboard, Diagnostics, and Settings plus a dynamic Distros group in the left navigation rail.
+- Each distro is a first-class navigation target. The MVP does not rely on a separate top-level Distros page before a user can inspect or act on a distro.
+- The window includes a persistent bottom status bar that remains visible across global pages and distro detail pages.
+- The dashboard is a summary surface, not the primary home for every distro action. It presents environment status, quick global actions, a distro inventory surface that opens detail pages, and a compact diagnostics summary.
+- Each distro opens in a dedicated detail page with the pivots Overview, Terminal, Configuration, and Diagnostics.
+- Diagnostics has one primary global home. Other surfaces may summarize or deep-link to diagnostic results, but the full diagnostics experience is not duplicated across multiple pages.
+- Settings remains a fixed global destination. Logs, backups, import and export flows, and other secondary workflows are entered through Settings or contextual actions until they justify first-class navigation.
+- The UX rebuild is confined to `CoolWSL.App`. The existing service and model contracts in `CoolWSL.Core`, `CoolWSL.Wsl`, `CoolWSL.Diagnostics`, and `CoolWSL.Configuration` remain the data and command boundary for the new shell.
+- Shared visual primitives such as card surfaces, typography, spacing, status indicators, and reusable page-level components should be centralized in app-level resources and shared controls instead of being redefined per page.
+
+### Rationale
+
+- The user mental model is distro-centric. Treating each distro as a primary navigation entity shortens the common path to start, inspect, configure, or diagnose a distro.
+- The previous flat page model distributed related information across Dashboard, Distros, and Diagnostics, which increased duplication and made it unclear where a given workflow belonged.
+- A persistent status bar keeps global WSL context available without forcing navigation back to the dashboard.
+- A dedicated distro detail page creates a stable extension point for later services, networking, filesystem, logs, and configuration work without requiring another information-architecture rewrite.
+- Keeping the backend boundary unchanged allows the UI layer to be rebuilt without destabilizing the tested command, parsing, and diagnostics services.
+- Centralizing shared UI primitives reduces repeated XAML patterns and keeps the application visually and structurally consistent as more surfaces are added.
+
+### Delivery Implications
+
+- `CoolWSL.App` should be organized around a shell composition model: a navigation host, a persistent status bar, global pages, and dedicated distro detail pages.
+- The shell navigation state should be driven from distro inventory and environment status rather than from a hard-coded list of flat feature pages.
+- Dashboard surfaces should navigate into distro detail pages instead of exposing dense per-row action stacks as the primary interaction model.
+- Lifecycle actions remain supported, but they move to distro detail pages or contextual overflow actions instead of dominating the dashboard inventory surface.
+- Diagnostics ownership is explicit: the global Diagnostics page owns the complete diagnostics view, and per-distro diagnostics belong in the distro detail page.
+- Settings and other secondary workflows should be modeled as contextual or secondary routes so the primary shell remains stable.
+- Shared styles and reusable controls should be introduced at the app root so page implementations compose common primitives instead of carrying page-specific typography, spacing, and container rules.
+- Existing backend abstractions should be reused as-is where possible. Any future app-layer refactor should preserve the current service-oriented boundary unless a backend limitation is proven.
+
+### Repository Inputs Consulted
+
+- `UX_REVIEW.md`
+- `REQUIREMENTS.md`
+- `DESIGN.md`
+- `IMPLEMENTATION_PLAN.md`
