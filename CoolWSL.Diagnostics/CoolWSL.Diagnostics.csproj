@@ -5,6 +5,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CoolWSL.Core\CoolWSL.Core.csproj" />
+    <ProjectReference Include="..\CoolWSL.Wsl\CoolWSL.Wsl.csproj" />
   </ItemGroup>
 
   <ItemGroup>

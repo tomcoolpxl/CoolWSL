@@ -98,6 +98,71 @@ public sealed class CommandRunnerViewModelTests
         Assert.AreEqual(CommandExecutionStatus.Cancelled, viewModel.History.Single().Status);
     }
 
+    [TestMethod]
+    public async Task RunAsync_WithNoDistro_SetsStatusMessage()
+    {
+        var viewModel = new CommandRunnerViewModel(new StubWslDistroService());
+        viewModel.CommandText = "echo hello";
+
+        await viewModel.RunAsync();
+
+        Assert.AreEqual("Select a distro before running a command.", viewModel.StatusText);
+        Assert.AreEqual(0, viewModel.History.Count);
+    }
+
+    [TestMethod]
+    public async Task RunAsync_WithEmptyCommand_SetsStatusMessage()
+    {
+        var viewModel = new CommandRunnerViewModel(new StubWslDistroService());
+        viewModel.SetSelectedDistro("Ubuntu");
+        viewModel.CommandText = string.Empty;
+
+        await viewModel.RunAsync();
+
+        Assert.AreEqual("Enter a command before running it.", viewModel.StatusText);
+        Assert.AreEqual(0, viewModel.History.Count);
+    }
+
+    [TestMethod]
+    public void RunAsync_WhileAlreadyRunning_IsGuarded()
+    {
+        var viewModel = new CommandRunnerViewModel(new StubWslDistroService());
+        viewModel.SetSelectedDistro("Ubuntu");
+        viewModel.CommandText = "echo hello";
+
+        Assert.IsTrue(viewModel.CanRun);
+
+        viewModel.CommandText = string.Empty;
+        Assert.IsFalse(viewModel.CanRun);
+    }
+
+    [TestMethod]
+    public void ReuseHistoryEntry_SetsCommandText()
+    {
+        var viewModel = new CommandRunnerViewModel(new StubWslDistroService());
+        var entry = new CommandHistoryEntry(
+            "Ubuntu", "ls -la", CommandExecutionStatus.Succeeded,
+            DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddSeconds(1),
+            0, "output", string.Empty);
+
+        viewModel.ReuseHistoryEntry(entry);
+
+        Assert.AreEqual("ls -la", viewModel.CommandText);
+    }
+
+    [TestMethod]
+    public void SetSelectedDistro_ClearsOutputAndLoadsHistory()
+    {
+        var viewModel = new CommandRunnerViewModel(new StubWslDistroService());
+        viewModel.SetSelectedDistro("Ubuntu");
+
+        Assert.AreEqual(string.Empty, viewModel.StandardOutput);
+        Assert.AreEqual(string.Empty, viewModel.StandardError);
+        Assert.AreEqual("n/a", viewModel.ExitCodeText);
+        Assert.AreEqual(0, viewModel.History.Count);
+        Assert.IsTrue(viewModel.StatusText.Contains("Ubuntu"));
+    }
+
     private static CommandResult CreateSucceededResult(string commandText, string output)
     {
         return CommandResult.Succeeded(

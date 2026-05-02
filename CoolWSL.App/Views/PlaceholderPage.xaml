@@ -5,10 +5,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <ScrollViewer>
-        <StackPanel MaxWidth="720" Padding="32" Spacing="12">
+    <ScrollView
+        Background="Transparent"
+        ContentOrientation="Vertical"
+        HorizontalScrollBarVisibility="Hidden"
+        VerticalScrollBarVisibility="Visible">
+        <StackPanel MaxWidth="720" Padding="32" Spacing="12" Background="Transparent">
             <TextBlock x:Name="SectionTitleBlock" FontSize="24" FontWeight="SemiBold" />
             <TextBlock x:Name="SectionDescriptionBlock" TextWrapping="WrapWholeWords" />
         </StackPanel>
-    </ScrollViewer>
+    </ScrollView>
 </Page>

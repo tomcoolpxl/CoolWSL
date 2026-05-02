@@ -7,9 +7,17 @@
     xmlns:models="using:CoolWSL.App.Models"
     xmlns:core="using:CoolWSL.Core.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-    <ScrollViewer>
-        <StackPanel MaxWidth="1040" Padding="32" Spacing="24">
+    mc:Ignorable="d"
+    UseLayoutRounding="True">
+    <ScrollViewer
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+        HorizontalScrollBarVisibility="Auto"
+        VerticalScrollBarVisibility="Auto"
+        VerticalAlignment="Stretch"
+        HorizontalAlignment="Stretch"
+        IsTabStop="True"
+        AllowFocusOnInteraction="True">
+        <StackPanel MaxWidth="1040" HorizontalAlignment="Center" Padding="32" Spacing="24" Background="Transparent">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -25,7 +33,11 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="8">
-                    <Button Content="Refresh" Click="OnRefreshClick" />
+                    <Button AutomationProperties.Name="Refresh distro page" Content="Refresh" Click="OnRefreshClick">
+                        <Button.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="F5" />
+                        </Button.KeyboardAccelerators>
+                    </Button>
                     <ProgressRing Width="20" Height="20" IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
                 </StackPanel>
             </Grid>
@@ -53,11 +65,11 @@
                     <TextBlock Text="{x:Bind ViewModel.HeaderCapabilityMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
 
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Open Terminal" Click="OnOpenTerminalClick" IsEnabled="{x:Bind ViewModel.CanOpenTerminal, Mode=OneWay}" />
-                        <Button Content="Run Command" Click="OnFocusCommandRunnerClick" IsEnabled="{x:Bind ViewModel.CanRunCommand, Mode=OneWay}" />
-                        <Button Content="Start" Click="OnStartClick" IsEnabled="{x:Bind ViewModel.CanStart, Mode=OneWay}" />
-                        <Button Content="Terminate" Click="OnTerminateClick" IsEnabled="{x:Bind ViewModel.CanTerminate, Mode=OneWay}" />
-                        <Button Content="Set Default" Click="OnSetDefaultClick" IsEnabled="{x:Bind ViewModel.CanSetDefault, Mode=OneWay}" />
+                        <Button AutomationProperties.Name="Open distro terminal" Content="Open Terminal" Click="OnOpenTerminalClick" IsEnabled="{x:Bind ViewModel.CanOpenTerminal, Mode=OneWay}" />
+                        <Button AutomationProperties.Name="Focus command runner" Content="Run Command" Click="OnFocusCommandRunnerClick" IsEnabled="{x:Bind ViewModel.CanRunCommand, Mode=OneWay}" />
+                        <Button AutomationProperties.Name="Start distro" Content="Start" Click="OnStartClick" IsEnabled="{x:Bind ViewModel.CanStart, Mode=OneWay}" />
+                        <Button AutomationProperties.Name="Terminate distro" Content="Terminate" Click="OnTerminateClick" IsEnabled="{x:Bind ViewModel.CanTerminate, Mode=OneWay}" />
+                        <Button AutomationProperties.Name="Set as default distro" Content="Set Default" Click="OnSetDefaultClick" IsEnabled="{x:Bind ViewModel.CanSetDefault, Mode=OneWay}" />
                     </StackPanel>
 
                     <StackPanel x:Name="EmptyStatePanel" x:Load="{x:Bind ViewModel.ShowEmptyState, Mode=OneWay}" Spacing="4">
@@ -96,12 +108,23 @@
                             SmallChange="5"
                             SpinButtonPlacementMode="Inline"
                             Value="{x:Bind ViewModel.CommandRunner.TimeoutSeconds, Mode=TwoWay}" />
-                        <Button Grid.Column="2" VerticalAlignment="Bottom" Click="OnRunCommandClick" Content="Run" IsEnabled="{x:Bind ViewModel.CommandRunner.CanRun, Mode=OneWay}" />
-                        <Button Grid.Column="3" VerticalAlignment="Bottom" Click="OnCancelCommandClick" Content="Cancel" IsEnabled="{x:Bind ViewModel.CommandRunner.CanCancel, Mode=OneWay}" />
+                        <Button AutomationProperties.Name="Run command" Grid.Column="2" VerticalAlignment="Bottom" Click="OnRunCommandClick" Content="Run" IsEnabled="{x:Bind ViewModel.CommandRunner.CanRun, Mode=OneWay}">
+                            <Button.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="Enter" Modifiers="Control" />
+                            </Button.KeyboardAccelerators>
+                        </Button>
+                        <Button AutomationProperties.Name="Cancel command" Grid.Column="3" VerticalAlignment="Bottom" Click="OnCancelCommandClick" Content="Cancel" IsEnabled="{x:Bind ViewModel.CommandRunner.CanCancel, Mode=OneWay}">
+                            <Button.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="Escape" />
+                            </Button.KeyboardAccelerators>
+                        </Button>
                     </Grid>
 
                     <TextBlock Text="{x:Bind ViewModel.CommandRunner.StatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
-                    <TextBlock Text="{x:Bind ViewModel.CommandRunner.ExitCodeText, Mode=OneWay}" />
+                    <TextBlock>
+                        <Run FontWeight="SemiBold" Text="Exit code: " />
+                        <Run Text="{x:Bind ViewModel.CommandRunner.ExitCodeText, Mode=OneWay}" />
+                    </TextBlock>
 
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
@@ -133,8 +156,8 @@
                     </Grid>
 
                     <TextBlock FontSize="18" FontWeight="SemiBold" Text="Session history" />
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.CommandRunner.History, Mode=OneWay}">
-                        <ItemsControl.ItemTemplate>
+                    <ListView SelectionMode="None" ItemsSource="{x:Bind ViewModel.CommandRunner.History, Mode=OneWay}">
+                        <ListView.ItemTemplate>
                             <DataTemplate x:DataType="core:CommandHistoryEntry">
                                 <Border Margin="0,0,0,12" Padding="12">
                                     <StackPanel Spacing="8">
@@ -154,8 +177,8 @@
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </StackPanel>
             </Border>
 
@@ -176,15 +199,15 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="8">
-                            <Button Content="Refresh Diagnostics" Click="OnRefreshDiagnosticsClick" IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}" />
-                            <ProgressRing Width="20" Height="20" IsActive="{x:Bind ViewModel.IsDiagnosticsLoading, Mode=OneWay}" />
+                            <Button AutomationProperties.Name="Refresh diagnostics" Content="Refresh Diagnostics" Click="OnRefreshDiagnosticsClick" IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}" />
+                            <ProgressRing Width="20" Height="20" IsActive="{x:Bind ViewModel.Diagnostics.IsLoading, Mode=OneWay}" />
                         </StackPanel>
                     </Grid>
 
-                    <TextBlock Text="{x:Bind ViewModel.DiagnosticsStatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                    <TextBlock Text="{x:Bind ViewModel.Diagnostics.StatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
 
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.DiagnosticsResults, Mode=OneWay}">
-                        <ItemsControl.ItemTemplate>
+                    <ListView SelectionMode="None" ItemsSource="{x:Bind ViewModel.Diagnostics.Results, Mode=OneWay}">
+                        <ListView.ItemTemplate>
                             <DataTemplate x:DataType="diagnostics:DiagnosticResult">
                                 <Border Margin="0,0,0,12" Padding="12">
                                     <StackPanel Spacing="8">
@@ -212,8 +235,8 @@
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </StackPanel>
             </Border>
         </StackPanel>

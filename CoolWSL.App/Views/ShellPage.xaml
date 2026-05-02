@@ -11,9 +11,10 @@
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
             PaneDisplayMode="Left"
+            Background="Transparent"
             SelectionChanged="OnSelectionChanged">
             <NavigationView.Header>
-                <StackPanel Spacing="4">
+                <StackPanel Spacing="4" Background="Transparent">
                     <TextBlock FontSize="28" FontWeight="SemiBold" Text="{x:Bind ViewModel.Title}" />
                     <TextBlock Opacity="0.72" Text="WSL inventory, lifecycle actions, command execution, and diagnostics for Windows 11." />
                 </StackPanel>
@@ -27,7 +28,7 @@
                 <NavigationViewItem Content="Settings" Tag="Settings" />
             </NavigationView.MenuItems>
 
-            <Frame x:Name="ContentFrame" />
+            <Frame x:Name="ContentFrame" Background="Transparent" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.HorizontalScrollMode="Disabled" />
         </NavigationView>
     </Grid>
 </Page>

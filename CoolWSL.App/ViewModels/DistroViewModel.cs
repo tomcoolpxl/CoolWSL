@@ -3,9 +3,8 @@ using System.Runtime.CompilerServices;
 using CoolWSL.App.Models;
 using CoolWSL.App.Services;
 using CoolWSL.Core.Abstractions;
+using CoolWSL.Core.Helpers;
 using CoolWSL.Core.Models;
-using CoolWSL.Diagnostics.Models;
-using CoolWSL.Diagnostics.Services;
 using CoolWSL.Diagnostics.Status;
 
 namespace CoolWSL.App.ViewModels;
@@ -14,17 +13,12 @@ public sealed class DistroViewModel : INotifyPropertyChanged
 {
     private readonly IDashboardStatusService dashboardStatusService;
     private readonly IWslDistroService distroService;
-    private readonly IDiagnosticsService diagnosticsService;
-    private readonly RefreshCoordinator diagnosticsRefreshCoordinator = new();
     private readonly RefreshCoordinator pageRefreshCoordinator = new();
     private string actionStatusText = string.Empty;
-    private IReadOnlyList<DiagnosticResult> diagnosticsResults = Array.Empty<DiagnosticResult>();
-    private string diagnosticsStatusText = "Select a distro to load diagnostics.";
     private IReadOnlyList<DistroSelectionItem> distros = Array.Empty<DistroSelectionItem>();
     private string emptyStateMessage = "Refresh the distro page to load the current distro inventory.";
     private string emptyStateTitle = "No distro selected";
     private bool hasLoaded;
-    private bool isDiagnosticsLoading;
     private bool isLoading;
     private DateTimeOffset? lastUpdatedAt;
     private DistroSelectionItem? selectedDistro;
@@ -34,18 +28,20 @@ public sealed class DistroViewModel : INotifyPropertyChanged
     public DistroViewModel(
         IDashboardStatusService dashboardStatusService,
         IWslDistroService distroService,
-        IDiagnosticsService diagnosticsService,
-        CommandRunnerViewModel commandRunner)
+        CommandRunnerViewModel commandRunner,
+        DistroPageDiagnosticsViewModel diagnostics)
     {
         this.dashboardStatusService = dashboardStatusService;
         this.distroService = distroService;
-        this.diagnosticsService = diagnosticsService;
         CommandRunner = commandRunner;
+        Diagnostics = diagnostics;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public CommandRunnerViewModel CommandRunner { get; }
+
+    public DistroPageDiagnosticsViewModel Diagnostics { get; }
 
     public IReadOnlyList<DistroSelectionItem> Distros
     {
@@ -207,49 +203,6 @@ public sealed class DistroViewModel : INotifyPropertyChanged
 
     public bool HasActionStatus => !string.IsNullOrWhiteSpace(ActionStatusText);
 
-    public IReadOnlyList<DiagnosticResult> DiagnosticsResults
-    {
-        get => diagnosticsResults;
-        private set
-        {
-            diagnosticsResults = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(HasDiagnosticsResults));
-        }
-    }
-
-    public bool HasDiagnosticsResults => DiagnosticsResults.Count > 0;
-
-    public bool IsDiagnosticsLoading
-    {
-        get => isDiagnosticsLoading;
-        private set
-        {
-            if (isDiagnosticsLoading == value)
-            {
-                return;
-            }
-
-            isDiagnosticsLoading = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string DiagnosticsStatusText
-    {
-        get => diagnosticsStatusText;
-        private set
-        {
-            if (string.Equals(diagnosticsStatusText, value, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            diagnosticsStatusText = value;
-            OnPropertyChanged();
-        }
-    }
-
     public async Task EnsureLoadedAsync(string? preferredDistroName = null)
     {
         if (HasLoaded && string.IsNullOrWhiteSpace(preferredDistroName))
@@ -275,7 +228,7 @@ public sealed class DistroViewModel : INotifyPropertyChanged
 
             Distros = snapshot.DistroInventory.Distros.Select(DistroSelectionItem.Create).ToArray();
             SummaryText = BuildSummary(snapshot);
-            WarningText = CombineDistinct(snapshot.EnvironmentStatus.DegradedReason, snapshot.DistroInventory.DegradedReason);
+            WarningText = StringHelpers.CombineDistinct(snapshot.EnvironmentStatus.DegradedReason, snapshot.DistroInventory.DegradedReason);
             lastUpdatedAt = DateTimeOffset.Now;
             OnPropertyChanged(nameof(RefreshStatusText));
             HasLoaded = true;
@@ -286,8 +239,6 @@ public sealed class DistroViewModel : INotifyPropertyChanged
                 EmptyStateTitle = BuildEmptyStateTitle(snapshot);
                 EmptyStateMessage = BuildEmptyStateMessage(snapshot);
                 SetSelectedDistro(null);
-                DiagnosticsResults = Array.Empty<DiagnosticResult>();
-                DiagnosticsStatusText = "Install or select a distro to run diagnostics.";
                 return;
             }
 
@@ -296,7 +247,7 @@ public sealed class DistroViewModel : INotifyPropertyChanged
 
             var selectedName = ResolveSelectedDistroName(preferredDistroName, snapshot.EnvironmentStatus.DefaultDistroName);
             SetSelectedDistro(Distros.FirstOrDefault(distro => string.Equals(distro.Name, selectedName, StringComparison.Ordinal)));
-            await RefreshDiagnosticsAsync();
+            await Diagnostics.RefreshAsync();
         }
         catch (OperationCanceledException) when (!pageRefreshCoordinator.IsLatest(lease.Version))
         {
@@ -316,8 +267,6 @@ public sealed class DistroViewModel : INotifyPropertyChanged
             SummaryText = "CoolWSL could not load the distro inventory.";
             WarningText = ex.Message;
             SetSelectedDistro(null);
-            DiagnosticsResults = Array.Empty<DiagnosticResult>();
-            DiagnosticsStatusText = "Diagnostics are unavailable until the distro inventory loads.";
         }
     }
 
@@ -325,7 +274,7 @@ public sealed class DistroViewModel : INotifyPropertyChanged
     {
         var selectedItem = Distros.FirstOrDefault(distro => string.Equals(distro.Name, distroName, StringComparison.Ordinal));
         SetSelectedDistro(selectedItem);
-        return RefreshDiagnosticsAsync();
+        return Diagnostics.RefreshAsync();
     }
 
     public Task OpenTerminalAsync()
@@ -344,51 +293,6 @@ public sealed class DistroViewModel : INotifyPropertyChanged
 
     public Task SetDefaultDistroAsync()
         => RunMutationAsync(name => distroService.SetDefaultDistroAsync(name), "Set as default");
-
-    public async Task RefreshDiagnosticsAsync()
-    {
-        if (string.IsNullOrWhiteSpace(SelectedDistroName))
-        {
-            DiagnosticsResults = Array.Empty<DiagnosticResult>();
-            DiagnosticsStatusText = "Select a distro to run diagnostics.";
-            return;
-        }
-
-        var lease = diagnosticsRefreshCoordinator.Start();
-        IsDiagnosticsLoading = true;
-
-        try
-        {
-            var snapshot = await diagnosticsService.GetSnapshotAsync(SelectedDistroName, lease.CancellationToken);
-            if (!diagnosticsRefreshCoordinator.IsLatest(lease.Version))
-            {
-                return;
-            }
-
-            DiagnosticsResults = snapshot.Results;
-            DiagnosticsStatusText = BuildDiagnosticsSummary(snapshot.Results);
-        }
-        catch (OperationCanceledException) when (!diagnosticsRefreshCoordinator.IsLatest(lease.Version))
-        {
-        }
-        catch (Exception ex)
-        {
-            if (!diagnosticsRefreshCoordinator.IsLatest(lease.Version))
-            {
-                return;
-            }
-
-            DiagnosticsResults = Array.Empty<DiagnosticResult>();
-            DiagnosticsStatusText = ex.Message;
-        }
-        finally
-        {
-            if (diagnosticsRefreshCoordinator.IsLatest(lease.Version))
-            {
-                IsDiagnosticsLoading = false;
-            }
-        }
-    }
 
     private Task RunMutationAsync(Func<string, Task<CommandResult>> action, string actionVerb)
     {
@@ -409,6 +313,8 @@ public sealed class DistroViewModel : INotifyPropertyChanged
         string successMessage,
         bool refreshAfterSuccess)
     {
+        // WSL lifecycle operations are not safely cancellable mid-flight;
+        // partial execution could leave WSL in an inconsistent state.
         var result = await action(CancellationToken.None);
         ActionStatusText = result.IsSuccess
             ? successMessage
@@ -440,27 +346,37 @@ public sealed class DistroViewModel : INotifyPropertyChanged
         return Distros[0].Name;
     }
 
+    private static readonly string[] SelectionPropertyNames =
+    [
+        nameof(SelectedDistro),
+        nameof(SelectedDistroName),
+        nameof(HeaderName),
+        nameof(HeaderState),
+        nameof(HeaderWslVersion),
+        nameof(HeaderDefault),
+        nameof(HeaderManagementLabel),
+        nameof(HeaderCapabilityMessage),
+        nameof(HasSelection),
+        nameof(ShowEmptyState),
+        nameof(HasDefaultLabel),
+        nameof(HasManagementLabel),
+        nameof(CanOpenTerminal),
+        nameof(CanRunCommand),
+        nameof(CanStart),
+        nameof(CanTerminate),
+        nameof(CanSetDefault),
+    ];
+
     private void SetSelectedDistro(DistroSelectionItem? value)
     {
         selectedDistro = value;
         CommandRunner.SetSelectedDistro(value?.Name);
-        OnPropertyChanged(nameof(SelectedDistro));
-        OnPropertyChanged(nameof(SelectedDistroName));
-        OnPropertyChanged(nameof(HeaderName));
-        OnPropertyChanged(nameof(HeaderState));
-        OnPropertyChanged(nameof(HeaderWslVersion));
-        OnPropertyChanged(nameof(HeaderDefault));
-        OnPropertyChanged(nameof(HeaderManagementLabel));
-        OnPropertyChanged(nameof(HeaderCapabilityMessage));
-        OnPropertyChanged(nameof(HasSelection));
-        OnPropertyChanged(nameof(ShowEmptyState));
-        OnPropertyChanged(nameof(HasDefaultLabel));
-        OnPropertyChanged(nameof(HasManagementLabel));
-        OnPropertyChanged(nameof(CanOpenTerminal));
-        OnPropertyChanged(nameof(CanRunCommand));
-        OnPropertyChanged(nameof(CanStart));
-        OnPropertyChanged(nameof(CanTerminate));
-        OnPropertyChanged(nameof(CanSetDefault));
+        Diagnostics.SetSelectedDistro(value?.Name);
+
+        foreach (var name in SelectionPropertyNames)
+        {
+            OnPropertyChanged(name);
+        }
     }
 
     private static string BuildSummary(DashboardStatusSnapshot snapshot)
@@ -493,23 +409,6 @@ public sealed class DistroViewModel : INotifyPropertyChanged
             _ => "Install a Linux distribution to populate the per-distro view.",
         };
     }
-
-    private static string BuildDiagnosticsSummary(IReadOnlyList<DiagnosticResult> results)
-    {
-        if (results.Count == 0)
-        {
-            return "No diagnostics have been loaded yet.";
-        }
-
-        var warningCount = results.Count(result => result.Severity == DiagnosticSeverity.Warning);
-        var errorCount = results.Count(result => result.Severity == DiagnosticSeverity.Error);
-        return $"{results.Count} diagnostics loaded. {warningCount} warning{(warningCount == 1 ? string.Empty : "s")}, {errorCount} error{(errorCount == 1 ? string.Empty : "s")}.";
-    }
-
-    private static string CombineDistinct(params string?[] values)
-        => string.Join(
-            " ",
-            values.Where(static value => !string.IsNullOrWhiteSpace(value)).Select(static value => value!.Trim()).Distinct(StringComparer.Ordinal));
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {

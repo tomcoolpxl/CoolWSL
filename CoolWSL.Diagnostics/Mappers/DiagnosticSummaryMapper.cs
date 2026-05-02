@@ -1,3 +1,4 @@
+using CoolWSL.Core.Helpers;
 using CoolWSL.Core.Models;
 using CoolWSL.Diagnostics.Models;
 
@@ -15,7 +16,7 @@ public sealed class DiagnosticSummaryMapper
             "WSL status",
             GetSeverity(statusCommand, environmentStatus.IsDegraded),
             environmentStatus.Summary,
-            FirstNonEmpty(environmentStatus.DegradedReason, environmentStatus.SuggestedNextStep, "WSL status loaded."),
+            StringHelpers.FirstNonEmpty(environmentStatus.DegradedReason, environmentStatus.SuggestedNextStep, "WSL status loaded."),
             BuildRawOutput(statusCommand),
             environmentStatus.SuggestedNextStep,
             statusCommand.Command.CommandText);
@@ -27,8 +28,8 @@ public sealed class DiagnosticSummaryMapper
         ArgumentNullException.ThrowIfNull(environmentStatus);
 
         var summary = versionCommand.IsSuccess
-            ? FirstNonEmpty(
-                JoinParts(
+            ? StringHelpers.FirstNonEmpty(
+                StringHelpers.JoinNonEmpty("; ",
                     environmentStatus.WslVersion is null ? null : $"WSL {environmentStatus.WslVersion}",
                     environmentStatus.KernelVersion is null ? null : $"Kernel {environmentStatus.KernelVersion}",
                     environmentStatus.WindowsVersion is null ? null : $"Windows {environmentStatus.WindowsVersion}"),
@@ -40,7 +41,7 @@ public sealed class DiagnosticSummaryMapper
             "WSL version",
             GetSeverity(versionCommand, environmentStatus.IsDegraded),
             summary,
-            FirstNonEmpty(versionCommand.Error?.SuggestedNextStep, environmentStatus.DegradedReason, "Review the raw output for version detail."),
+            StringHelpers.FirstNonEmpty(versionCommand.Error?.SuggestedNextStep, environmentStatus.DegradedReason, "Review the raw output for version detail."),
             BuildRawOutput(versionCommand),
             versionCommand.Error?.SuggestedNextStep ?? environmentStatus.SuggestedNextStep,
             versionCommand.Command.CommandText);
@@ -62,7 +63,7 @@ public sealed class DiagnosticSummaryMapper
             "Distro inventory",
             GetSeverity(inventoryCommand, inventory.IsDegraded || inventory.Availability != WslAvailability.Available),
             summary,
-            FirstNonEmpty(inventory.DegradedReason, inventory.SuggestedNextStep, inventory.Summary),
+            StringHelpers.FirstNonEmpty(inventory.DegradedReason, inventory.SuggestedNextStep, inventory.Summary),
             BuildRawOutput(inventoryCommand),
             inventory.SuggestedNextStep,
             inventoryCommand.Command.CommandText);
@@ -80,7 +81,7 @@ public sealed class DiagnosticSummaryMapper
                 "Default distro",
                 DiagnosticSeverity.Success,
                 $"{environmentStatus.DefaultDistroName} is the current default distro.",
-                FirstNonEmpty(environmentStatus.Summary, "The default distro was reported by WSL."),
+                StringHelpers.FirstNonEmpty(environmentStatus.Summary, "The default distro was reported by WSL."),
                 string.Empty);
         }
 
@@ -101,7 +102,7 @@ public sealed class DiagnosticSummaryMapper
             "Default distro",
             DiagnosticSeverity.Warning,
             "WSL did not report a default distro.",
-            FirstNonEmpty(environmentStatus.DegradedReason, "Refresh the inventory or use Set default from the distro page if needed."),
+            StringHelpers.FirstNonEmpty(environmentStatus.DegradedReason, "Refresh the inventory or use Set default from the distro page if needed."),
             string.Empty,
             environmentStatus.SuggestedNextStep);
     }
@@ -142,7 +143,7 @@ public sealed class DiagnosticSummaryMapper
             "DNS resolution",
             DiagnosticSeverity.Error,
             result.Error?.Summary ?? $"{distroName} could not complete the DNS resolution check.",
-            FirstNonEmpty(result.Error?.SuggestedNextStep, "Review the raw output for the failing lookup tool."),
+            StringHelpers.FirstNonEmpty(result.Error?.SuggestedNextStep, "Review the raw output for the failing lookup tool."),
             BuildRawOutput(result),
             result.Error?.SuggestedNextStep,
             result.Command.CommandText);
@@ -184,7 +185,7 @@ public sealed class DiagnosticSummaryMapper
             "Internet connectivity",
             DiagnosticSeverity.Error,
             result.Error?.Summary ?? $"{distroName} could not complete the internet connectivity check.",
-            FirstNonEmpty(result.Error?.SuggestedNextStep, "Review the raw output for the failing probe."),
+            StringHelpers.FirstNonEmpty(result.Error?.SuggestedNextStep, "Review the raw output for the failing probe."),
             BuildRawOutput(result),
             result.Error?.SuggestedNextStep,
             result.Command.CommandText);
@@ -262,21 +263,4 @@ public sealed class DiagnosticSummaryMapper
         return string.Join(Environment.NewLine + Environment.NewLine, parts);
     }
 
-    private static string FirstNonEmpty(params string?[] values)
-    {
-        foreach (var value in values)
-        {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                return value.Trim();
-            }
-        }
-
-        return string.Empty;
-    }
-
-    private static string JoinParts(params string?[] values)
-        => string.Join(
-            "; ",
-            values.Where(static value => !string.IsNullOrWhiteSpace(value)).Select(static value => value!.Trim()));
 }

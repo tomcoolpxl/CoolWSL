@@ -115,6 +115,25 @@ public sealed class WslDistroServiceTests
         Assert.AreSame(expectedResult, result);
     }
 
+    [TestMethod]
+    public void CreateOpenDefaultDistroCommand_BuildsExpectedCommand()
+    {
+        var command = WslCommandFactory.CreateOpenDefaultDistroCommand();
+
+        Assert.AreEqual("wsl.exe", command.FileName);
+        Assert.AreEqual(0, command.Arguments.Count);
+    }
+
+    [TestMethod]
+    public void CreateOpenDistroCommand_BuildsExpectedCommand()
+    {
+        var command = WslCommandFactory.CreateOpenDistroCommand("Ubuntu Dev");
+
+        Assert.AreEqual("wsl.exe", command.FileName);
+        Assert.IsTrue(command.Arguments.Contains("--distribution"));
+        Assert.IsTrue(command.Arguments.Contains("Ubuntu Dev"));
+    }
+
     private static WslDistroService CreateService(IWslCommandService commandService)
         => new(commandService, new WslErrorMapper(), new WslListParser(), new WslStatusParser(), new NullAppLogger(), TimeProvider.System);
 

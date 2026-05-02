@@ -111,7 +111,7 @@ public sealed partial class DistroPage : Page
 
     private async void OnRefreshDiagnosticsClick(object sender, RoutedEventArgs e)
     {
-        await ViewModel.RefreshDiagnosticsAsync();
+        await ViewModel.Diagnostics.RefreshAsync();
     }
 
     private async Task<bool> ConfirmAsync(OperationRequest request)

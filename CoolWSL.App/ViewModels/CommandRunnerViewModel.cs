@@ -256,6 +256,8 @@ public sealed class CommandRunnerViewModel : INotifyPropertyChanged
         return entries.ToArray();
     }
 
+    private const int MaxHistoryPerDistro = 50;
+
     private void AddHistory(CommandHistoryEntry entry)
     {
         if (!historyByDistro.TryGetValue(entry.DistroName, out var entries))
@@ -265,6 +267,12 @@ public sealed class CommandRunnerViewModel : INotifyPropertyChanged
         }
 
         entries.Insert(0, entry);
+
+        if (entries.Count > MaxHistoryPerDistro)
+        {
+            entries.RemoveRange(MaxHistoryPerDistro, entries.Count - MaxHistoryPerDistro);
+        }
+
         History = entries.ToArray();
     }
 

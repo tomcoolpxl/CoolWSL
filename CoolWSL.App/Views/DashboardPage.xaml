@@ -6,9 +6,17 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:models="using:CoolWSL.App.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-    <ScrollViewer>
-        <StackPanel MaxWidth="960" Padding="32" Spacing="24">
+    mc:Ignorable="d"
+    UseLayoutRounding="True">
+    <ScrollViewer
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+        HorizontalScrollBarVisibility="Auto"
+        VerticalScrollBarVisibility="Auto"
+        VerticalAlignment="Stretch"
+        HorizontalAlignment="Stretch"
+        IsTabStop="True"
+        AllowFocusOnInteraction="True">
+        <StackPanel MaxWidth="960" HorizontalAlignment="Center" Padding="32,32,48,32" Spacing="24" Background="Transparent">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -25,17 +33,24 @@
 
                 <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="8">
                     <Button
+                        AutomationProperties.Name="Open default distro terminal"
                         Content="Open Default Distro"
                         Click="OnOpenDefaultClick"
                         IsEnabled="{x:Bind ViewModel.State.CanOpenDefaultDistro, Mode=OneWay}" />
                     <Button
+                        AutomationProperties.Name="Shutdown all WSL distros"
                         Content="Shutdown All WSL"
                         Click="OnShutdownAllClick"
                         IsEnabled="{x:Bind ViewModel.State.CanShutdownAll, Mode=OneWay}" />
                     <Button
+                        AutomationProperties.Name="Refresh dashboard"
                         Content="Refresh"
                         Click="OnRefreshClick"
-                        IsEnabled="{x:Bind ViewModel.State.CanRefresh, Mode=OneWay}" />
+                        IsEnabled="{x:Bind ViewModel.State.CanRefresh, Mode=OneWay}">
+                        <Button.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="F5" />
+                        </Button.KeyboardAccelerators>
+                    </Button>
                     <ProgressRing
                         Width="20"
                         Height="20"
@@ -100,8 +115,8 @@
                         <TextBlock Grid.Column="4" FontWeight="SemiBold" Text="Actions" />
                     </Grid>
 
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.State.Distros, Mode=OneWay}">
-                        <ItemsControl.ItemTemplate>
+                    <ListView SelectionMode="None" ItemsSource="{x:Bind ViewModel.State.Distros, Mode=OneWay}">
+                        <ListView.ItemTemplate>
                             <DataTemplate x:DataType="models:DashboardDistroRow">
                                 <Grid Margin="0,6,0,6" ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
@@ -121,15 +136,15 @@
                                     <TextBlock Grid.Column="2" Text="{x:Bind WslVersion}" />
                                     <TextBlock Grid.Column="3" Text="{x:Bind DefaultLabel}" />
                                     <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8">
-                                        <Button Click="OnOpenDistroClick" Content="Open" />
-                                        <Button Click="OnStartDistroClick" Content="Start" IsEnabled="{x:Bind CanStart}" />
-                                        <Button Click="OnTerminateDistroClick" Content="Terminate" IsEnabled="{x:Bind CanTerminate}" />
-                                        <Button Click="OnSetDefaultClick" Content="Set Default" IsEnabled="{x:Bind CanSetDefault}" />
+                                        <Button AutomationProperties.Name="{x:Bind OpenAutomationName}" Click="OnOpenDistroClick" Content="Open" />
+                                        <Button AutomationProperties.Name="{x:Bind StartAutomationName}" Click="OnStartDistroClick" Content="Start" IsEnabled="{x:Bind CanStart}" />
+                                        <Button AutomationProperties.Name="{x:Bind TerminateAutomationName}" Click="OnTerminateDistroClick" Content="Terminate" IsEnabled="{x:Bind CanTerminate}" />
+                                        <Button AutomationProperties.Name="{x:Bind SetDefaultAutomationName}" Click="OnSetDefaultClick" Content="Set Default" IsEnabled="{x:Bind CanSetDefault}" />
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </StackPanel>
             </Border>
         </StackPanel>

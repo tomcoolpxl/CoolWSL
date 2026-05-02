@@ -1,4 +1,5 @@
 using System.Globalization;
+using CoolWSL.Core.Helpers;
 using CoolWSL.Core.Models;
 using CoolWSL.Diagnostics.Status;
 
@@ -66,8 +67,8 @@ public sealed record DashboardState(
         var environmentStatus = snapshot.EnvironmentStatus;
         var distroInventory = snapshot.DistroInventory;
         var distros = distroInventory.Distros.Select(MapDistro).ToArray();
-        var warningText = CombineDistinct(environmentStatus.DegradedReason, distroInventory.DegradedReason);
-        var suggestedNextStep = CombineDistinct(environmentStatus.SuggestedNextStep, distroInventory.SuggestedNextStep);
+        var warningText = StringHelpers.CombineDistinct(environmentStatus.DegradedReason, distroInventory.DegradedReason);
+        var suggestedNextStep = StringHelpers.CombineDistinct(environmentStatus.SuggestedNextStep, distroInventory.SuggestedNextStep);
         var (emptyStateTitle, emptyStateMessage) = BuildEmptyState(environmentStatus, distroInventory, distros.Length);
 
         return new(
@@ -112,7 +113,7 @@ public sealed record DashboardState(
             EmptyStateTitle = HasLoaded ? EmptyStateTitle : "Dashboard unavailable",
             EmptyStateMessage = HasLoaded ? EmptyStateMessage : message,
             RefreshStatus = "Refresh failed. Review the warning text and try again.",
-            WarningText = CombineDistinct(WarningText, message),
+            WarningText = StringHelpers.CombineDistinct(WarningText, message),
             IsLoading = false,
             HasLoaded = true,
         };
@@ -143,7 +144,7 @@ public sealed record DashboardState(
             distroInventory.Availability == WslAvailability.Unavailable ||
             distroInventory.IsDegraded)
         {
-            return FirstNonEmpty(distroInventory.Summary, environmentStatus.Summary, "The distro inventory is unavailable.");
+            return StringHelpers.FirstNonEmpty(distroInventory.Summary, environmentStatus.Summary, "The distro inventory is unavailable.");
         }
 
         return "No Linux distributions are installed.";
@@ -164,7 +165,7 @@ public sealed record DashboardState(
         {
             return (
                 "WSL is not installed",
-                FirstNonEmpty(environmentStatus.Summary, distroInventory.Summary, "Install WSL to populate the dashboard inventory."));
+                StringHelpers.FirstNonEmpty(environmentStatus.Summary, distroInventory.Summary, "Install WSL to populate the dashboard inventory."));
         }
 
         if (environmentStatus.Availability == WslAvailability.Unavailable ||
@@ -172,14 +173,14 @@ public sealed record DashboardState(
         {
             return (
                 "WSL inventory unavailable",
-                FirstNonEmpty(distroInventory.Summary, environmentStatus.Summary, "WSL inventory data is unavailable."));
+                StringHelpers.FirstNonEmpty(distroInventory.Summary, environmentStatus.Summary, "WSL inventory data is unavailable."));
         }
 
         if (distroInventory.IsDegraded)
         {
             return (
                 "Distro inventory is limited",
-                FirstNonEmpty(distroInventory.Summary, "WSL inventory details are only partially available."));
+                StringHelpers.FirstNonEmpty(distroInventory.Summary, "WSL inventory details are only partially available."));
         }
 
         return (
@@ -199,45 +200,9 @@ public sealed record DashboardState(
             distroInventory.IsDegraded ||
             distroInventory.Distros.Count == 0;
 
-        return FirstNonEmpty(
-            CombineDistinct(environmentStatus.Summary, includeInventorySummary ? distroInventory.Summary : null),
+        return StringHelpers.FirstNonEmpty(
+            StringHelpers.CombineDistinct(environmentStatus.Summary, includeInventorySummary ? distroInventory.Summary : null),
             "WSL dashboard data loaded.");
-    }
-
-    private static string CombineDistinct(params string?[] values)
-    {
-        var parts = new List<string>();
-
-        foreach (var value in values)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                continue;
-            }
-
-            var trimmedValue = value.Trim();
-            if (parts.Contains(trimmedValue, StringComparer.Ordinal))
-            {
-                continue;
-            }
-
-            parts.Add(trimmedValue);
-        }
-
-        return string.Join(" ", parts);
-    }
-
-    private static string FirstNonEmpty(params string?[] values)
-    {
-        foreach (var value in values)
-        {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                return value.Trim();
-            }
-        }
-
-        return string.Empty;
     }
 
     private static string FormatAvailability(WslAvailability availability)
@@ -285,19 +250,7 @@ public sealed record DashboardState(
     }
 
     private static string BuildCapabilityMessage(WslDistro distro)
-    {
-        if (distro.IsSystemManaged)
-        {
-            return "System-managed distros stay visible, but terminate and set-default actions stay disabled by default.";
-        }
-
-        if (distro.IsRunning)
-        {
-            return "The distro is running and ready for lifecycle actions.";
-        }
-
-        return "The distro is stopped. Start it or open a terminal to launch it.";
-    }
+        => DistroCapabilityHelper.BuildCapabilityMessage(distro);
 }
 
 public sealed record DashboardDistroRow(
@@ -320,4 +273,12 @@ public sealed record DashboardDistroRow(
     public bool CanSetDefault => !IsDefault && !IsSystemManaged;
 
     public bool HasManagementLabel => !string.IsNullOrWhiteSpace(ManagementLabel);
+
+    public string OpenAutomationName => $"Open {Name}";
+
+    public string StartAutomationName => $"Start {Name}";
+
+    public string TerminateAutomationName => $"Terminate {Name}";
+
+    public string SetDefaultAutomationName => $"Set {Name} as default";
 }

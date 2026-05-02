@@ -1,4 +1,3 @@
-using CoolWSL.App.Services;
 using CoolWSL.App.ViewModels;
 using CoolWSL.Core.Abstractions;
 using CoolWSL.Core.Models;
@@ -15,8 +14,7 @@ public sealed class DashboardViewModelTests
     {
         var viewModel = new DashboardViewModel(
             new SequenceDashboardStatusService(_ => Task.FromResult(CreateSnapshot("Ubuntu", "2.5.9"))),
-            new StubWslDistroService(),
-            new RefreshCoordinator());
+            new StubWslDistroService());
 
         await viewModel.RefreshAsync();
 
@@ -41,8 +39,7 @@ public sealed class DashboardViewModelTests
                     return CreateSnapshot("Ubuntu", "2.4.0");
                 },
                 _ => Task.FromResult(CreateSnapshot("Debian", "2.5.0"))),
-            new StubWslDistroService(),
-            new RefreshCoordinator());
+            new StubWslDistroService());
 
         var firstRefresh = viewModel.RefreshAsync();
         await firstStarted.Task;
@@ -72,8 +69,7 @@ public sealed class DashboardViewModelTests
                     string.Empty,
                     string.Empty,
                     0),
-            },
-            new RefreshCoordinator());
+            });
 
         await viewModel.RefreshAsync();
         await viewModel.StartDistroAsync("Ubuntu");

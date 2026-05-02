@@ -12,16 +12,15 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
 {
     private readonly IDashboardStatusService dashboardStatusService;
     private readonly IWslDistroService distroService;
-    private readonly RefreshCoordinator refreshCoordinator;
+    private readonly RefreshCoordinator refreshCoordinator = new();
     private string actionStatusText = string.Empty;
     private bool isActionInProgress;
     private DashboardState state = DashboardState.Initial;
 
-    public DashboardViewModel(IDashboardStatusService dashboardStatusService, IWslDistroService distroService, RefreshCoordinator refreshCoordinator)
+    public DashboardViewModel(IDashboardStatusService dashboardStatusService, IWslDistroService distroService)
     {
         this.dashboardStatusService = dashboardStatusService;
         this.distroService = distroService;
-        this.refreshCoordinator = refreshCoordinator;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -171,12 +170,14 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
 
         try
         {
+            // WSL lifecycle operations (terminate, shutdown, set-default) are not safely
+            // cancellable mid-flight; partial execution could leave WSL in an inconsistent state.
             var result = await action(CancellationToken.None);
             ActionStatusText = result.IsSuccess
                 ? successMessage
                 : result.Error?.Summary ?? "The WSL action failed.";
 
-            if (refreshAfterSuccess && result.IsSuccess || ShouldRefreshAfter(result))
+            if ((refreshAfterSuccess && result.IsSuccess) || ShouldRefreshAfter(result))
             {
                 await RefreshAsync();
             }
