@@ -4,241 +4,563 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:diagnostics="using:CoolWSL.Diagnostics.Models"
-    xmlns:models="using:CoolWSL.App.Models"
     xmlns:core="using:CoolWSL.Core.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     UseLayoutRounding="True">
-    <ScrollViewer
-        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-        HorizontalScrollBarVisibility="Auto"
-        VerticalScrollBarVisibility="Auto"
-        VerticalAlignment="Stretch"
-        HorizontalAlignment="Stretch"
-        IsTabStop="True"
-        AllowFocusOnInteraction="True">
-        <StackPanel MaxWidth="1040" HorizontalAlignment="Center" Padding="32" Spacing="24" Background="Transparent">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Padding="32,32,32,8" Spacing="12">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Spacing="4">
-                    <TextBlock FontSize="28" FontWeight="SemiBold" Text="Distros" />
-                    <TextBlock
-                        Opacity="0.72"
-                        Text="Select a distro to manage lifecycle actions, run commands, and inspect targeted diagnostics."
-                        TextWrapping="WrapWholeWords" />
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="Distros" />
+
+                    <StackPanel
+                        x:Name="SelectedHeader"
+                        x:Load="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+                        Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                            <FontIcon
+                                FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                FontSize="22"
+                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                Glyph="&#xEC7A;"
+                                VerticalAlignment="Center" />
+                            <TextBlock
+                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                Text="{x:Bind ViewModel.HeaderName, Mode=OneWay}"
+                                VerticalAlignment="Center" />
+                            <Border
+                                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="10,2,10,2"
+                                VerticalAlignment="Center">
+                                <TextBlock
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind ViewModel.HeaderState, Mode=OneWay}" />
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock
+                                Style="{StaticResource SecondaryTextStyle}"
+                                Text="{x:Bind ViewModel.HeaderWslVersion, Mode=OneWay}" />
+                            <TextBlock
+                                x:Name="DefaultLabelBlock"
+                                x:Load="{x:Bind ViewModel.HasDefaultLabel, Mode=OneWay}"
+                                Style="{StaticResource SecondaryTextStyle}"
+                                Text="{x:Bind ViewModel.HeaderDefault, Mode=OneWay}" />
+                            <TextBlock
+                                x:Name="ManagementLabelBlock"
+                                x:Load="{x:Bind ViewModel.HasManagementLabel, Mode=OneWay}"
+                                Style="{StaticResource SecondaryTextStyle}"
+                                Text="{x:Bind ViewModel.HeaderManagementLabel, Mode=OneWay}" />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="8">
-                    <Button AutomationProperties.Name="Refresh distro page" Content="Refresh" Click="OnRefreshClick">
+                <StackPanel
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    Spacing="8"
+                    VerticalAlignment="Top">
+                    <ProgressRing Width="20" Height="20" IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                    <Button
+                        AutomationProperties.Name="Refresh distro page"
+                        Click="OnRefreshClick">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE72C;" />
+                            <TextBlock Text="Refresh" />
+                        </StackPanel>
                         <Button.KeyboardAccelerators>
                             <KeyboardAccelerator Key="F5" />
                         </Button.KeyboardAccelerators>
                     </Button>
-                    <ProgressRing Width="20" Height="20" IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
                 </StackPanel>
             </Grid>
 
-            <TextBlock Text="{x:Bind ViewModel.RefreshStatusText, Mode=OneWay}" />
-            <TextBlock Text="{x:Bind ViewModel.ActionStatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
-            <TextBlock Text="{x:Bind ViewModel.WarningText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+            <TextBlock
+                Style="{StaticResource TertiaryTextStyle}"
+                Text="{x:Bind ViewModel.RefreshStatusText, Mode=OneWay}" />
 
-            <Border Padding="20">
-                <StackPanel Spacing="16">
-                    <TextBlock FontSize="20" FontWeight="SemiBold" Text="Selected distro" />
-                    <ComboBox
-                        DisplayMemberPath="Name"
-                        ItemsSource="{x:Bind ViewModel.Distros, Mode=OneWay}"
-                        PlaceholderText="Choose a distro"
-                        SelectionChanged="OnDistroSelectionChanged"
-                        SelectedItem="{x:Bind ViewModel.SelectedDistro, Mode=OneWay}" />
-                    <TextBlock x:Name="SelectedDistroHeaderBlock" x:Load="{x:Bind ViewModel.HasSelection, Mode=OneWay}" FontSize="24" FontWeight="SemiBold" Text="{x:Bind ViewModel.HeaderName, Mode=OneWay}" />
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <TextBlock Text="{x:Bind ViewModel.HeaderState, Mode=OneWay}" />
-                        <TextBlock Text="{x:Bind ViewModel.HeaderWslVersion, Mode=OneWay}" />
-                        <TextBlock x:Name="DefaultLabelBlock" x:Load="{x:Bind ViewModel.HasDefaultLabel, Mode=OneWay}" Text="{x:Bind ViewModel.HeaderDefault, Mode=OneWay}" />
-                        <TextBlock x:Name="ManagementLabelBlock" x:Load="{x:Bind ViewModel.HasManagementLabel, Mode=OneWay}" Text="{x:Bind ViewModel.HeaderManagementLabel, Mode=OneWay}" />
-                    </StackPanel>
-                    <TextBlock Text="{x:Bind ViewModel.HeaderCapabilityMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+            <TextBlock
+                x:Name="WarningBlock"
+                x:Load="{x:Bind ViewModel.HasWarning, Mode=OneWay}"
+                Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                Text="{x:Bind ViewModel.WarningText, Mode=OneWay}"
+                TextWrapping="WrapWholeWords" />
 
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button AutomationProperties.Name="Open distro terminal" Content="Open Terminal" Click="OnOpenTerminalClick" IsEnabled="{x:Bind ViewModel.CanOpenTerminal, Mode=OneWay}" />
-                        <Button AutomationProperties.Name="Focus command runner" Content="Run Command" Click="OnFocusCommandRunnerClick" IsEnabled="{x:Bind ViewModel.CanRunCommand, Mode=OneWay}" />
-                        <Button AutomationProperties.Name="Start distro" Content="Start" Click="OnStartClick" IsEnabled="{x:Bind ViewModel.CanStart, Mode=OneWay}" />
-                        <Button AutomationProperties.Name="Terminate distro" Content="Terminate" Click="OnTerminateClick" IsEnabled="{x:Bind ViewModel.CanTerminate, Mode=OneWay}" />
-                        <Button AutomationProperties.Name="Set as default distro" Content="Set Default" Click="OnSetDefaultClick" IsEnabled="{x:Bind ViewModel.CanSetDefault, Mode=OneWay}" />
-                    </StackPanel>
-
-                    <StackPanel x:Name="EmptyStatePanel" x:Load="{x:Bind ViewModel.ShowEmptyState, Mode=OneWay}" Spacing="4">
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="{x:Bind ViewModel.EmptyStateTitle, Mode=OneWay}" />
-                        <TextBlock Text="{x:Bind ViewModel.EmptyStateMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-
-            <Border x:Name="CommandRunnerSection" Padding="20">
-                <StackPanel Spacing="16">
-                    <TextBlock FontSize="20" FontWeight="SemiBold" Text="Command runner" />
-                    <TextBlock
-                        Opacity="0.72"
-                        Text="Commands run inside the selected distro, keep stdout and stderr separate, and keep history only for this app session."
-                        TextWrapping="WrapWholeWords" />
-
-                    <Grid ColumnSpacing="12" RowSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBox
-                            x:Name="CommandInputBox"
-                            Grid.Column="0"
-                            Header="Command"
-                            PlaceholderText="uname -a"
-                            Text="{x:Bind ViewModel.CommandRunner.CommandText, Mode=TwoWay}" />
-                        <NumberBox
-                            Grid.Column="1"
-                            Header="Timeout (seconds)"
-                            Minimum="1"
-                            SmallChange="5"
-                            SpinButtonPlacementMode="Inline"
-                            Value="{x:Bind ViewModel.CommandRunner.TimeoutSeconds, Mode=TwoWay}" />
-                        <Button AutomationProperties.Name="Run command" Grid.Column="2" VerticalAlignment="Bottom" Click="OnRunCommandClick" Content="Run" IsEnabled="{x:Bind ViewModel.CommandRunner.CanRun, Mode=OneWay}">
-                            <Button.KeyboardAccelerators>
-                                <KeyboardAccelerator Key="Enter" Modifiers="Control" />
-                            </Button.KeyboardAccelerators>
-                        </Button>
-                        <Button AutomationProperties.Name="Cancel command" Grid.Column="3" VerticalAlignment="Bottom" Click="OnCancelCommandClick" Content="Cancel" IsEnabled="{x:Bind ViewModel.CommandRunner.CanCancel, Mode=OneWay}">
-                            <Button.KeyboardAccelerators>
-                                <KeyboardAccelerator Key="Escape" />
-                            </Button.KeyboardAccelerators>
-                        </Button>
-                    </Grid>
-
-                    <TextBlock Text="{x:Bind ViewModel.CommandRunner.StatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
-                    <TextBlock>
-                        <Run FontWeight="SemiBold" Text="Exit code: " />
-                        <Run Text="{x:Bind ViewModel.CommandRunner.ExitCodeText, Mode=OneWay}" />
-                    </TextBlock>
-
-                    <Grid ColumnSpacing="16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Spacing="8">
-                            <TextBlock FontWeight="SemiBold" Text="stdout" />
-                            <TextBox
-                                AcceptsReturn="True"
-                                FontFamily="Consolas"
-                                IsReadOnly="True"
-                                MinHeight="160"
-                                Text="{x:Bind ViewModel.CommandRunner.StandardOutput, Mode=OneWay}"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" Spacing="8">
-                            <TextBlock FontWeight="SemiBold" Text="stderr" />
-                            <TextBox
-                                AcceptsReturn="True"
-                                FontFamily="Consolas"
-                                IsReadOnly="True"
-                                MinHeight="160"
-                                Text="{x:Bind ViewModel.CommandRunner.StandardError, Mode=OneWay}"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </Grid>
-
-                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Session history" />
-                    <ListView SelectionMode="None" ItemsSource="{x:Bind ViewModel.CommandRunner.History, Mode=OneWay}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="core:CommandHistoryEntry">
-                                <Border Margin="0,0,0,12" Padding="12">
-                                    <StackPanel Spacing="8">
-                                        <Grid ColumnSpacing="12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="3*" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{x:Bind CommandText}" TextWrapping="WrapWholeWords" />
-                                            <TextBlock Grid.Column="1" Text="{x:Bind StatusLabel}" />
-                                            <TextBlock Grid.Column="2" Text="{x:Bind ExitCodeLabel}" />
-                                            <Button Grid.Column="3" Click="OnReuseHistoryEntryClick" Content="Reuse" />
-                                        </Grid>
-                                        <TextBlock Opacity="0.72" Text="{x:Bind StartedAt}" />
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </StackPanel>
-            </Border>
-
-            <Border Padding="20">
-                <StackPanel Spacing="16">
-                    <Grid ColumnSpacing="16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Spacing="4">
-                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="Diagnostics" />
-                            <TextBlock
-                                Opacity="0.72"
-                                Text="Global WSL checks and per-distro DNS and internet probes for the selected distro."
-                                TextWrapping="WrapWholeWords" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="8">
-                            <Button AutomationProperties.Name="Refresh diagnostics" Content="Refresh Diagnostics" Click="OnRefreshDiagnosticsClick" IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}" />
-                            <ProgressRing Width="20" Height="20" IsActive="{x:Bind ViewModel.Diagnostics.IsLoading, Mode=OneWay}" />
-                        </StackPanel>
-                    </Grid>
-
-                    <TextBlock Text="{x:Bind ViewModel.Diagnostics.StatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
-
-                    <ListView SelectionMode="None" ItemsSource="{x:Bind ViewModel.Diagnostics.Results, Mode=OneWay}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="diagnostics:DiagnosticResult">
-                                <Border Margin="0,0,0,12" Padding="12">
-                                    <StackPanel Spacing="8">
-                                        <Grid ColumnSpacing="12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="2*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock FontWeight="SemiBold" Text="{x:Bind Title}" />
-                                            <TextBlock Grid.Column="1" Text="{x:Bind SeverityLabel}" />
-                                        </Grid>
-                                        <TextBlock Text="{x:Bind Summary}" TextWrapping="WrapWholeWords" />
-                                        <TextBlock x:Name="DiagnosticDetailsBlock" x:Load="{x:Bind HasDetails}" Opacity="0.72" Text="{x:Bind Details}" TextWrapping="WrapWholeWords" />
-                                        <TextBlock x:Name="DiagnosticSuggestedNextStepBlock" x:Load="{x:Bind HasSuggestedNextStep}" Opacity="0.72" Text="{x:Bind SuggestedNextStep}" TextWrapping="WrapWholeWords" />
-                                        <TextBlock x:Name="DiagnosticCommandTextBlock" x:Load="{x:Bind HasCommandText}" Opacity="0.72" Text="{x:Bind CommandText}" TextWrapping="WrapWholeWords" />
-                                        <TextBox
-                                            x:Name="DiagnosticRawOutputBox"
-                                            x:Load="{x:Bind HasRawOutput}"
-                                            AcceptsReturn="True"
-                                            FontFamily="Consolas"
-                                            IsReadOnly="True"
-                                            MinHeight="120"
-                                            Text="{x:Bind RawOutput}"
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </StackPanel>
-            </Border>
+            <TextBlock
+                x:Name="ActionStatusBlock"
+                x:Load="{x:Bind ViewModel.HasActionStatus, Mode=OneWay}"
+                Text="{x:Bind ViewModel.ActionStatusText, Mode=OneWay}"
+                TextWrapping="WrapWholeWords" />
         </StackPanel>
-    </ScrollViewer>
+
+        <Border
+            Grid.Row="1"
+            x:Name="EmptyStateCard"
+            x:Load="{x:Bind ViewModel.ShowEmptyState, Mode=OneWay}"
+            Margin="32,12,32,32"
+            VerticalAlignment="Top"
+            Style="{StaticResource CardBorderStyle}">
+            <StackPanel Spacing="8">
+                <TextBlock
+                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                    Text="{x:Bind ViewModel.EmptyStateTitle, Mode=OneWay}" />
+                <TextBlock
+                    Text="{x:Bind ViewModel.EmptyStateMessage, Mode=OneWay}"
+                    TextWrapping="WrapWholeWords" />
+            </StackPanel>
+        </Border>
+
+        <Pivot
+            Grid.Row="1"
+            x:Name="DistroPivot"
+            x:Load="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+            Margin="20,8,20,0">
+
+            <PivotItem Header="Overview">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel HorizontalAlignment="Stretch" MaxWidth="900" Padding="12,16,12,32" Spacing="12">
+
+                        <Border Style="{StaticResource CardBorderStyle}">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon
+                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                    FontSize="20"
+                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                    Glyph="&#xEC7A;"
+                                    VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Open terminal" />
+                                    <TextBlock
+                                        Style="{StaticResource SecondaryTextStyle}"
+                                        Text="Launch the default Windows Terminal session for this distro." />
+                                </StackPanel>
+                                <Button
+                                    Grid.Column="2"
+                                    AutomationProperties.Name="Open distro terminal"
+                                    Click="OnOpenTerminalClick"
+                                    IsEnabled="{x:Bind ViewModel.CanOpenTerminal, Mode=OneWay}"
+                                    Style="{ThemeResource AccentButtonStyle}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE8A7;" />
+                                        <TextBlock Text="Open" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource CardBorderStyle}">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon
+                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                    FontSize="20"
+                                    Glyph="&#xE768;"
+                                    VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Start" />
+                                    <TextBlock
+                                        Style="{StaticResource SecondaryTextStyle}"
+                                        Text="Boot the distro VM if it is currently stopped." />
+                                </StackPanel>
+                                <Button
+                                    Grid.Column="2"
+                                    AutomationProperties.Name="Start distro"
+                                    Click="OnStartClick"
+                                    Content="Start"
+                                    IsEnabled="{x:Bind ViewModel.CanStart, Mode=OneWay}" />
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource CardBorderStyle}">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon
+                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                    FontSize="20"
+                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                    Glyph="&#xE71A;"
+                                    VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Terminate" />
+                                    <TextBlock
+                                        Style="{StaticResource SecondaryTextStyle}"
+                                        Text="Immediately stop the distro and any processes running inside it."
+                                        TextWrapping="WrapWholeWords" />
+                                </StackPanel>
+                                <Button
+                                    Grid.Column="2"
+                                    AutomationProperties.Name="Terminate distro"
+                                    Click="OnTerminateClick"
+                                    Content="Terminate"
+                                    IsEnabled="{x:Bind ViewModel.CanTerminate, Mode=OneWay}" />
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource CardBorderStyle}">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon
+                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                    FontSize="20"
+                                    Glyph="&#xE735;"
+                                    VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Set as default" />
+                                    <TextBlock
+                                        Style="{StaticResource SecondaryTextStyle}"
+                                        Text="Make this distro the target of plain wsl commands." />
+                                </StackPanel>
+                                <Button
+                                    Grid.Column="2"
+                                    AutomationProperties.Name="Set as default distro"
+                                    Click="OnSetDefaultClick"
+                                    Content="Set default"
+                                    IsEnabled="{x:Bind ViewModel.CanSetDefault, Mode=OneWay}" />
+                            </Grid>
+                        </Border>
+
+                        <TextBlock
+                            Style="{StaticResource SecondaryTextStyle}"
+                            Text="{x:Bind ViewModel.HeaderCapabilityMessage, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
+            <PivotItem Header="Terminal">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel HorizontalAlignment="Stretch" MaxWidth="900" Padding="12,16,12,32" Spacing="12">
+
+                        <Border Style="{StaticResource CardBorderStyle}">
+                            <StackPanel Spacing="12">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="3*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox
+                                        x:Name="CommandInputBox"
+                                        Header="Command"
+                                        PlaceholderText="uname -a"
+                                        Text="{x:Bind ViewModel.CommandRunner.CommandText, Mode=TwoWay}" />
+                                    <NumberBox
+                                        Grid.Column="1"
+                                        Header="Timeout (s)"
+                                        Minimum="1"
+                                        SmallChange="5"
+                                        SpinButtonPlacementMode="Inline"
+                                        Value="{x:Bind ViewModel.CommandRunner.TimeoutSeconds, Mode=TwoWay}" />
+                                    <Button
+                                        Grid.Column="2"
+                                        AutomationProperties.Name="Run command"
+                                        Click="OnRunCommandClick"
+                                        IsEnabled="{x:Bind ViewModel.CommandRunner.CanRun, Mode=OneWay}"
+                                        Style="{ThemeResource AccentButtonStyle}"
+                                        VerticalAlignment="Bottom">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE768;" />
+                                            <TextBlock Text="Run" />
+                                        </StackPanel>
+                                        <Button.KeyboardAccelerators>
+                                            <KeyboardAccelerator Key="Enter" Modifiers="Control" />
+                                        </Button.KeyboardAccelerators>
+                                    </Button>
+                                    <Button
+                                        Grid.Column="3"
+                                        AutomationProperties.Name="Cancel command"
+                                        Click="OnCancelCommandClick"
+                                        Content="Cancel"
+                                        IsEnabled="{x:Bind ViewModel.CommandRunner.CanCancel, Mode=OneWay}"
+                                        VerticalAlignment="Bottom">
+                                        <Button.KeyboardAccelerators>
+                                            <KeyboardAccelerator Key="Escape" />
+                                        </Button.KeyboardAccelerators>
+                                    </Button>
+                                </Grid>
+
+                                <TextBlock
+                                    Text="{x:Bind ViewModel.CommandRunner.StatusText, Mode=OneWay}"
+                                    TextWrapping="WrapWholeWords" />
+                                <TextBlock>
+                                    <Run FontWeight="SemiBold" Text="Exit code: " />
+                                    <Run Text="{x:Bind ViewModel.CommandRunner.ExitCodeText, Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource CardBorderStyle}">
+                            <StackPanel Spacing="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Standard output" VerticalAlignment="Center" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                        <Button
+                                            AutomationProperties.Name="Copy standard output"
+                                            Click="OnCopyStdoutClick"
+                                            ToolTipService.ToolTip="Copy stdout">
+                                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE8C8;" />
+                                        </Button>
+                                        <Button
+                                            AutomationProperties.Name="Clear command output"
+                                            Click="OnClearOutputClick"
+                                            ToolTipService.ToolTip="Clear output">
+                                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE74D;" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBox
+                                    AcceptsReturn="True"
+                                    FontFamily="Consolas"
+                                    IsReadOnly="True"
+                                    MinHeight="160"
+                                    Text="{x:Bind ViewModel.CommandRunner.StandardOutput, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource CardBorderStyle}">
+                            <StackPanel Spacing="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <FontIcon
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                        FontSize="14"
+                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                        Glyph="&#xE783;"
+                                        VerticalAlignment="Center" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Margin="8,0,0,0"
+                                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                        Text="Standard error"
+                                        VerticalAlignment="Center" />
+                                    <Button
+                                        Grid.Column="2"
+                                        AutomationProperties.Name="Copy standard error"
+                                        Click="OnCopyStderrClick"
+                                        ToolTipService.ToolTip="Copy stderr">
+                                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE8C8;" />
+                                    </Button>
+                                </Grid>
+                                <TextBox
+                                    AcceptsReturn="True"
+                                    FontFamily="Consolas"
+                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                    IsReadOnly="True"
+                                    MinHeight="100"
+                                    Text="{x:Bind ViewModel.CommandRunner.StandardError, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander.Header>
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Session history" />
+                            </Expander.Header>
+                            <Expander.Content>
+                                <ItemsRepeater ItemsSource="{x:Bind ViewModel.CommandRunner.History, Mode=OneWay}">
+                                    <ItemsRepeater.Layout>
+                                        <StackLayout Spacing="8" />
+                                    </ItemsRepeater.Layout>
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="core:CommandHistoryEntry">
+                                            <Border Style="{StaticResource CardBorderStyle}" Padding="14">
+                                                <StackPanel Spacing="6">
+                                                    <Grid ColumnSpacing="12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock
+                                                            FontFamily="Consolas"
+                                                            Text="{x:Bind CommandText}"
+                                                            TextWrapping="WrapWholeWords"
+                                                            VerticalAlignment="Center" />
+                                                        <TextBlock
+                                                            Grid.Column="1"
+                                                            Style="{StaticResource SecondaryTextStyle}"
+                                                            Text="{x:Bind StatusLabel}"
+                                                            VerticalAlignment="Center" />
+                                                        <TextBlock
+                                                            Grid.Column="2"
+                                                            Style="{StaticResource SecondaryTextStyle}"
+                                                            Text="{x:Bind ExitCodeLabel}"
+                                                            VerticalAlignment="Center" />
+                                                        <Button
+                                                            Grid.Column="3"
+                                                            Click="OnReuseHistoryEntryClick"
+                                                            Content="Reuse" />
+                                                    </Grid>
+                                                    <TextBlock
+                                                        Style="{StaticResource TertiaryTextStyle}"
+                                                        Text="{x:Bind StartedAt}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
+                            </Expander.Content>
+                        </Expander>
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
+            <PivotItem Header="Configuration">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel HorizontalAlignment="Stretch" MaxWidth="900" Padding="12,16,12,32" Spacing="12">
+                        <Border Style="{StaticResource CardBorderStyle}">
+                            <StackPanel Spacing="6">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Configuration editor coming soon" />
+                                <TextBlock
+                                    Style="{StaticResource SecondaryTextStyle}"
+                                    Text="The /etc/wsl.conf editor lands with implementation Phase 9. Until then, edit the file directly inside the distro."
+                                    TextWrapping="WrapWholeWords" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
+            <PivotItem Header="Diagnostics">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel HorizontalAlignment="Stretch" MaxWidth="900" Padding="12,16,12,32" Spacing="12">
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Style="{StaticResource SecondaryTextStyle}"
+                                Text="{x:Bind ViewModel.Diagnostics.StatusText, Mode=OneWay}"
+                                TextWrapping="WrapWholeWords"
+                                VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <ProgressRing Width="16" Height="16" IsActive="{x:Bind ViewModel.Diagnostics.IsLoading, Mode=OneWay}" />
+                                <Button
+                                    AutomationProperties.Name="Refresh diagnostics"
+                                    Click="OnRefreshDiagnosticsClick"
+                                    IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE72C;" />
+                                        <TextBlock Text="Refresh" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Diagnostics.Results, Mode=OneWay}">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Spacing="8" />
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="diagnostics:DiagnosticResult">
+                                    <Border Style="{StaticResource CardBorderStyle}">
+                                        <StackPanel Spacing="8">
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
+                                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                                    Text="{x:Bind Title}"
+                                                    TextWrapping="WrapWholeWords"
+                                                    VerticalAlignment="Center" />
+                                                <Border
+                                                    Grid.Column="1"
+                                                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="12"
+                                                    Padding="10,2,10,2"
+                                                    VerticalAlignment="Center">
+                                                    <TextBlock
+                                                        Style="{ThemeResource CaptionTextBlockStyle}"
+                                                        Text="{x:Bind SeverityLabel}" />
+                                                </Border>
+                                            </Grid>
+                                            <TextBlock Text="{x:Bind Summary}" TextWrapping="WrapWholeWords" />
+                                            <TextBlock
+                                                x:Name="DiagnosticDetailsBlock"
+                                                x:Load="{x:Bind HasDetails}"
+                                                Style="{StaticResource SecondaryTextStyle}"
+                                                Text="{x:Bind Details}"
+                                                TextWrapping="WrapWholeWords" />
+                                            <TextBlock
+                                                x:Name="DiagnosticSuggestedNextStepBlock"
+                                                x:Load="{x:Bind HasSuggestedNextStep}"
+                                                Style="{StaticResource SecondaryTextStyle}"
+                                                Text="{x:Bind SuggestedNextStep}"
+                                                TextWrapping="WrapWholeWords" />
+                                            <TextBlock
+                                                x:Name="DiagnosticCommandTextBlock"
+                                                x:Load="{x:Bind HasCommandText}"
+                                                FontFamily="Consolas"
+                                                Style="{StaticResource TertiaryTextStyle}"
+                                                Text="{x:Bind CommandText}"
+                                                TextWrapping="WrapWholeWords" />
+                                            <TextBox
+                                                x:Name="DiagnosticRawOutputBox"
+                                                x:Load="{x:Bind HasRawOutput}"
+                                                AcceptsReturn="True"
+                                                FontFamily="Consolas"
+                                                IsReadOnly="True"
+                                                MinHeight="100"
+                                                Text="{x:Bind RawOutput}"
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
+        </Pivot>
+    </Grid>
 </Page>

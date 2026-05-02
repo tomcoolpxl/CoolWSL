@@ -1,6 +1,5 @@
 using CoolWSL.App.Views;
 using Microsoft.UI;
-using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -21,7 +20,6 @@ public sealed partial class MainWindow : Window
         AppTitleBar.SizeChanged += OnAppTitleBarSizeChanged;
 
         ConfigureTitleBar();
-        ConfigureSystemBackdrop();
     }
 
     private void ConfigureTitleBar()
@@ -50,14 +48,6 @@ public sealed partial class MainWindow : Window
         }
 
         UpdateTitleBarInsets();
-    }
-
-    private void ConfigureSystemBackdrop()
-    {
-        if (MicaController.IsSupported())
-        {
-            SystemBackdrop = new MicaBackdrop { Kind = MicaKind.Base };
-        }
     }
 
     private void OnAppTitleBarLoaded(object sender, RoutedEventArgs e)

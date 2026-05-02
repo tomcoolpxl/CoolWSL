@@ -11,14 +11,7 @@
 
 ## UX Rebuild Track
 
-Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through C have shipped (see `DONE.md`); the items below cover the remaining phases D through G.
-
-### UX Phase D - Distro detail rebuild
-
-- [ ] Replace the existing `DistroPage` layout with a single page that contains a header, status pill, and a `Pivot` (Overview, Terminal, Configuration, Diagnostics).
-- [ ] Move lifecycle actions and capability messaging into the Overview pivot using `SettingsCard` rows.
-- [ ] Redesign the command runner inside the Terminal pivot with a single output area, stdout / stderr colour distinction, copy and clear toolbar, and a virtualised collapsible history.
-- [ ] Move per-distro diagnostics into the Diagnostics pivot fed by `IDiagnosticsService.GetSnapshotAsync(selectedDistroName)`.
+Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through D have shipped (see `DONE.md`); the items below cover the remaining phases E through G.
 
 ### UX Phase E - Diagnostics rebuild
 

@@ -240,6 +240,13 @@ public sealed class CommandRunnerViewModel : INotifyPropertyChanged
         currentRunSource?.Cancel();
     }
 
+    public void ClearOutput()
+    {
+        StandardOutput = string.Empty;
+        StandardError = string.Empty;
+        ExitCodeText = "n/a";
+    }
+
     public void ReuseHistoryEntry(CommandHistoryEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);

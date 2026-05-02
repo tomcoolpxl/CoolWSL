@@ -4,8 +4,8 @@ using CoolWSL.Core.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace CoolWSL.App.Views;
 
@@ -36,25 +36,9 @@ public sealed partial class DistroPage : Page
         await ViewModel.RefreshAsync();
     }
 
-    private async void OnDistroSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (sender is not ComboBox { SelectedItem: CoolWSL.App.Models.DistroSelectionItem selectedItem })
-        {
-            return;
-        }
-
-        await ViewModel.SelectDistroAsync(selectedItem.Name);
-    }
-
     private async void OnOpenTerminalClick(object sender, RoutedEventArgs e)
     {
         await ViewModel.OpenTerminalAsync();
-    }
-
-    private void OnFocusCommandRunnerClick(object sender, RoutedEventArgs e)
-    {
-        CommandRunnerSection.StartBringIntoView();
-        CommandInputBox.Focus(FocusState.Programmatic);
     }
 
     private async void OnStartClick(object sender, RoutedEventArgs e)
@@ -99,12 +83,27 @@ public sealed partial class DistroPage : Page
         ViewModel.CommandRunner.Cancel();
     }
 
+    private void OnCopyStdoutClick(object sender, RoutedEventArgs e)
+    {
+        CopyToClipboard(ViewModel.CommandRunner.StandardOutput);
+    }
+
+    private void OnCopyStderrClick(object sender, RoutedEventArgs e)
+    {
+        CopyToClipboard(ViewModel.CommandRunner.StandardError);
+    }
+
+    private void OnClearOutputClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.CommandRunner.ClearOutput();
+    }
+
     private void OnReuseHistoryEntryClick(object sender, RoutedEventArgs e)
     {
         if ((sender as FrameworkElement)?.DataContext is CommandHistoryEntry entry)
         {
             ViewModel.CommandRunner.ReuseHistoryEntry(entry);
-            CommandRunnerSection.StartBringIntoView();
+            CommandInputBox.StartBringIntoView();
             CommandInputBox.Focus(FocusState.Programmatic);
         }
     }
@@ -112,6 +111,18 @@ public sealed partial class DistroPage : Page
     private async void OnRefreshDiagnosticsClick(object sender, RoutedEventArgs e)
     {
         await ViewModel.Diagnostics.RefreshAsync();
+    }
+
+    private static void CopyToClipboard(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        var package = new DataPackage();
+        package.SetText(text);
+        Clipboard.SetContent(package);
     }
 
     private async Task<bool> ConfirmAsync(OperationRequest request)

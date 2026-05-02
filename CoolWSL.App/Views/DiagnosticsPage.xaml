@@ -26,7 +26,7 @@
                 <StackPanel Spacing="4">
                     <TextBlock FontSize="28" FontWeight="SemiBold" Text="Diagnostics" />
                     <TextBlock
-                        Opacity="0.72"
+                        Style="{StaticResource SecondaryTextStyle}"
                         Text="Review WSL health, raw command evidence, and per-distro DNS and internet checks without making any changes automatically."
                         TextWrapping="WrapWholeWords" />
                 </StackPanel>
@@ -73,9 +73,9 @@
                                     <Button AutomationProperties.Name="Retry diagnostic" Grid.Column="2" Click="OnRetryClick" Content="Retry" />
                                 </Grid>
                                 <TextBlock Text="{x:Bind Summary}" TextWrapping="WrapWholeWords" />
-                                <TextBlock x:Name="DiagnosticDetailsBlock" x:Load="{x:Bind HasDetails}" Opacity="0.72" Text="{x:Bind Details}" TextWrapping="WrapWholeWords" />
-                                <TextBlock x:Name="DiagnosticSuggestedNextStepBlock" x:Load="{x:Bind HasSuggestedNextStep}" Opacity="0.72" Text="{x:Bind SuggestedNextStep}" TextWrapping="WrapWholeWords" />
-                                <TextBlock x:Name="DiagnosticCommandTextBlock" x:Load="{x:Bind HasCommandText}" Opacity="0.72" Text="{x:Bind CommandText}" TextWrapping="WrapWholeWords" />
+                                <TextBlock x:Name="DiagnosticDetailsBlock" x:Load="{x:Bind HasDetails}" Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind Details}" TextWrapping="WrapWholeWords" />
+                                <TextBlock x:Name="DiagnosticSuggestedNextStepBlock" x:Load="{x:Bind HasSuggestedNextStep}" Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind SuggestedNextStep}" TextWrapping="WrapWholeWords" />
+                                <TextBlock x:Name="DiagnosticCommandTextBlock" x:Load="{x:Bind HasCommandText}" Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind CommandText}" TextWrapping="WrapWholeWords" />
                                 <TextBox
                                     x:Name="DiagnosticRawOutputBox"
                                     x:Load="{x:Bind HasRawOutput}"

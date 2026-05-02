@@ -1,6 +1,7 @@
 using CoolWSL.Core.Models;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace CoolWSL.App.Dialogs.ConfirmationDialogs;
 
@@ -35,12 +36,18 @@ public sealed class OperationConfirmationDialog : ContentDialog
 
         if (request.HasDetailText)
         {
-            panel.Children.Add(new TextBlock
+            var detailBlock = new TextBlock
             {
                 Text = request.DetailText,
-                Opacity = 0.72,
                 TextWrapping = TextWrapping.WrapWholeWords,
-            });
+            };
+
+            if (Application.Current?.Resources["TextFillColorSecondaryBrush"] is Brush secondaryBrush)
+            {
+                detailBlock.Foreground = secondaryBrush;
+            }
+
+            panel.Children.Add(detailBlock);
         }
 
         return panel;
