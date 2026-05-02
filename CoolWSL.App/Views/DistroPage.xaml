@@ -16,7 +16,8 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" MaxWidth="964" HorizontalAlignment="Center" Padding="32,32,32,8" Spacing="12">
+        <Grid Grid.Row="0" x:Name="DistroHeaderContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
+        <StackPanel Width="{Binding ActualWidth, ElementName=DistroHeaderContentHost}" Padding="32,32,32,8" Spacing="12">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -109,13 +110,14 @@
                 Text="{x:Bind ViewModel.ActionStatusText, Mode=OneWay}"
                 TextWrapping="WrapWholeWords" />
         </StackPanel>
+        </Grid>
 
         <Border
             Grid.Row="1"
             x:Name="EmptyStateCard"
             x:Load="{x:Bind ViewModel.ShowEmptyState, Mode=OneWay}"
             Margin="32,12,32,32"
-            MaxWidth="900"
+            MaxWidth="{StaticResource WidePageContentMaxWidth}"
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             Style="{StaticResource CardBorderStyle}">
@@ -137,7 +139,7 @@
 
             <PivotItem Header="Overview">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <Grid x:Name="OverviewContentHost" MaxWidth="900" HorizontalAlignment="Center">
+                    <Grid x:Name="OverviewContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
                     <StackPanel Width="{Binding ActualWidth, ElementName=OverviewContentHost}" Padding="12,16,12,32" Spacing="12">
 
                         <Border Style="{StaticResource CardBorderStyle}">
@@ -267,7 +269,7 @@
 
             <PivotItem Header="Settings">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <Grid x:Name="DistroSettingsContentHost" MaxWidth="900" HorizontalAlignment="Center">
+                    <Grid x:Name="DistroSettingsContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
                     <StackPanel Width="{Binding ActualWidth, ElementName=DistroSettingsContentHost}" Padding="12,16,12,32" Spacing="12">
                         
                         <Border Style="{StaticResource CardBorderStyle}" Padding="16">
@@ -403,7 +405,7 @@
 
             <PivotItem Header="Diagnostics">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <Grid x:Name="DiagnosticsContentHost" MaxWidth="900" HorizontalAlignment="Center">
+                    <Grid x:Name="DiagnosticsContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
                     <StackPanel Width="{Binding ActualWidth, ElementName=DiagnosticsContentHost}" Padding="12,16,12,32" Spacing="12">
 
                         <Grid ColumnSpacing="12">

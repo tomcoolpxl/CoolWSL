@@ -1,4 +1,5 @@
 using CoolWSL.App.DependencyInjection;
+using CoolWSL.App.Services;
 using CoolWSL.App.ViewModels;
 using CoolWSL.Configuration.DependencyInjection;
 using CoolWSL.Core.Abstractions;
@@ -23,6 +24,7 @@ public sealed class ServiceRegistrationTests
         Assert.IsNotNull(services);
         Assert.IsNotNull(services.GetService<IAppLogger>());
         Assert.IsNotNull(services.GetService<IAppLogReader>());
+        Assert.IsNotNull(services.GetService<IThemePreferenceService>());
         Assert.IsNotNull(services.GetService<IWslGlobalConfigService>());
         Assert.IsNotNull(services.GetService<IWslCommandService>());
         Assert.IsNotNull(services.GetService<IWslDistroService>());

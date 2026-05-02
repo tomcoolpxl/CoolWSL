@@ -1,4 +1,5 @@
 using CoolWSL.App.ViewModels;
+using CoolWSL.App.Services;
 using CoolWSL.App.Views;
 using CoolWSL.Configuration.DependencyInjection;
 using CoolWSL.Core.DependencyInjection;
@@ -20,6 +21,7 @@ public static class AppServiceCollection
             .AddCoolWslConfiguration()
             .AddCoolWslDiagnostics();
 
+        services.AddSingleton<IThemePreferenceService, ThemePreferenceService>();
         services.AddSingleton<DashboardViewModel>();
         services.AddSingleton<DistroSettingsViewModel>();
         services.AddSingleton<DistroPageDiagnosticsViewModel>();

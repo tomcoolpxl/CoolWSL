@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using CoolWSL.App.Helpers;
+using CoolWSL.App.Services;
 using CoolWSL.Core.Abstractions;
 using CoolWSL.Core.Models;
 using CoolWSL.Diagnostics.Status;
@@ -12,6 +13,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private readonly IDashboardStatusService statusService;
     private readonly IWslDistroService distroService;
     private readonly IWslGlobalConfigService globalConfigService;
+    private readonly IThemePreferenceService themePreferenceService;
     private readonly IAppLogger logger;
     private bool hasLoaded;
     private bool hasDefaultDistro;
@@ -33,17 +35,22 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string globalConfigBackupPathText = "No backup created in this session.";
     private string globalConfigRestartNotice = "Global WSL configuration changes apply after WSL restarts.";
     private WslConfigValidationResult globalConfigValidation = WslConfigValidationResult.Empty;
+    private int selectedThemeIndex;
 
     public SettingsViewModel(
         IDashboardStatusService statusService,
         IWslDistroService distroService,
         IWslGlobalConfigService globalConfigService,
+        IThemePreferenceService themePreferenceService,
         IAppLogger logger)
     {
         this.statusService = statusService;
         this.distroService = distroService;
         this.globalConfigService = globalConfigService;
+        this.themePreferenceService = themePreferenceService;
         this.logger = logger;
+        selectedThemeIndex = MapThemeToIndex(themePreferenceService.CurrentTheme);
+        themePreferenceService.ThemeChanged += OnThemeChanged;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -165,6 +172,22 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public bool CanRunActions => !IsActionInProgress;
 
     public bool CanOpenDefaultDistro => CanRunActions && hasDefaultDistro;
+
+    public int SelectedThemeIndex
+    {
+        get => selectedThemeIndex;
+        set
+        {
+            if (selectedThemeIndex == value)
+            {
+                return;
+            }
+
+            selectedThemeIndex = value;
+            themePreferenceService.SetTheme(MapIndexToTheme(value));
+            OnPropertyChanged();
+        }
+    }
 
     public string GlobalConfigPathText
     {
@@ -349,6 +372,18 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    private void OnThemeChanged(object? sender, EventArgs e)
+    {
+        var themeIndex = MapThemeToIndex(themePreferenceService.CurrentTheme);
+        if (selectedThemeIndex == themeIndex)
+        {
+            return;
+        }
+
+        selectedThemeIndex = themeIndex;
+        OnPropertyChanged(nameof(SelectedThemeIndex));
+    }
+
     public async Task SaveGlobalConfigAsync()
     {
         if (!CanSaveGlobalConfig)
@@ -495,6 +530,22 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
                 return $"{prefix}{location} {issue.Message}";
             }));
     }
+
+    private static int MapThemeToIndex(AppThemePreference themePreference)
+        => themePreference switch
+        {
+            AppThemePreference.Light => 1,
+            AppThemePreference.Dark => 2,
+            _ => 0,
+        };
+
+    private static AppThemePreference MapIndexToTheme(int themeIndex)
+        => themeIndex switch
+        {
+            1 => AppThemePreference.Light,
+            2 => AppThemePreference.Dark,
+            _ => AppThemePreference.System,
+        };
 
     private async Task ExecuteActionAsync(
         Func<CancellationToken, Task<CommandResult>> action,

@@ -1,15 +1,18 @@
+using CoolWSL.App.Services;
 using CoolWSL.App.Views;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
 
 namespace CoolWSL.App;
 
 public sealed partial class MainWindow : Window
 {
-    public MainWindow(ShellPage shellPage, StatusBar statusBar)
+    private readonly IThemePreferenceService themePreferenceService;
+
+    public MainWindow(ShellPage shellPage, StatusBar statusBar, IThemePreferenceService themePreferenceService)
     {
+        this.themePreferenceService = themePreferenceService;
         InitializeComponent();
 
         Title = "CoolWSL";
@@ -18,7 +21,15 @@ public sealed partial class MainWindow : Window
 
         AppTitleBar.Loaded += OnAppTitleBarLoaded;
         AppTitleBar.SizeChanged += OnAppTitleBarSizeChanged;
+        Activated += OnWindowActivated;
+        themePreferenceService.ThemeChanged += OnThemeChanged;
 
+        if (Content is FrameworkElement rootElement)
+        {
+            rootElement.ActualThemeChanged += OnRootActualThemeChanged;
+        }
+
+        ApplyTheme(themePreferenceService.CurrentTheme);
         ConfigureTitleBar();
     }
 
@@ -36,18 +47,67 @@ public sealed partial class MainWindow : Window
         titleBar.PreferredHeightOption = TitleBarHeightOption.Standard;
         titleBar.ButtonBackgroundColor = Colors.Transparent;
         titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-
-        if (Application.Current.Resources["SubtleFillColorSecondaryBrush"] is SolidColorBrush hoverBrush)
-        {
-            titleBar.ButtonHoverBackgroundColor = hoverBrush.Color;
-        }
-
-        if (Application.Current.Resources["SubtleFillColorTertiaryBrush"] is SolidColorBrush pressedBrush)
-        {
-            titleBar.ButtonPressedBackgroundColor = pressedBrush.Color;
-        }
-
+        UpdateTitleBarButtonColors();
         UpdateTitleBarInsets();
+    }
+
+    private void OnThemeChanged(object? sender, EventArgs e)
+    {
+        ApplyTheme(themePreferenceService.CurrentTheme);
+    }
+
+    private void OnRootActualThemeChanged(FrameworkElement sender, object args)
+    {
+        UpdateTitleBarButtonColors();
+    }
+
+    private void OnWindowActivated(object sender, WindowActivatedEventArgs e)
+    {
+        UpdateTitleBarButtonColors();
+    }
+
+    private void ApplyTheme(AppThemePreference themePreference)
+    {
+        if (Content is not FrameworkElement rootElement)
+        {
+            return;
+        }
+
+        rootElement.RequestedTheme = themePreference switch
+        {
+            AppThemePreference.Light => ElementTheme.Light,
+            AppThemePreference.Dark => ElementTheme.Dark,
+            _ => ElementTheme.Default,
+        };
+
+        UpdateTitleBarButtonColors();
+    }
+
+    private void UpdateTitleBarButtonColors()
+    {
+        if (!AppWindowTitleBar.IsCustomizationSupported())
+        {
+            return;
+        }
+
+        var activeTheme = (Content as FrameworkElement)?.ActualTheme ?? ElementTheme.Default;
+        var isDark = activeTheme == ElementTheme.Dark;
+        var titleBar = AppWindow.TitleBar;
+
+        titleBar.ButtonForegroundColor = isDark
+            ? ColorHelper.FromArgb(0xFF, 0xF5, 0xF5, 0xF5)
+            : ColorHelper.FromArgb(0xFF, 0x1C, 0x1C, 0x1C);
+        titleBar.ButtonInactiveForegroundColor = isDark
+            ? ColorHelper.FromArgb(0xCC, 0xF5, 0xF5, 0xF5)
+            : ColorHelper.FromArgb(0xCC, 0x1C, 0x1C, 0x1C);
+        titleBar.ButtonHoverForegroundColor = titleBar.ButtonForegroundColor;
+        titleBar.ButtonPressedForegroundColor = titleBar.ButtonForegroundColor;
+        titleBar.ButtonHoverBackgroundColor = isDark
+            ? ColorHelper.FromArgb(0x24, 0xFF, 0xFF, 0xFF)
+            : ColorHelper.FromArgb(0x14, 0x00, 0x00, 0x00);
+        titleBar.ButtonPressedBackgroundColor = isDark
+            ? ColorHelper.FromArgb(0x33, 0xFF, 0xFF, 0xFF)
+            : ColorHelper.FromArgb(0x1F, 0x00, 0x00, 0x00);
     }
 
     private void OnAppTitleBarLoaded(object sender, RoutedEventArgs e)

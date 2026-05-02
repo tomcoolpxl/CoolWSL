@@ -12,7 +12,7 @@
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Disabled"
         HorizontalScrollBarVisibility="Disabled">
-        <Grid x:Name="SettingsContentHost" MaxWidth="920" HorizontalAlignment="Center">
+        <Grid x:Name="SettingsContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
         <StackPanel Width="{Binding ActualWidth, ElementName=SettingsContentHost}" Padding="32" Spacing="20">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
@@ -199,7 +199,11 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Theme" VerticalAlignment="Center" />
-                            <ComboBox Grid.Column="1" SelectedIndex="0" IsEnabled="False" HorizontalAlignment="Left" MinWidth="180">
+                            <ComboBox
+                                Grid.Column="1"
+                                Width="{StaticResource SettingsValueControlWidth}"
+                                HorizontalAlignment="Right"
+                                SelectedIndex="{x:Bind ViewModel.SelectedThemeIndex, Mode=TwoWay}">
                                 <ComboBoxItem Content="System" />
                                 <ComboBoxItem Content="Light" />
                                 <ComboBoxItem Content="Dark" />
@@ -213,7 +217,7 @@
                             OnContent="Enabled" />
                         <TextBlock
                             Style="{StaticResource SecondaryTextStyle}"
-                            Text="Theme persistence and backdrop preferences are part of the user preferences work in Phase 18. Mica remains disabled because the text-rendering pass removed it to keep ClearType crisp."
+                            Text="Theme changes apply immediately and persist across launches. Mica remains disabled because the text-rendering pass removed it to keep ClearType crisp."
                             TextWrapping="WrapWholeWords" />
                     </StackPanel>
                 </Expander>
@@ -235,6 +239,8 @@
                             Header="Confirm destructive WSL actions"
                             IsEnabled="False"
                             IsOn="True"
+                            HorizontalAlignment="Right"
+                            MinWidth="{StaticResource SettingsValueControlWidth}"
                             OffContent="Off"
                             OnContent="On" />
                         <Grid ColumnSpacing="16">
@@ -243,7 +249,12 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Default command timeout" VerticalAlignment="Center" />
-                            <TextBox Grid.Column="1" Text="15 seconds" IsEnabled="False" MaxWidth="180" HorizontalAlignment="Left" />
+                            <TextBox
+                                Grid.Column="1"
+                                Width="{StaticResource SettingsValueControlWidth}"
+                                Text="15 seconds"
+                                IsEnabled="False"
+                                HorizontalAlignment="Right" />
                         </Grid>
                         <TextBlock
                             Style="{StaticResource SecondaryTextStyle}"

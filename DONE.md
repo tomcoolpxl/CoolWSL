@@ -164,6 +164,16 @@
 - Verified the updated global-settings guidance against Microsoft Learn on 2026-05-03, which recommends using the WSL Settings app for `.wslconfig` changes and confirms that `.wslconfig` applies to WSL 2 only and takes effect after WSL restarts.
 - Verified `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug --filter "FullyQualifiedName~DashboardStateTests|FullyQualifiedName~DistroSelectionItemTests"`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug --filter "FullyQualifiedName~SettingsViewModelTests|FullyQualifiedName~DistroSettingsViewModelTests|FullyQualifiedName~DistroSettingsRowViewModelTests"`, and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-build` with `COOLWSL_SMOKE_TEST=1` on 2026-05-03.
 
+## UX fix pass - wider settings-style layouts, theme selection, and title-bar polish delivered
+
+- Standardized the effective content width envelope for Settings and the Distro page so the header, Overview cards, Settings cards, and Diagnostics cards all use the same wider centered host instead of narrower mixed widths.
+- Rebuilt the Distro header inside the same width-bound host as the page content so the `Distros` heading and refresh affordance align left like the Dashboard header rather than appearing visually centered.
+- Standardized settings control widths with a shared `SettingsValueControlWidth` resource and right-aligned the per-distro structured-editor controls, global Settings theme picker, timeout field, and toggles to match the Windows Terminal settings layout style more closely.
+- Added persisted System, Light, and Dark theme selection backed by a new local `ThemePreferenceService`, wired the active selection into the Settings Appearance card, and applied the chosen theme to the main window root on startup and on change.
+- Updated the custom title-bar button foreground and hover colours to track the active light or dark theme so minimize, maximize, and close remain legible when the window is active instead of falling back to black on dark surfaces.
+- Switched the WSL Settings handoff to launch the installed app through its registered `shell:AppsFolder` identity after confirming the local Start-menu registration exposed `WSL Settings` under `shell:AppsFolder\{6D809377-6AF0-444B-8957-A3773F02200E}\WSL\wslsettings\wslsettings.exe`.
+- Verified `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug --filter "FullyQualifiedName~SettingsViewModelTests|FullyQualifiedName~ServiceRegistrationTests"`, `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-build` with `COOLWSL_SMOKE_TEST=1`, and the registered WSL Settings shell launch command on 2026-05-03.
+
 ## Code review remediation - CODE_REVIEW findings resolved
 
 - Reordered `WslCommandService` redirected output reads ahead of stdin writes so large stdin payloads cannot deadlock behind unread stdout/stderr, and added focused stdin regression coverage.

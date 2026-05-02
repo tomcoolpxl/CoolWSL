@@ -10,7 +10,7 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="{StaticResource SettingsValueControlWidth}" />
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="4">
                 <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.Label, Mode=OneWay}" />
@@ -31,18 +31,20 @@
                     TextWrapping="WrapWholeWords" />
             </StackPanel>
             
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="150">
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Width="{StaticResource SettingsValueControlWidth}">
                 <ToggleSwitch 
                     x:Name="BoolToggle"
                     x:Load="{x:Bind ViewModel.IsBoolean, Mode=OneWay}"
                     IsOn="{x:Bind ViewModel.BooleanValue, Mode=TwoWay}"
-                    IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}" />
+                    IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}"
+                    HorizontalAlignment="Right" />
                     
                 <TextBox 
                     x:Name="StringBox"
                     x:Load="{x:Bind ViewModel.IsString, Mode=OneWay}"
                     Text="{x:Bind ViewModel.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}" />
+                    IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}"
+                    HorizontalAlignment="Stretch" />
             </StackPanel>
         </Grid>
     </Border>

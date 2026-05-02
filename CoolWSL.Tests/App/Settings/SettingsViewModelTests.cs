@@ -1,3 +1,4 @@
+using CoolWSL.App.Services;
 using CoolWSL.App.ViewModels;
 using CoolWSL.Core.Abstractions;
 using CoolWSL.Core.Models;
@@ -17,6 +18,7 @@ public sealed class SettingsViewModelTests
             new StubDashboardStatusService(),
             new StubWslDistroService(),
             configService,
+            new StubThemePreferenceService(),
             new StubAppLogger());
 
         await viewModel.RefreshAsync();
@@ -37,6 +39,7 @@ public sealed class SettingsViewModelTests
             new StubDashboardStatusService(),
             new StubWslDistroService(),
             new StubGlobalConfigService("[wsl2]\nmemory=2GB\n"),
+            new StubThemePreferenceService(),
             new StubAppLogger());
 
         await viewModel.RefreshAsync();
@@ -44,6 +47,23 @@ public sealed class SettingsViewModelTests
 
         Assert.IsFalse(viewModel.CanSaveGlobalConfig);
         StringAssert.Contains(viewModel.GlobalConfigValidationText, "Error line");
+    }
+
+    [TestMethod]
+    public void SelectedThemeIndex_UpdatesThemePreference()
+    {
+        var themeService = new StubThemePreferenceService();
+        var viewModel = new SettingsViewModel(
+            new StubDashboardStatusService(),
+            new StubWslDistroService(),
+            new StubGlobalConfigService("[wsl2]\nmemory=2GB\n"),
+            themeService,
+            new StubAppLogger());
+
+        viewModel.SelectedThemeIndex = 2;
+
+        Assert.AreEqual(AppThemePreference.Dark, themeService.CurrentTheme);
+        Assert.AreEqual(2, viewModel.SelectedThemeIndex);
     }
 
     private sealed class StubGlobalConfigService : IWslGlobalConfigService
@@ -135,6 +155,19 @@ public sealed class SettingsViewModelTests
     {
         public void LogInfo(string area, string message)
         {
+        }
+    }
+
+    private sealed class StubThemePreferenceService : IThemePreferenceService
+    {
+        public event EventHandler? ThemeChanged;
+
+        public AppThemePreference CurrentTheme { get; private set; } = AppThemePreference.System;
+
+        public void SetTheme(AppThemePreference theme)
+        {
+            CurrentTheme = theme;
+            ThemeChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }
