@@ -92,7 +92,7 @@ public sealed class WslDistroConfigService : IWslDistroConfigService
             var command = schemaKey.VerifyCommand;
             if (command.Contains("<username>"))
             {
-                command = command.Replace("<username>", entry.Value);
+                command = command.Replace("<username>", entry.EffectiveValue);
             }
 
             var result = await distroService.RunInDistroAsync(distroName, command, TimeSpan.FromSeconds(10), cancellationToken);

@@ -3,6 +3,7 @@ using CoolWSL.Core.Services;
 using CoolWSL.Wsl.Errors;
 using CoolWSL.Wsl.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using System.Text;
 
 namespace CoolWSL.Tests.Wsl;
@@ -81,6 +82,29 @@ public sealed class WslCommandServiceTests
         StringAssert.Contains(result.StandardOutput, "Default Distribution: archlinux");
         StringAssert.Contains(result.StandardOutput, "Default Version: 2");
         Assert.IsFalse(result.StandardOutput.Contains('\0'));
+    }
+
+    [TestMethod]
+    public async Task ExecuteWithStdinAsync_ReadsRedirectedOutputBeforeLargeStdinCompletes()
+    {
+        var service = CreateService();
+        var line = new string('a', 256);
+        var stdin = string.Concat(Enumerable.Repeat(line + "\n", 12000));
+        var command = new WslCommand(
+            "pwsh",
+            new[]
+            {
+                "-NoProfile",
+                "-Command",
+                "$reader = [Console]::In; while (($line = $reader.ReadLine()) -ne $null) { [Console]::Out.WriteLine($line) }"
+            },
+            TimeSpan.FromSeconds(10));
+
+        var result = await service.ExecuteWithStdinAsync(command, stdin);
+
+        Assert.AreEqual(CommandExecutionStatus.Succeeded, result.Status);
+        Assert.AreEqual(string.Empty, result.StandardError);
+        Assert.IsTrue(result.StandardOutput.Length >= stdin.Length);
     }
 
     private static WslCommandService CreateService()

@@ -80,8 +80,38 @@ public sealed class IniEntry : IniNode
     public required string Key { get; init; }
     public required string RawKey { get; init; }
     public required string Value { get; init; }
+    public required string OriginalValue { get; init; }
     public string? RawLine { get; init; }
     public bool IsKnown { get; set; }
+
+    public string EffectiveValue => TryUnquote(Value, out var unquoted) ? unquoted : Value;
+
+    private static bool TryUnquote(string value, out string unquoted)
+    {
+        if (value.Length >= 2 && value[0] == '"' && value[^1] == '"')
+        {
+            var inner = value[1..^1];
+            var builder = new StringBuilder(inner.Length);
+
+            for (var index = 0; index < inner.Length; index++)
+            {
+                if (inner[index] == '\\' && index + 1 < inner.Length && (inner[index + 1] == '"' || inner[index + 1] == '\\'))
+                {
+                    builder.Append(inner[index + 1]);
+                    index++;
+                    continue;
+                }
+
+                builder.Append(inner[index]);
+            }
+
+            unquoted = builder.ToString();
+            return true;
+        }
+
+        unquoted = value;
+        return false;
+    }
 }
 
 public sealed class IniMalformedLine : IniNode
@@ -159,14 +189,9 @@ public sealed class IniDocument
                 }
                 break;
             case IniEntry entry:
-                if (string.IsNullOrEmpty(entry.RawLine) || (!entry.RawLine.Contains(entry.Value) && entry.Value.Length > 0))
+                if (string.IsNullOrEmpty(entry.RawLine) || !string.Equals(entry.Value, entry.OriginalValue, StringComparison.Ordinal))
                 {
-                    string val = entry.Value;
-                    if (val.Contains(", "))
-                    {
-                        val = $"\"{val}\"";
-                    }
-                    sb.Append($"{entry.RawKey}={val}\n");
+                    sb.Append($"{entry.RawKey}={FormatValue(entry.Value)}\n");
                 }
                 else
                 {
@@ -174,5 +199,20 @@ public sealed class IniDocument
                 }
                 break;
         }
+    }
+
+    private static string FormatValue(string value)
+    {
+        if (value.Length >= 2 && value[0] == '"' && value[^1] == '"')
+        {
+            return value;
+        }
+
+        if (value.Contains(", ", StringComparison.Ordinal))
+        {
+            return $"\"{value}\"";
+        }
+
+        return value;
     }
 }

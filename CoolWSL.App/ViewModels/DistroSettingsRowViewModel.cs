@@ -82,7 +82,7 @@ public sealed class DistroSettingsRowViewModel : INotifyPropertyChanged
     public void Refresh(IniDocument document, WslDistroCapabilityContext capabilities)
     {
         var entry = document.Section(schema.Section)?.Entry(schema.Key);
-        currentValue = entry?.Value;
+        currentValue = entry?.EffectiveValue;
         IsModified = false;
         
         OnPropertyChanged(nameof(Value));

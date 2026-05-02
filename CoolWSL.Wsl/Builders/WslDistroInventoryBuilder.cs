@@ -6,7 +6,7 @@ namespace CoolWSL.Wsl.Builders;
 
 public static class WslDistroInventoryBuilder
 {
-    public static WslDistroInventory Build(CommandResult listResult, WslListParser listParser, WslErrorMapper errorMapper)
+    public static WslDistroInventory Build(CommandResult listResult, CommandResult? runningListResult, WslListParser listParser, WslErrorMapper errorMapper)
     {
         ArgumentNullException.ThrowIfNull(listResult);
         ArgumentNullException.ThrowIfNull(listParser);
@@ -18,6 +18,12 @@ public static class WslDistroInventoryBuilder
         }
 
         var parseResult = listParser.Parse(listResult.StandardOutput);
+        if (parseResult.Distros.Any(static distro => distro.State == WslDistroState.Unknown) && runningListResult?.IsSuccess == true)
+        {
+            var runningDistros = listParser.ParseDistroNames(runningListResult.StandardOutput);
+            parseResult = listParser.InferStatesFromRunningList(parseResult, runningDistros);
+        }
+
         if (parseResult.HasNoDistributions)
         {
             return new(

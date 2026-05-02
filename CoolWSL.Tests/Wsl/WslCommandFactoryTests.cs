@@ -17,6 +17,16 @@ public sealed class WslCommandFactoryTests
     }
 
     [TestMethod]
+    public void CreateListRunningQuietCommand_UsesDocumentedArguments()
+    {
+        var command = WslCommandFactory.CreateListRunningQuietCommand();
+
+        Assert.AreEqual("wsl.exe", command.FileName);
+        CollectionAssert.AreEqual(new[] { "--list", "--running", "--quiet" }, command.Arguments.ToArray());
+        Assert.AreEqual("wsl.exe --list --running --quiet", command.CommandText);
+    }
+
+    [TestMethod]
     public void CreateTerminateDistroCommand_PreservesRawArgumentAndQuotesDisplayText()
     {
         var command = WslCommandFactory.CreateTerminateDistroCommand("Ubuntu Dev && calc");

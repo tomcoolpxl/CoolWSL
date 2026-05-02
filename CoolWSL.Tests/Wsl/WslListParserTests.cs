@@ -72,4 +72,24 @@ NOM              ETAT            VERSION
         Assert.AreEqual(WslDistroState.Unknown, result.Distros[0].State);
         Assert.AreEqual("En cours", result.Distros[0].StateLabel);
     }
+
+    [TestMethod]
+    public void InferStatesFromRunningList_MapsUnknownStatesToRunningAndStopped()
+    {
+        const string verboseOutput = """
+NOM              ETAT            VERSION
+* Ubuntu 22.04   En cours        2
+  Debian         Arrete          1
+""";
+        const string runningOutput = "Ubuntu 22.04\n";
+
+        var parseResult = parser.Parse(verboseOutput);
+        var inferredResult = parser.InferStatesFromRunningList(parseResult, parser.ParseDistroNames(runningOutput));
+
+        Assert.IsTrue(inferredResult.IsDegraded);
+        Assert.AreEqual(WslDistroState.Running, inferredResult.Distros[0].State);
+        Assert.AreEqual(WslDistroState.Stopped, inferredResult.Distros[1].State);
+        Assert.AreEqual("En cours", inferredResult.Distros[0].StateLabel);
+        Assert.AreEqual("Arrete", inferredResult.Distros[1].StateLabel);
+    }
 }

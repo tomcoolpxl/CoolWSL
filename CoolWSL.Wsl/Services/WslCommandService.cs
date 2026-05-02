@@ -59,14 +59,14 @@ public sealed class WslCommandService : IWslCommandService
             return CreateLaunchFailure(command, startedAt, endAt, exception);
         }
 
+        var outputTask = process.StandardOutput.ReadToEndAsync();
+        var errorTask = process.StandardError.ReadToEndAsync();
+
         if (stdin is not null)
         {
             await process.StandardInput.WriteAsync(stdin).ConfigureAwait(false);
             process.StandardInput.Close();
         }
-
-        var outputTask = process.StandardOutput.ReadToEndAsync();
-        var errorTask = process.StandardError.ReadToEndAsync();
 
         using var timeoutCts = command.Timeout is TimeSpan timeout
             ? new CancellationTokenSource(timeout)

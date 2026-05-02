@@ -37,8 +37,12 @@ public sealed class WslDistroService : IWslDistroService
 
     public async Task<WslDistroInventory> GetDistroInventoryAsync(CancellationToken cancellationToken = default)
     {
-        var result = await commandService.ExecuteAsync(WslCommandFactory.CreateListVerboseCommand(), cancellationToken).ConfigureAwait(false);
-        return WslDistroInventoryBuilder.Build(result, listParser, errorMapper);
+        var listTask = commandService.ExecuteAsync(WslCommandFactory.CreateListVerboseCommand(), cancellationToken);
+        var runningListTask = commandService.ExecuteAsync(WslCommandFactory.CreateListRunningQuietCommand(), cancellationToken);
+
+        await Task.WhenAll(listTask, runningListTask).ConfigureAwait(false);
+
+        return WslDistroInventoryBuilder.Build(listTask.Result, runningListTask.Result, listParser, errorMapper);
     }
 
     public async Task<WslEnvironmentStatus> GetEnvironmentStatusAsync(CancellationToken cancellationToken = default)

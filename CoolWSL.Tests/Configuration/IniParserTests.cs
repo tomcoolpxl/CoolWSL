@@ -45,26 +45,39 @@ public class IniParserTests
     }
 
     [TestMethod]
-    public void QuotedDrvFsOptions_StripsQuotesOnParse_AddsBackOnSerialize()
+    public void QuotedDrvFsOptions_PreservesRawValue_AndExposesEffectiveValue()
     {
         var input = "[automount]\noptions=\"metadata,uid=1003,gid=1003,umask=077,fmask=11,case=off\"\n";
         var doc = IniParser.Parse(input);
-        Assert.AreEqual("metadata,uid=1003,gid=1003,umask=077,fmask=11,case=off", doc.Sections[0].Entry("options")!.Value);
+        var entry = doc.Sections[0].Entry("options")!;
+        Assert.AreEqual("\"metadata,uid=1003,gid=1003,umask=077,fmask=11,case=off\"", entry.Value);
+        Assert.AreEqual("metadata,uid=1003,gid=1003,umask=077,fmask=11,case=off", entry.EffectiveValue);
         
-        // Emitting without edits will use RawLine, preserving quotes
         Assert.AreEqual(input, doc.Serialize());
 
-        // But if we edit it:
         var newEntry = new IniEntry {
             Key = "options",
             RawKey = "options",
             Value = "metadata, uid=1003, gid=1003, umask=077",
+            OriginalValue = "metadata, uid=1003, gid=1003, umask=077",
             RawLine = null
         };
         var newDoc = doc.WithSection(doc.Sections[0].WithEntry(newEntry));
-        // It has a comma followed by space, so Serialize will quote it
         var expectedNewOutput = "[automount]\noptions=\"metadata, uid=1003, gid=1003, umask=077\"\n";
         Assert.AreEqual(expectedNewOutput, newDoc.Serialize());
+    }
+
+    [TestMethod]
+    public void QuotedFreeText_RetainsOuterQuotesInStoredValue()
+    {
+        var input = "[boot]\ncommand=\"echo \\\"hello\\\"\"\n";
+
+        var doc = IniParser.Parse(input);
+        var entry = doc.Sections[0].Entry("command")!;
+
+        Assert.AreEqual("\"echo \\\"hello\\\"\"", entry.Value);
+        Assert.AreEqual("echo \"hello\"", entry.EffectiveValue);
+        Assert.AreEqual(input, doc.Serialize());
     }
 
     [TestMethod]

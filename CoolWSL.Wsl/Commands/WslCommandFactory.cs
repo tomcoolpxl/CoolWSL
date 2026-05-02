@@ -13,6 +13,9 @@ public static class WslCommandFactory
     public static WslCommand CreateListVerboseCommand(TimeSpan? timeout = null)
         => CreateQueryCommand("List registered WSL distributions", timeout, "--list", "--verbose");
 
+    public static WslCommand CreateListRunningQuietCommand(TimeSpan? timeout = null)
+        => CreateQueryCommand("List running WSL distributions", timeout, "--list", "--running", "--quiet");
+
     public static WslCommand CreateStatusCommand(TimeSpan? timeout = null)
         => CreateQueryCommand("Read WSL status", timeout, "--status");
 

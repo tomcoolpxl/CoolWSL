@@ -152,3 +152,11 @@
 
 - Verified all `dotnet build` and `dotnet test` output passes clean on 2026-05-02.
 - Verified `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` finishes successfully on 2026-05-02.
+
+## Code review remediation - CODE_REVIEW findings resolved
+
+- Reordered `WslCommandService` redirected output reads ahead of stdin writes so large stdin payloads cannot deadlock behind unread stdout/stderr, and added focused stdin regression coverage.
+- Updated `DistroSettingsViewModel` to cancel superseded loads via the existing refresh-coordination pattern, reject stale completions, reuse one shared global-summary and capability-loading path across load and save, and replace the nested WSL Settings launcher fallback with an ordered loop.
+- Preserved raw quoted INI values in the document model, added an explicit unquoted semantic value for validation and structured-editor consumers, and tightened serialization to reuse `RawLine` only when an entry is unchanged.
+- Reduced localized distro-state degradation by combining `wsl.exe --list --verbose` with `wsl.exe --list --running --quiet` so running and stopped states can still be inferred when verbose state labels are localized.
+- Verified `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug` (77 passed) and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-build` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02.

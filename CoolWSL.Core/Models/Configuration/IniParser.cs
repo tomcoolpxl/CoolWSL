@@ -71,11 +71,6 @@ public static class IniParser
                 string rawKey = entryMatch.Groups[1].Value;
                 string rawValue = entryMatch.Groups[2].Value;
                 string value = rawValue.Trim();
-                
-                if (value.StartsWith("\"") && value.EndsWith("\"") && value.Length >= 2)
-                {
-                    value = value.Substring(1, value.Length - 2);
-                }
 
                 var entry = new IniEntry
                 {
@@ -83,6 +78,7 @@ public static class IniParser
                     Key = rawKey.Trim().ToLowerInvariant(),
                     RawKey = rawKey,
                     Value = value,
+                    OriginalValue = value,
                     RawLine = line
                 };
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using CoolWSL.App.Services;
 using CoolWSL.Core.Abstractions;
 using CoolWSL.Core.Models;
 using CoolWSL.Core.Models.Configuration;
@@ -17,6 +18,7 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
     private readonly IWslDistroConfigService configService;
     private readonly IDashboardStatusService statusService;
     private readonly IWslGlobalConfigService globalConfigService;
+    private readonly RefreshCoordinator loadCoordinator = new();
 
     private string? selectedDistroName;
     private WslDistroConfigDocument? currentDocument;
@@ -103,7 +105,7 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
             }
             else
             {
-                var entry = new IniEntry { Key = schema.Key, RawKey = schema.Key, Value = value, RawLine = null };
+                var entry = new IniEntry { Key = schema.Key, RawKey = schema.Key, Value = value, OriginalValue = value, RawLine = null };
                 section = section.WithEntry(entry);
             }
             
@@ -176,20 +178,23 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
 
     public void OpenWslSettings()
     {
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = "wslsettings:", UseShellExecute = true });
-        }
-        catch
+        Exception? lastException = null;
+        foreach (var target in new[] { "wslsettings:", "wslsettings.exe", "ms-settings:" })
         {
             try
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = "wslsettings.exe", UseShellExecute = true });
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = target, UseShellExecute = true });
+                return;
             }
-            catch
+            catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = "ms-settings:", UseShellExecute = true });
+                lastException = ex;
             }
+        }
+
+        if (lastException is not null)
+        {
+            throw lastException;
         }
     }
 
@@ -201,99 +206,103 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
 
     public async Task LoadAsync()
     {
-        if (selectedDistroName == null)
+        var lease = loadCoordinator.Start();
+        var distroName = selectedDistroName;
+
+        if (distroName == null)
         {
             currentDocument = null;
+            currentCapabilities = null;
             RawText = string.Empty;
             IsModified = false;
+            BackupPath = null;
+            RestartImpact = WslConfigRestartImpact.None;
             StatusMessage = "No distro selected.";
+            RefreshValidationCollections();
             return;
         }
 
         IsLoading = true;
-        StatusMessage = $"Loading /etc/wsl.conf for {selectedDistroName}...";
+        BackupPath = null;
+        RestartImpact = WslConfigRestartImpact.None;
+        StatusMessage = $"Loading /etc/wsl.conf for {distroName}...";
 
         try
         {
-            currentDocument = await configService.ReadAsync(selectedDistroName);
-            RawText = currentDocument.OriginalContent;
-            IsModified = false;
-            StatusMessage = currentDocument.Existed 
-                ? $"Loaded at {currentDocument.LoadedAt:T}." 
-                : "File not found - distro is using defaults.";
-            
-            var globalDoc = await globalConfigService.ReadAsync();
-            var globalIni = IniParser.Parse(globalDoc.Content);
-            var memory = globalIni.Section("wsl2")?.Entry("memory")?.Value ?? "50% of host";
-            var networking = globalIni.Section("wsl2")?.Entry("networkingMode")?.Value ?? "NAT";
-            var gui = globalIni.Section("wsl2")?.Entry("guiApplications")?.Value == "false" ? "off" : "on";
-            GlobalWslSummary = $"Memory: {memory} | Networking: {networking} | GUI apps: {gui}";
+            var documentTask = configService.ReadAsync(distroName, lease.CancellationToken);
+            var settingsContextTask = LoadSettingsContextAsync(distroName, lease.CancellationToken);
 
-            var snap = await statusService.GetSnapshotAsync();
-            var distroStatus = snap.DistroInventory.Distros.FirstOrDefault(d => d.Name == selectedDistroName);
-            currentCapabilities = new WslDistroCapabilityContext(
-                Environment.OSVersion.Version.Build,
-                snap.EnvironmentStatus.WslVersion,
-                distroStatus?.WslVersion,
-                distroStatus?.IsSystemManaged ?? false,
-                Array.Empty<string>());
-                
-            var validation = configService.Validate(currentDocument.Document, currentCapabilities);
-            currentDocument = currentDocument with { Validation = validation };
-            
-            foreach (var row in Rows) row.Refresh(currentDocument.Document, currentCapabilities);
-            
-            RefreshValidationCollections();
+            await Task.WhenAll(documentTask, settingsContextTask);
+
+            if (!loadCoordinator.IsLatest(lease.Version))
+            {
+                return;
+            }
+
+            var document = documentTask.Result;
+            var settingsContext = settingsContextTask.Result;
+
+            GlobalWslSummary = settingsContext.GlobalSummary;
+            ApplyDocument(document, settingsContext.Capabilities);
+            IsModified = false;
+            StatusMessage = document.Existed 
+                ? $"Loaded at {document.LoadedAt:T}." 
+                : "File not found - distro is using defaults.";
+        }
+        catch (OperationCanceledException) when (!loadCoordinator.IsLatest(lease.Version))
+        {
         }
         catch (Exception ex)
         {
+            if (!loadCoordinator.IsLatest(lease.Version))
+            {
+                return;
+            }
+
             StatusMessage = $"Load failed: {ex.Message}";
             currentDocument = null;
+            currentCapabilities = null;
+            RefreshValidationCollections();
         }
         finally
         {
-            IsLoading = false;
+            if (loadCoordinator.IsLatest(lease.Version))
+            {
+                IsLoading = false;
+            }
         }
     }
 
     public async Task SaveAsync()
     {
-        if (selectedDistroName == null || !IsModified) return;
+        var distroName = selectedDistroName;
+        if (distroName == null || !IsModified) return;
 
         IsLoading = true;
         StatusMessage = "Saving...";
 
         try
         {
-            var globalDoc = await globalConfigService.ReadAsync();
-            var globalIni = IniParser.Parse(globalDoc.Content);
-            var memory = globalIni.Section("wsl2")?.Entry("memory")?.Value ?? "50% of host";
-            var networking = globalIni.Section("wsl2")?.Entry("networkingMode")?.Value ?? "NAT";
-            var gui = globalIni.Section("wsl2")?.Entry("guiApplications")?.Value == "false" ? "off" : "on";
-            GlobalWslSummary = $"Memory: {memory} | Networking: {networking} | GUI apps: {gui}";
-
-            var snap = await statusService.GetSnapshotAsync();
-            var distroStatus = snap.DistroInventory.Distros.FirstOrDefault(d => d.Name == selectedDistroName);
-            currentCapabilities = new WslDistroCapabilityContext(
-                Environment.OSVersion.Version.Build,
-                snap.EnvironmentStatus.WslVersion,
-                distroStatus?.WslVersion,
-                distroStatus?.IsSystemManaged ?? false,
-                Array.Empty<string>());
+            var settingsContext = await LoadSettingsContextAsync(distroName, CancellationToken.None);
+            GlobalWslSummary = settingsContext.GlobalSummary;
+            currentCapabilities = settingsContext.Capabilities;
 
             var newDoc = IniParser.Parse(RawText);
             var validation = configService.Validate(newDoc, currentCapabilities);
             if (validation.HasErrors)
             {
                 StatusMessage = "Cannot save: validation blocked by errors.";
-                currentDocument = currentDocument! with { Validation = validation };
+                if (currentDocument is not null)
+                {
+                    currentDocument = currentDocument with { Validation = validation };
+                }
                 RefreshValidationCollections();
                 return;
             }
 
-            var result = await configService.SaveAsync(selectedDistroName, newDoc, currentCapabilities);
-            currentDocument = await configService.ReadAsync(selectedDistroName);
-            RawText = currentDocument.OriginalContent;
+            var result = await configService.SaveAsync(distroName, newDoc, currentCapabilities, CancellationToken.None);
+            var savedDocument = await configService.ReadAsync(distroName, CancellationToken.None);
+            ApplyDocument(savedDocument, currentCapabilities);
             IsModified = false;
             BackupPath = result.BackupPath;
             RestartImpact = result.RestartSuggestion;
@@ -312,6 +321,55 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
         {
             IsLoading = false;
         }
+    }
+
+    private async Task<(string GlobalSummary, WslDistroCapabilityContext Capabilities)> LoadSettingsContextAsync(string distroName, CancellationToken cancellationToken)
+    {
+        var globalConfigTask = globalConfigService.ReadAsync(cancellationToken);
+        var snapshotTask = statusService.GetSnapshotAsync(cancellationToken);
+
+        await Task.WhenAll(globalConfigTask, snapshotTask);
+
+        var globalIni = IniParser.Parse(globalConfigTask.Result.Content);
+        var memory = globalIni.Section("wsl2")?.Entry("memory")?.EffectiveValue ?? "50% of host";
+        var networking = globalIni.Section("wsl2")?.Entry("networkingMode")?.EffectiveValue ?? "NAT";
+        var gui = globalIni.Section("wsl2")?.Entry("guiApplications")?.EffectiveValue == "false" ? "off" : "on";
+
+        var snapshot = snapshotTask.Result;
+        var distroStatus = snapshot.DistroInventory.Distros.FirstOrDefault(d => d.Name == distroName);
+        var capabilities = new WslDistroCapabilityContext(
+            Environment.OSVersion.Version.Build,
+            snapshot.EnvironmentStatus.WslVersion,
+            distroStatus?.WslVersion,
+            distroStatus?.IsSystemManaged ?? false,
+            Array.Empty<string>());
+
+        return ($"Memory: {memory} | Networking: {networking} | GUI apps: {gui}", capabilities);
+    }
+
+    private void ApplyDocument(WslDistroConfigDocument document, WslDistroCapabilityContext capabilities)
+    {
+        currentCapabilities = capabilities;
+
+        var validation = configService.Validate(document.Document, capabilities);
+        currentDocument = document with { Validation = validation };
+
+        isSyncing = true;
+        try
+        {
+            RawText = currentDocument.OriginalContent;
+        }
+        finally
+        {
+            isSyncing = false;
+        }
+
+        foreach (var row in Rows)
+        {
+            row.Refresh(currentDocument.Document, capabilities);
+        }
+
+        RefreshValidationCollections();
     }
 
     public async Task VerifyAsync()

@@ -20,6 +20,7 @@ public sealed class DiagnosticsServiceTests
             ["wsl.exe --status"] = CreateSucceeded("--status", "Default Distribution: Ubuntu\nDefault Version: 2"),
             ["wsl.exe --version"] = CreateSucceeded("--version", "WSL version: 2.5.9\nKernel version: 6.6.87.2"),
             ["wsl.exe --list --verbose"] = CreateSucceeded("--list --verbose", "  NAME      STATE           VERSION\n* Ubuntu    Running         2\n  Debian    Running         2"),
+            ["wsl.exe --list --running --quiet"] = CreateSucceeded("--list --running --quiet", "Ubuntu\nDebian\n"),
         });
         commandService.DistroCommandResult = CreateSucceeded("probe", string.Empty);
         var service = CreateService(commandService);
@@ -64,6 +65,7 @@ public sealed class DiagnosticsServiceTests
                 1,
                 new WslCommandError(WslErrorKind.UnsupportedFeature, "This WSL installation does not support that command.")),
             ["wsl.exe --list --verbose"] = CreateSucceeded("--list --verbose", "  NAME      STATE           VERSION\n* Ubuntu    Running         2"),
+            ["wsl.exe --list --running --quiet"] = CreateSucceeded("--list --running --quiet", "Ubuntu\n"),
         });
         commandService.DistroCommandResults = new Queue<CommandResult>(new[] { unsupportedDnsResult, failedInternetResult });
         var service = CreateService(commandService);
@@ -74,6 +76,25 @@ public sealed class DiagnosticsServiceTests
         Assert.AreEqual(DiagnosticSeverity.Warning, snapshot.Results.Single(result => result.Id == "dns-resolution").Severity);
         Assert.AreEqual(DiagnosticSeverity.Error, snapshot.Results.Single(result => result.Id == "internet-connectivity").Severity);
         Assert.AreEqual(DiagnosticSeverity.Warning, snapshot.Results.Single(result => result.Id == "wsl-version").Severity);
+    }
+
+    [TestMethod]
+    public async Task GetSnapshotAsync_InfersLocalizedStateForSelectedDistroInventory()
+    {
+        var commandService = new StubWslCommandService(new Dictionary<string, CommandResult>(StringComparer.Ordinal)
+        {
+            ["wsl.exe --status"] = CreateSucceeded("--status", "Default Distribution: Ubuntu 22.04\nDefault Version: 2"),
+            ["wsl.exe --version"] = CreateSucceeded("--version", "WSL version: 2.5.9\nKernel version: 6.6.87.2"),
+            ["wsl.exe --list --verbose"] = CreateSucceeded("--list --verbose", "NOM              ETAT            VERSION\n* Ubuntu 22.04   En cours        2\n  Debian         Arrete          1\n"),
+            ["wsl.exe --list --running --quiet"] = CreateSucceeded("--list --running --quiet", "Ubuntu 22.04\n"),
+        });
+        commandService.DistroCommandResult = CreateSucceeded("probe", string.Empty);
+        var service = CreateService(commandService);
+
+        var snapshot = await service.GetSnapshotAsync("Ubuntu 22.04");
+
+        Assert.AreEqual(WslDistroState.Running, snapshot.DistroInventory.Distros.Single(distro => distro.Name == "Ubuntu 22.04").State);
+        Assert.AreEqual(WslDistroState.Stopped, snapshot.DistroInventory.Distros.Single(distro => distro.Name == "Debian").State);
     }
 
     private static DiagnosticsService CreateService(StubWslCommandService commandService)

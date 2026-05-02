@@ -40,15 +40,17 @@ public sealed class DiagnosticsService : IDiagnosticsService
         var statusCommandTask = commandService.ExecuteAsync(WslCommandFactory.CreateStatusCommand(), cancellationToken);
         var versionCommandTask = commandService.ExecuteAsync(WslCommandFactory.CreateVersionCommand(), cancellationToken);
         var listCommandTask = commandService.ExecuteAsync(WslCommandFactory.CreateListVerboseCommand(), cancellationToken);
+        var runningListCommandTask = commandService.ExecuteAsync(WslCommandFactory.CreateListRunningQuietCommand(), cancellationToken);
 
-        await Task.WhenAll(statusCommandTask, versionCommandTask, listCommandTask).ConfigureAwait(false);
+        await Task.WhenAll(statusCommandTask, versionCommandTask, listCommandTask, runningListCommandTask).ConfigureAwait(false);
 
         var statusResult = statusCommandTask.Result;
         var versionResult = versionCommandTask.Result;
         var listResult = listCommandTask.Result;
+        var runningListResult = runningListCommandTask.Result;
 
         var environmentStatus = WslEnvironmentStatusBuilder.Build(statusResult, versionResult, statusParser, errorMapper);
-        var distroInventory = WslDistroInventoryBuilder.Build(listResult, listParser, errorMapper);
+        var distroInventory = WslDistroInventoryBuilder.Build(listResult, runningListResult, listParser, errorMapper);
 
         var resolvedDistroName = ResolveSelectedDistroName(selectedDistroName, environmentStatus.DefaultDistroName, distroInventory.Distros);
         var selectedDistro = distroInventory.Distros.FirstOrDefault(distro => string.Equals(distro.Name, resolvedDistroName, StringComparison.Ordinal));

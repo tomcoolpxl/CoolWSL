@@ -107,6 +107,71 @@ public sealed class WslListParser
         return new(distros, degradedReason is not null, degradedReason);
     }
 
+    public IReadOnlySet<string> ParseDistroNames(string output)
+    {
+        var names = new HashSet<string>(StringComparer.Ordinal);
+
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            return names;
+        }
+
+        foreach (var rawLine in output.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n'))
+        {
+            var trimmedLine = rawLine.Trim();
+            if (trimmedLine.Length == 0)
+            {
+                continue;
+            }
+
+            if (NoDistributionMarkers.Any(marker => trimmedLine.Contains(marker, StringComparison.OrdinalIgnoreCase)))
+            {
+                return new HashSet<string>(StringComparer.Ordinal);
+            }
+
+            if (trimmedLine.StartsWith("Windows Subsystem for Linux", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (trimmedLine.StartsWith('*'))
+            {
+                trimmedLine = trimmedLine[1..].TrimStart();
+            }
+
+            if (trimmedLine.Equals("NAME", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            names.Add(trimmedLine);
+        }
+
+        return names;
+    }
+
+    public WslListParseResult InferStatesFromRunningList(WslListParseResult parseResult, IReadOnlySet<string> runningDistros)
+    {
+        ArgumentNullException.ThrowIfNull(parseResult);
+        ArgumentNullException.ThrowIfNull(runningDistros);
+
+        if (parseResult.Distros.All(static distro => distro.State != WslDistroState.Unknown))
+        {
+            return parseResult;
+        }
+
+        var updatedDistros = parseResult.Distros
+            .Select(distro => distro.State == WslDistroState.Unknown
+                ? distro with { State = runningDistros.Contains(distro.Name) ? WslDistroState.Running : WslDistroState.Stopped }
+                : distro)
+            .ToArray();
+
+        return new(
+            updatedDistros,
+            true,
+            "One or more distro states were inferred from the running-distro list because the verbose state labels were not recognized.");
+    }
+
     private static bool IsHeaderLikeSegment(string value)
         => value.Any(char.IsLetter) && value.Equals(value.ToUpperInvariant(), StringComparison.Ordinal);
 

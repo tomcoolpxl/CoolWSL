@@ -58,6 +58,13 @@ public sealed class WslDistroServiceTests
                     "Windows Subsystem for Linux has no installed distributions.",
                     string.Empty,
                     0),
+                ["wsl.exe --list --running --quiet"] = CommandResult.Succeeded(
+                    new WslCommand("wsl.exe", new[] { "--list", "--running", "--quiet" }),
+                    DateTimeOffset.UnixEpoch,
+                    DateTimeOffset.UnixEpoch.AddSeconds(1),
+                    string.Empty,
+                    string.Empty,
+                    0),
             });
         var service = CreateService(commandService);
 
@@ -66,6 +73,36 @@ public sealed class WslDistroServiceTests
         Assert.AreEqual(WslAvailability.Available, result.Availability);
         Assert.AreEqual(0, result.Distros.Count);
         Assert.IsFalse(result.IsDegraded);
+    }
+
+    [TestMethod]
+    public async Task GetDistroInventoryAsync_InfersLocalizedRunningStateFromRunningList()
+    {
+        var commandService = new StubWslCommandService(
+            new Dictionary<string, CommandResult>(StringComparer.Ordinal)
+            {
+                ["wsl.exe --list --verbose"] = CommandResult.Succeeded(
+                    new WslCommand("wsl.exe", new[] { "--list", "--verbose" }),
+                    DateTimeOffset.UnixEpoch,
+                    DateTimeOffset.UnixEpoch.AddSeconds(1),
+                    "NOM              ETAT            VERSION\n* Ubuntu 22.04   En cours        2\n  Debian         Arrete          1\n",
+                    string.Empty,
+                    0),
+                ["wsl.exe --list --running --quiet"] = CommandResult.Succeeded(
+                    new WslCommand("wsl.exe", new[] { "--list", "--running", "--quiet" }),
+                    DateTimeOffset.UnixEpoch,
+                    DateTimeOffset.UnixEpoch.AddSeconds(1),
+                    "Ubuntu 22.04\n",
+                    string.Empty,
+                    0),
+            });
+        var service = CreateService(commandService);
+
+        var result = await service.GetDistroInventoryAsync();
+
+        Assert.IsTrue(result.IsDegraded);
+        Assert.AreEqual(WslDistroState.Running, result.Distros[0].State);
+        Assert.AreEqual(WslDistroState.Stopped, result.Distros[1].State);
     }
 
     [TestMethod]
