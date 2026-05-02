@@ -8,7 +8,7 @@ The UI direction is a Windows 11-native shell that combines the entity-first nav
 
 The shell is organized around:
 
-- fixed destinations: Dashboard, Settings
+- fixed destinations: Dashboard, Logs, Settings
 - a dynamic Distros group where each distro is its own navigation item
 - a persistent bottom status bar
 - a distro detail page with a pivot: Overview, Terminal, Configuration, Diagnostics — the Diagnostics pivot is the only home for full diagnostic results
@@ -95,6 +95,7 @@ The title bar should stay close to the standard Windows 11 height instead of con
 
 ```text
 Dashboard
+Logs
 Settings
 
 Distros
@@ -105,12 +106,12 @@ Distros
 
 Rules:
 
-- Dashboard and Settings are the only fixed global destinations.
+- Dashboard, Logs, and Settings are the fixed global destinations.
 - Distros is a dynamic group driven by the live distro inventory.
 - Each distro item shows name plus a compact state indicator.
 - The currently selected distro item opens the distro detail page.
 - Diagnostics are reached through the Diagnostics pivot inside a distro detail page rather than through a global rail destination.
-- Logs, backups, and other secondary workflows should be entered from Settings or contextual actions until they justify first-class placement.
+- Backups and other secondary workflows should be entered from Settings or contextual actions until they justify first-class placement.
 
 ### Status Bar
 
@@ -329,7 +330,7 @@ Each result should surface title, severity, short summary, expandable details, r
 
 ### Future 1.0 Extensions
 
-Version 1.0 may add Services, Filesystem, Networking, and Logs as additional pivots or secondary routes, but the primary shell model should stay the same.
+Version 1.0 may add Services, Filesystem, and Networking as additional pivots or secondary routes, but the primary shell model should stay the same.
 
 ---
 
@@ -361,7 +362,7 @@ Settings content should use settings cards, descriptive copy, and clear restart-
 
 ### Logs
 
-Logs should become a real surface once `IAppLogger` is implemented, but they do not need to occupy first-class shell space in MVP.
+Logs are a fixed global surface backed by the metadata-only app logger.
 
 The logs surface should support:
 
@@ -380,7 +381,7 @@ These flows should be launched from:
 - Settings
 - dedicated dialogs or secondary pages when the workflow is complex enough
 
-They should not displace Dashboard, Diagnostics, Settings, or the distro rail in the main shell.
+They should not displace Dashboard, Logs, Settings, or the distro rail in the main shell.
 
 ---
 

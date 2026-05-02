@@ -10,8 +10,10 @@ public static class ServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddSingleton<IAppLogger, NullAppLogger>();
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<FileAppLogger>();
+        services.AddSingleton<IAppLogger>(static serviceProvider => serviceProvider.GetRequiredService<FileAppLogger>());
+        services.AddSingleton<IAppLogReader>(static serviceProvider => serviceProvider.GetRequiredService<FileAppLogger>());
 
         return services;
     }

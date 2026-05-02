@@ -81,7 +81,7 @@ CoolWSL should avoid:
 
 CoolWSL should use a single shell with:
 
-- fixed left-rail destinations for Dashboard and Settings
+- fixed left-rail destinations for Dashboard, Logs, and Settings
 - a dynamic Distros group where each distro is its own first-class navigation item
 - a persistent bottom status bar showing WSL availability, default distro, running-distro count, and last refresh time
 - a Windows 11-native visual language built from real cards, Fluent icons, theme brushes, and standard window chrome
@@ -127,9 +127,11 @@ Diagnostics
 
 Diagnostics live inside the per-distro detail page as the Diagnostics pivot. Global checks (`wsl --status`, `wsl --version`, inventory, default distro) are surfaced inside that pivot alongside per-distro probes; the dashboard may summarize top findings but the shell does not expose a separate Diagnostics destination.
 
+Logs should remain a fixed global destination for metadata-only app and command history.
+
 Settings should remain a fixed global destination for application settings and global WSL configuration.
 
-Logs, backups, and other secondary workflows may be reached from Settings or contextual actions rather than occupying first-class shell positions in MVP.
+Backups and other secondary workflows may be reached from Settings or contextual actions rather than occupying first-class shell positions in MVP.
 
 ## MVP Requirements
 
@@ -165,7 +167,7 @@ The shutdown action must clearly warn that it affects all running WSL distros.
 
 The shell navigation must support:
 
-- Fixed top-level destinations for Dashboard and Settings.
+- Fixed top-level destinations for Dashboard, Logs, and Settings.
 - A Distros group bound to all registered distros.
 - Selecting a distro as a first-class navigation action.
 - Distinguishing running and stopped distros with clear state indicators.
@@ -192,7 +194,7 @@ The persistent status bar must show:
 - Running distro count.
 - Last refresh time.
 
-It must remain visible across Dashboard, Diagnostics, Settings, and distro detail pages and degrade safely when data is unavailable.
+It must remain visible across Dashboard, Logs, Settings, and distro detail pages and degrade safely when data is unavailable.
 
 ## MVP Distro Detail
 
@@ -701,7 +703,7 @@ The main shell should use this structure:
 
 ```text
 Dashboard
-Diagnostics
+Logs
 Settings
 Distros
     Ubuntu
@@ -711,7 +713,7 @@ Distros
 
 The shell should also include a persistent bottom status bar.
 
-Logs, backups, and other secondary workflows should be entered from Settings or contextual actions until they justify first-class navigation.
+Backups and other secondary workflows should be entered from Settings or contextual actions until they justify first-class navigation.
 
 ## Dashboard UX
 
@@ -741,7 +743,7 @@ Configuration
 Diagnostics
 ```
 
-Version 1.0 may extend this with Services, Filesystem, Networking, and Logs as additional pivots or secondary routes without changing the primary shell model.
+Version 1.0 may extend this with Services, Filesystem, and Networking as additional pivots or secondary routes without changing the primary shell model.
 
 ## Diagnostics UX
 
@@ -805,7 +807,7 @@ The MVP is acceptable when:
 
 - The app starts on Windows 11.
 - It detects whether WSL is available.
-- It uses a fixed shell with Dashboard, Settings, and per-distro navigation items.
+- It uses a fixed shell with Dashboard, Logs, Settings, and per-distro navigation items.
 - It lists registered distros.
 - It shows running or stopped state.
 - It shows the default distro.

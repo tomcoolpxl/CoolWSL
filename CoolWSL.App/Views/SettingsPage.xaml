@@ -1,0 +1,286 @@
+<Page
+    x:Class="CoolWSL.App.Views.SettingsPage"
+    x:Name="RootPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    UseLayoutRounding="True">
+    <ScrollViewer
+        Background="Transparent"
+        VerticalScrollBarVisibility="Auto"
+        HorizontalScrollMode="Disabled"
+        HorizontalScrollBarVisibility="Disabled">
+        <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Padding="32" Spacing="20">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="Settings" />
+                    <TextBlock
+                        Style="{StaticResource SecondaryTextStyle}"
+                        Text="Application preferences, WSL defaults, diagnostics, logs, and product information."
+                        TextWrapping="WrapWholeWords" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <ProgressRing Width="20" Height="20" IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                    <Button
+                        AutomationProperties.Name="Refresh settings status"
+                        Click="OnRefreshClick">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE72C;" />
+                            <TextBlock Text="Refresh" />
+                        </StackPanel>
+                        <Button.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="F5" />
+                        </Button.KeyboardAccelerators>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock
+                Style="{StaticResource TertiaryTextStyle}"
+                Text="{x:Bind ViewModel.LastLoadedText, Mode=OneWay}" />
+
+            <TextBlock
+                x:Name="ActionStatusBlock"
+                x:Load="{x:Bind ViewModel.HasActionStatus, Mode=OneWay}"
+                Text="{x:Bind ViewModel.ActionStatusText, Mode=OneWay}"
+                TextWrapping="WrapWholeWords" />
+
+            <Border Style="{StaticResource CardBorderStyle}">
+                <Expander IsExpanded="True">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEC7A;" />
+                            <StackPanel Spacing="2">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="WSL" />
+                                <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Global WSL state and safe global actions." />
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander.Header>
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <Grid ColumnSpacing="16" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Status" />
+                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.WslStatusText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+
+                            <TextBlock Grid.Row="1" Style="{StaticResource SecondaryTextStyle}" Text="Default distro" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind ViewModel.DefaultDistroText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+
+                            <TextBlock Grid.Row="2" Style="{StaticResource SecondaryTextStyle}" Text="Inventory" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{x:Bind ViewModel.DistroSummaryText, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button
+                                AutomationProperties.Name="Open default distro terminal"
+                                Click="OnOpenDefaultClick"
+                                IsEnabled="{x:Bind ViewModel.CanOpenDefaultDistro, Mode=OneWay}"
+                                Style="{ThemeResource AccentButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE756;" />
+                                    <TextBlock Text="Open default terminal" />
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                AutomationProperties.Name="Shutdown all WSL distros"
+                                Click="OnShutdownAllClick"
+                                IsEnabled="{x:Bind ViewModel.CanRunActions, Mode=OneWay}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE7E8;" />
+                                    <TextBlock Text="Shutdown all WSL" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <TextBlock
+                            Style="{StaticResource SecondaryTextStyle}"
+                            Text="The raw global .wslconfig editor is tracked by implementation Phase 8 and will appear here when delivered."
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </Expander>
+            </Border>
+
+            <Border Style="{StaticResource CardBorderStyle}">
+                <Expander>
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE790;" />
+                            <StackPanel Spacing="2">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Appearance" />
+                                <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Theme and window rendering preferences." />
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander.Header>
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <Grid ColumnSpacing="16" RowSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Theme" VerticalAlignment="Center" />
+                            <ComboBox Grid.Column="1" SelectedIndex="0" IsEnabled="False" HorizontalAlignment="Left" MinWidth="180">
+                                <ComboBoxItem Content="System" />
+                                <ComboBoxItem Content="Light" />
+                                <ComboBoxItem Content="Dark" />
+                            </ComboBox>
+                        </Grid>
+                        <ToggleSwitch
+                            Header="Use Mica backdrop"
+                            IsEnabled="False"
+                            IsOn="False"
+                            OffContent="Disabled for text clarity"
+                            OnContent="Enabled" />
+                        <TextBlock
+                            Style="{StaticResource SecondaryTextStyle}"
+                            Text="Theme persistence and backdrop preferences are part of the user preferences work in Phase 18. Mica remains disabled because the text-rendering pass removed it to keep ClearType crisp."
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </Expander>
+            </Border>
+
+            <Border Style="{StaticResource CardBorderStyle}">
+                <Expander>
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8B0;" />
+                            <StackPanel Spacing="2">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Behaviour" />
+                                <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Safety defaults and command behavior." />
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander.Header>
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <ToggleSwitch
+                            Header="Confirm destructive WSL actions"
+                            IsEnabled="False"
+                            IsOn="True"
+                            OffContent="Off"
+                            OnContent="On" />
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Default command timeout" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1" Text="15 seconds" IsEnabled="False" MaxWidth="180" HorizontalAlignment="Left" />
+                        </Grid>
+                        <TextBlock
+                            Style="{StaticResource SecondaryTextStyle}"
+                            Text="These controls are visible now so Settings has the final shape, but persistence lands with Phase 18 user preferences."
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </Expander>
+            </Border>
+
+            <Border Style="{StaticResource CardBorderStyle}">
+                <Expander>
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE9D9;" />
+                            <StackPanel Spacing="2">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Diagnostics" />
+                                <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Diagnostic surfaces and evidence policy." />
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander.Header>
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <TextBlock
+                            Text="Full diagnostics live in each distro detail page under the Diagnostics pivot."
+                            TextWrapping="WrapWholeWords" />
+                        <TextBlock
+                            Style="{StaticResource SecondaryTextStyle}"
+                            Text="Diagnostic output remains visible as raw evidence on the selected distro, including global checks collected with that distro as context."
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </Expander>
+            </Border>
+
+            <Border Style="{StaticResource CardBorderStyle}">
+                <Expander>
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8A5;" />
+                            <StackPanel Spacing="2">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Logs" />
+                                <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Metadata-only command and app events." />
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander.Header>
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <TextBlock
+                            Text="Logs store command metadata only. Command stdout and stderr remain outside the log by default."
+                            TextWrapping="WrapWholeWords" />
+                        <Button AutomationProperties.Name="Open logs" Click="OnOpenLogsClick" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE8A5;" />
+                                <TextBlock Text="Open logs" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Expander>
+            </Border>
+
+            <Border Style="{StaticResource CardBorderStyle}">
+                <Expander>
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE946;" />
+                            <StackPanel Spacing="2">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="About" />
+                                <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Version and project links." />
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander.Header>
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <Grid ColumnSpacing="16" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Product" />
+                            <TextBlock Grid.Column="1" Text="CoolWSL" />
+
+                            <TextBlock Grid.Row="1" Style="{StaticResource SecondaryTextStyle}" Text="Version" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind AppVersion}" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button AutomationProperties.Name="Open repository" Click="OnOpenRepositoryClick">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE774;" />
+                                    <TextBlock Text="Open repository" />
+                                </StackPanel>
+                            </Button>
+                            <Button AutomationProperties.Name="Report issue" Click="OnReportIssueClick">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE7BA;" />
+                                    <TextBlock Text="Report issue" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

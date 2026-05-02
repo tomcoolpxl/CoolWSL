@@ -11,12 +11,7 @@
 
 ## UX Rebuild Track
 
-Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through E have shipped (see `DONE.md`); the items below cover the remaining phases F and G.
-
-### UX Phase F - Settings and Logs pages
-
-- [ ] Replace `PlaceholderPage` for `Settings` with a real settings page using `SettingsExpander` groups (WSL, Appearance, Behaviour, Diagnostics, About).
-- [ ] Reintroduce `Logs` in the rail and replace `PlaceholderPage` with a real log viewer once `IAppLogger` is implemented (currently `NullAppLogger`).
+Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through F have shipped (see `DONE.md`); the item below covers the remaining phase G.
 
 ### UX Phase G - Accessibility pass
 

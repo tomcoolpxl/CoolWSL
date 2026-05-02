@@ -24,6 +24,8 @@ public static class AppServiceCollection
         services.AddSingleton<CommandRunnerViewModel>();
         services.AddSingleton<DistroPageDiagnosticsViewModel>();
         services.AddSingleton<DistroViewModel>();
+        services.AddSingleton<LogsViewModel>();
+        services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<ShellViewModel>();
         services.AddSingleton<StatusBarViewModel>();
         services.AddSingleton<MainWindow>();
@@ -31,6 +33,8 @@ public static class AppServiceCollection
         services.AddTransient<Views.StatusBar>();
         services.AddTransient<Views.DashboardPage>();
         services.AddTransient<Views.DistroPage>();
+        services.AddTransient<Views.LogsPage>();
+        services.AddTransient<Views.SettingsPage>();
         services.AddTransient<Views.PlaceholderPage>();
 
         return services.BuildServiceProvider();

@@ -50,13 +50,13 @@ Date: 2026-05-02
 
 ### Decision
 
-- CoolWSL uses a single WinUI shell with fixed global destinations for Dashboard and Settings plus a dynamic Distros group in the left navigation rail.
+- CoolWSL uses a single WinUI shell with fixed global destinations for Dashboard, Logs, and Settings plus a dynamic Distros group in the left navigation rail.
 - Each distro is a first-class navigation target. The MVP does not rely on a separate top-level Distros page before a user can inspect or act on a distro.
 - The window includes a persistent bottom status bar that remains visible across global pages and distro detail pages.
 - The dashboard is a summary surface, not the primary home for every distro action. It presents environment status, quick global actions, a distro inventory surface that opens detail pages, and a compact diagnostics summary.
 - Each distro opens in a dedicated detail page with the pivots Overview, Terminal, Configuration, and Diagnostics.
 - Diagnostics live inside the per-distro Diagnostics pivot. That pivot owns both the global checks (`wsl --status`, `wsl --version`, inventory, default distro, host note) and the per-distro probes (DNS, internet) for the selected distro context. Other surfaces may summarize, but the shell does not expose a separate Diagnostics destination.
-- Settings remains a fixed global destination. Logs, backups, import and export flows, and other secondary workflows are entered through Settings or contextual actions until they justify first-class navigation.
+- Logs and Settings remain fixed global destinations. Logs expose the metadata-only `IAppLogger` history; backups, import and export flows, and other secondary workflows are entered through Settings or contextual actions until they justify first-class navigation.
 - The UX rebuild is confined to `CoolWSL.App`. The existing service and model contracts in `CoolWSL.Core`, `CoolWSL.Wsl`, `CoolWSL.Diagnostics`, and `CoolWSL.Configuration` remain the data and command boundary for the new shell.
 - Shared visual primitives such as card surfaces, typography, spacing, status indicators, and reusable page-level components should be centralized in app-level resources and shared controls instead of being redefined per page.
 
@@ -76,7 +76,7 @@ Date: 2026-05-02
 - Dashboard surfaces should navigate into distro detail pages instead of exposing dense per-row action stacks as the primary interaction model.
 - Lifecycle actions remain supported, but they move to distro detail pages or contextual overflow actions instead of dominating the dashboard inventory surface.
 - Diagnostics ownership is explicit: the per-distro Diagnostics pivot owns the complete diagnostics view, including global checks rendered with the selected distro as context. The shell does not expose a separate Diagnostics destination, and other surfaces only summarize.
-- Settings and other secondary workflows should be modeled as contextual or secondary routes so the primary shell remains stable.
+- Logs and Settings should be modeled as stable global routes. Other secondary workflows should remain contextual or secondary routes so the primary shell remains stable.
 - Shared styles and reusable controls should be introduced at the app root so page implementations compose common primitives instead of carrying page-specific typography, spacing, and container rules.
 - Existing backend abstractions should be reused as-is where possible. Any future app-layer refactor should preserve the current service-oriented boundary unless a backend limitation is proven.
 

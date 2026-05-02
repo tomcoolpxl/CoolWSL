@@ -21,6 +21,7 @@ public sealed class ServiceRegistrationTests
 
         Assert.IsNotNull(services);
         Assert.IsNotNull(services.GetService<IAppLogger>());
+        Assert.IsNotNull(services.GetService<IAppLogReader>());
         Assert.IsNotNull(services.GetService<IWslCommandService>());
         Assert.IsNotNull(services.GetService<IWslDistroService>());
         Assert.IsNotNull(services.GetService<IDashboardStatusService>());
@@ -28,6 +29,8 @@ public sealed class ServiceRegistrationTests
         Assert.IsNotNull(services.GetService<DashboardViewModel>());
         Assert.IsNotNull(services.GetService<CommandRunnerViewModel>());
         Assert.IsNotNull(services.GetService<DistroViewModel>());
+        Assert.IsNotNull(services.GetService<LogsViewModel>());
+        Assert.IsNotNull(services.GetService<SettingsViewModel>());
         Assert.IsNotNull(services.GetService<ShellViewModel>());
         Assert.IsNotNull(services.GetService<WslModuleMarker>());
         Assert.IsNotNull(services.GetService<ConfigurationModuleMarker>());
