@@ -1,0 +1,4 @@
+C:\Users\thraa\github\CoolWSL\assets\CoolWPL-logo.png 1024x1024 bounds=160,114-860,934
+C:\Users\thraa\github\CoolWSL\CoolWSL.App\Assets\AppIcon.png 64x64 bounds=9,5-54,55
+C:\Users\thraa\github\CoolWSL\CoolWSL.App\Assets\Square44x44Logo.targetsize-32.png 32x32 bounds=4,2-26,27
+C:\Users\thraa\github\CoolWSL\CoolWSL.App\Assets\Square44x44Logo.targetsize-256.png 256x256 bounds=37,20-218,221

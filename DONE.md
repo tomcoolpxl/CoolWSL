@@ -209,11 +209,8 @@
 
 ## UX hotfix follow-up - viewport-bound card widths and terminal profile launch delivered
 
-- Forced Dashboard, Logs, Settings, and every Distro pivot content host to bind to the available viewport/root width while still capping at `WidePageContentMaxWidth`, so card width no longer depends on each card's contents and matches the Distro Settings width envelope.
-- Kept `CardBorderStyle` at 16 px padding and stretch alignment, removed redundant per-card padding overrides from Distro Settings, and kept the Logs nested empty state at the same 16 px padding.
-- Right-aligned per-distro structured setting switches by giving boolean `ToggleSwitch` controls a compact fixed width at the right edge of the value column instead of letting the default switch layout reserve a wide content area.
-- Removed the leading icon offset from the Distro header so `Distros`, the selected distro name, running state, WSL version, default label, and last-refreshed text all start on the same left edge as the cards.
-- Updated selected-distro terminal launch to use `wt.exe new-tab --profile "<distroName>"`, matching Microsoft Learn's documented Windows Terminal profile launch path so the generated WSL profile settings, including cursor shape, are used.
 - Corrected the follow-up by removing the nested parent card around Distro Settings structured rows, so `WslConfigKeyCard` rows are top-level cards instead of narrower cards inside a card. Added a XAML regression test for this.
 - Corrected selected-distro Windows Terminal launch to use a dedicated `UseShellExecute=false` start path for `wt.exe`, so `ProcessStartInfo.ArgumentList` is definitely passed to Windows Terminal before falling back to `wsl.exe`.
 - Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore -m:1 /p:UseSharedCompilation=false`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj --no-restore -m:1 /p:UseSharedCompilation=false -v:q` (85 passed), and the non-interactive CoolWSL smoke launch marker on 2026-05-03.
+
+- Removed the leading icon offset from the Distro header so `Distros`, the selected distro name, running state, WSL version, default label, and last-refreshed text all start on the same left edge as the cards.

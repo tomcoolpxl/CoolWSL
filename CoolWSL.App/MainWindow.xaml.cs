@@ -3,6 +3,7 @@ using CoolWSL.App.Views;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using System.IO;
 
 namespace CoolWSL.App;
 
@@ -30,7 +31,20 @@ public sealed partial class MainWindow : Window
         }
 
         ApplyTheme(themePreferenceService.CurrentTheme);
+        ConfigureWindowIcon();
         ConfigureTitleBar();
+    }
+
+    private void ConfigureWindowIcon()
+    {
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
+
+        if (!File.Exists(iconPath))
+        {
+            return;
+        }
+
+        AppWindow.SetIcon(iconPath);
     }
 
     private void ConfigureTitleBar()
