@@ -1,5 +1,19 @@
 # CoolWSL Done
 
+## Delivery automation update - tag release Winget artifact automation delivered
+
+- Updated `.github/workflows/release.yml` so every stable `vX.Y.Z` tag run now generates Winget manifests from the produced checksums file via `build/Export-WingetManifest.ps1`.
+- Added workflow artifact upload for generated manifests as `winget-manifests-vX.Y.Z` with 30-day retention.
+- Updated `docs/winget-community.md` and `README.md` so maintainers know the manifests are generated automatically in CI and still reproducible locally.
+- Verified edited files with workspace diagnostics (`get_errors`) on 2026-05-04 with no reported issues.
+
+## Delivery automation update - community winget packaging handoff delivered
+
+- Added `build/Export-WingetManifest.ps1` to generate community `winget-pkgs` manifests from stable release metadata and the release `.checksums.txt` file.
+- Added `docs/winget-community.md` with a maintainer-focused workflow for generating manifests, validating, and submitting a PR to `microsoft/winget-pkgs`.
+- Updated `README.md` with a new community Winget section and direct link to the maintainer workflow document.
+- Verified `pwsh -NoProfile -File .\build\Export-WingetManifest.ps1 -Version 1.0.4 -ChecksumsFile .\artifacts\release-1.0.4-buildoutput\CoolWSL-1.0.4-win-x64.checksums.txt` on 2026-05-04, generating the expected three manifests under `artifacts/winget/manifests/t/tomcoolpxl/CoolWSL/1.0.4`.
+
 ## Delivery automation update - installer-first release artifacts delivered
 
 - Added `build/Invoke-ReleaseInstaller.ps1` to produce stable release artifacts from a self-contained install-folder publish: MSI installer, ZIP portable package, and SHA-256 checksums file.

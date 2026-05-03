@@ -10,6 +10,8 @@
 - [x] Add GitHub Actions CI for restore, build, test, and smoke verification.
 - [x] Add tag-driven release packaging that stamps assembly versions and installer artifact versions automatically.
 - [x] Document winget-compatible installer release flow for MSI/ZIP/checksums artifacts.
+- [x] Add community winget manifest generation docs and automation for release MSI assets.
+- [x] Add release workflow automation to generate and upload Winget manifests for each stable tag.
 
 - [ ] Phase E1.0: Pivot rename + Terminal removal + scaffolding
 - [ ] Phase E1.1: Distro filesystem service + lossless INI document

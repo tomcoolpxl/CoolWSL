@@ -63,11 +63,30 @@ jobs:
             -Version '${{ steps.version.outputs.version }}' `
             -OutputDirectory 'artifacts/release'
 
+      - name: Generate Winget manifests
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $checksumsPath = Join-Path 'artifacts/release' ("CoolWSL-$version-win-x64.checksums.txt")
+
+          .\build\Export-WingetManifest.ps1 `
+            -Version $version `
+            -ChecksumsFile $checksumsPath `
+            -OutputDirectory 'artifacts/winget'
+
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-${{ steps.version.outputs.tag }}
           path: artifacts/release
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Winget manifests artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: winget-manifests-${{ steps.version.outputs.tag }}
+          path: artifacts/winget
           if-no-files-found: error
           retention-days: 30
 
