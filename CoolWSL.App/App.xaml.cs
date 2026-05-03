@@ -20,12 +20,14 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        mainWindow ??= Services.GetRequiredService<MainWindow>();
-
         if (IsSmokeTestEnabled())
         {
-            ConfigureSmokeTest(mainWindow);
+            WriteSmokeTestMarker();
+            Exit();
+            return;
         }
+
+        mainWindow ??= Services.GetRequiredService<MainWindow>();
 
         mainWindow.Activate();
     }
@@ -57,15 +59,4 @@ public partial class App : Application
         File.WriteAllText(markerPath, DateTimeOffset.UtcNow.ToString("O"));
     }
 
-    private void ConfigureSmokeTest(Window window)
-    {
-        void OnActivated(object sender, WindowActivatedEventArgs eventArgs)
-        {
-            window.Activated -= OnActivated;
-            WriteSmokeTestMarker();
-            window.DispatcherQueue.TryEnqueue(window.Close);
-        }
-
-        window.Activated += OnActivated;
-    }
 }
