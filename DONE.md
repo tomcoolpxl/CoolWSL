@@ -1,5 +1,16 @@
 # CoolWSL Done
 
+## Delivery automation - CI, release packaging, and winget-friendly MSIX flow delivered
+
+- Added `.github/workflows/ci.yml` using the official GitHub Actions .NET path on `windows-latest`: `actions/checkout`, `actions/setup-dotnet` with `global.json`, solution restore/build, test execution, non-interactive smoke launch, and artifact upload for test results.
+- Added `.github/workflows/release.yml` for stable `vX.Y.Z` tags. The workflow restores, tests, decodes a signing certificate from repository secrets, builds a signed Release package, uploads artifacts, and publishes assets to the matching GitHub Release with generated notes.
+- Added `.github/release.yml` so GitHub-generated release notes can group labeled pull requests into stable categories instead of falling back to an unstructured changelog.
+- Added `build/Invoke-ReleasePackage.ps1`, a reusable packaging entrypoint that stamps a temporary MSIX manifest, derives `X.Y.Z.0` package versions from app SemVer, exports SHA-256 sidecar files, supports signed and unsigned builds, and emits GitHub Actions outputs for downstream steps.
+- Updated `CoolWSL.App/CoolWSL.App.csproj` so Release packaging can override the manifest path and defaults to a single `.msix` instead of an `.msixbundle`, which keeps the installer smaller for the repo's current x64-only delivery path.
+- Updated `README.md` and `.gitignore` with the CI/release flow, required signing secrets, tag-based release command, and the winget guidance that the signed `.msix` release asset is the intended small installer.
+- Fixed `CoolWSL.Tests/App/Distro/DistroSettingsViewModelTests.cs` so the superseded-load test reflects the current `SetSelectedDistro()` plus `LoadAsync()` contract instead of hanging while waiting for work that never started. This was required to make the new CI test gate pass cleanly.
+- Verified `pwsh -NoProfile -File .\build\Invoke-ReleasePackage.ps1 -Version 0.1.3 -Unsigned -OutputDirectory artifacts\release-local-test` (stamped single `.msix` plus `.sha256.txt`), `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug` (84 passed), and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` and `COOLWSL_SMOKE_TEST_FILE` (marker written) on 2026-05-03.
+
 ## Phase 1 - Delivery baseline and packaging decision ratified
 
 - Chose packaged WinUI 3 delivery using single-project MSIX and framework-dependent Windows App SDK `2.0.1`, with signed MSIX sideload as the initial install path and optional `.appinstaller` support for direct updates.

@@ -2,6 +2,7 @@
 TestResults/
 AppPackages/
 BundleArtifacts/
+artifacts/
 
 **/bin/
 **/obj/

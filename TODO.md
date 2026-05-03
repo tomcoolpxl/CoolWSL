@@ -4,6 +4,13 @@
 
 ### Current Phase: EXTRA1
 
+- [ ] Add an unpackaged self-contained Release publish mode for installer builds.
+- [ ] Add a WiX-based MSI plus ZIP release packaging flow for GitHub Releases.
+- [ ] Document the installer-first winget release flow and retire the MSIX-first release notes.
+- [x] Add GitHub Actions CI for restore, build, test, and smoke verification.
+- [x] Add tag-driven release packaging that stamps assembly and MSIX versions automatically.
+- [x] Document the signed MSIX / winget-compatible release flow and required secrets.
+
 - [ ] Phase E1.0: Pivot rename + Terminal removal + scaffolding
 - [ ] Phase E1.1: Distro filesystem service + lossless INI document
 - [ ] Phase E1.2: Per-distro config service (read, validate, save, backup)

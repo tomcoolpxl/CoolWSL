@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+permissions:
+  contents: write
+
+jobs:
+  package-and-publish:
+    runs-on: windows-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Resolve release version
+        id: version
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}'
+          if (-not $tag.StartsWith('v', [System.StringComparison]::Ordinal)) {
+              throw "Expected a tag starting with 'v', got '$tag'."
+          }
+
+          $version = $tag.Substring(1)
+          if ($version -notmatch '^\d+\.\d+\.\d+$') {
+              throw "Release tags must use stable SemVer in the form vX.Y.Z. Got '$tag'."
+          }
+
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$version"
+
+      - name: Restore solution
+        run: dotnet restore .\CoolWSL.sln
+
+      - name: Run tests
+        run: dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Release --no-restore --logger trx --results-directory TestResults
+
+      - name: Build installer artifacts
+        id: package
+        shell: pwsh
+        run: |
+          .\build\Invoke-ReleaseInstaller.ps1 `
+            -Version '${{ steps.version.outputs.version }}' `
+            -OutputDirectory 'artifacts/release'
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.version.outputs.tag }}
+          path: artifacts/release
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          $releaseFiles = Get-ChildItem -Path .\artifacts\release -Recurse -File |
+              Where-Object { $_.Extension -in '.msi', '.zip', '.txt' } |
+              Sort-Object Name |
+              ForEach-Object FullName
+
+          if (-not $releaseFiles) {
+              throw 'No release files were found in artifacts/release.'
+          }
+
+          gh release view $env:RELEASE_TAG *> $null
+          if ($LASTEXITCODE -eq 0) {
+              gh release upload $env:RELEASE_TAG $releaseFiles --clobber
+          }
+          else {
+              gh release create $env:RELEASE_TAG $releaseFiles --verify-tag --generate-notes
+          }
+
+      - name: Upload test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-test-results-${{ steps.version.outputs.tag }}
+          path: TestResults
+          if-no-files-found: warn
+          retention-days: 14

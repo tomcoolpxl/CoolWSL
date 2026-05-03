@@ -1,0 +1,15 @@
+<Project Sdk="WixToolset.Sdk/7.0.0">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <Cultures>en-us</Cultures>
+    <SuppressIces>ICE03</SuppressIces>
+    <CoolWslInstallerVersion Condition="'$(CoolWslInstallerVersion)' == ''">0.0.0</CoolWslInstallerVersion>
+    <CoolWslInstallerIconPath Condition="'$(CoolWslInstallerIconPath)' == ''">$(MSBuildThisFileDirectory)..\CoolWSL.App\Assets\AppIcon.ico</CoolWslInstallerIconPath>
+    <DefineConstants>$(DefineConstants);CoolWslInstallerVersion=$(CoolWslInstallerVersion);CoolWslInstallerIconPath=$(CoolWslInstallerIconPath)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(GeneratedWixFragmentPath)" Condition="'$(GeneratedWixFragmentPath)' != ''" />
+  </ItemGroup>
+</Project>

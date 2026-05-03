@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  merge_group:
+    types:
+      - checks_requested
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-smoke:
+    runs-on: windows-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore solution
+        run: dotnet restore .\CoolWSL.sln
+
+      - name: Build solution
+        run: dotnet build .\CoolWSL.sln -c Debug --no-restore
+
+      - name: Run tests
+        run: dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug --no-build --logger trx --results-directory TestResults
+
+      - name: Smoke launch app
+        shell: pwsh
+        run: |
+          $marker = Join-Path $env:RUNNER_TEMP 'coolwsl-smoke-marker.txt'
+          Remove-Item $marker -ErrorAction SilentlyContinue
+          $env:COOLWSL_SMOKE_TEST = '1'
+          $env:COOLWSL_SMOKE_TEST_FILE = $marker
+
+          try {
+              dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-build
+              if ($LASTEXITCODE -ne 0) {
+                  exit $LASTEXITCODE
+              }
+
+              if (-not (Test-Path -LiteralPath $marker)) {
+                  throw 'Smoke test marker was not created.'
+              }
+
+              Get-Content -LiteralPath $marker
+          }
+          finally {
+              Remove-Item Env:COOLWSL_SMOKE_TEST -ErrorAction SilentlyContinue
+              Remove-Item Env:COOLWSL_SMOKE_TEST_FILE -ErrorAction SilentlyContinue
+          }
+
+      - name: Upload test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults
+          if-no-files-found: warn
+          retention-days: 14

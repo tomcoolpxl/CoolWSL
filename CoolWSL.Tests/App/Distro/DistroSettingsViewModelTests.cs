@@ -30,33 +30,21 @@ public sealed class DistroSettingsViewModelTests
             new StubGlobalConfigService("[wsl2]\nmemory=4GB\n"));
 
         viewModel.SetSelectedDistro("Ubuntu");
+        var firstLoadTask = viewModel.LoadAsync();
         await firstStarted.Task;
 
         viewModel.SetSelectedDistro("Debian");
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.RawText == "[user]\ndefault=debian\n");
+        await viewModel.LoadAsync();
 
         releaseFirst.SetResult(null);
-        await WaitUntilAsync(() => configService.CancelledReadCount == 1);
+        await firstLoadTask;
 
         Assert.AreEqual("[user]\ndefault=debian\n", viewModel.RawText);
         Assert.AreEqual("Global .wslconfig: memory 4GB, networking NAT, GUI apps on.", viewModel.GlobalWslSummary);
         Assert.IsTrue(viewModel.StatusMessage.StartsWith("Loaded at ", StringComparison.Ordinal));
+        Assert.IsFalse(viewModel.IsLoading);
+        Assert.AreEqual(1, configService.CancelledReadCount);
         Assert.AreEqual("debian", viewModel.Rows.Single(row => row.KeyId == "user.default").Value);
-    }
-
-    private static async Task WaitUntilAsync(Func<bool> condition)
-    {
-        for (var attempt = 0; attempt < 100; attempt++)
-        {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(10);
-        }
-
-        Assert.Fail("Timed out waiting for the expected state.");
     }
 
     private static DashboardStatusSnapshot CreateSnapshot(params string[] distroNames)

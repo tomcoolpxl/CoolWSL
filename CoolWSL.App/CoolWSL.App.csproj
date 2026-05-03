@@ -3,6 +3,10 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.26100.0</TargetPlatformMinVersion>
+    <PackageManifestPath Condition="'$(PackageManifestPath)' == ''">Package.appxmanifest</PackageManifestPath>
+    <CoolWslDistributionKind Condition="'$(CoolWslDistributionKind)' == ''">AppPackage</CoolWslDistributionKind>
+    <CoolWslIsAppPackage Condition="'$(CoolWslDistributionKind)' == 'AppPackage'">true</CoolWslIsAppPackage>
+    <CoolWslIsInstallFolder Condition="'$(CoolWslDistributionKind)' == 'InstallFolder'">true</CoolWslIsInstallFolder>
     <RootNamespace>CoolWSL.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
@@ -13,12 +17,17 @@
     <WindowsAppSdkDeploymentManagerInitialize>false</WindowsAppSdkDeploymentManagerInitialize>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' or '$(CoolWslIsInstallFolder)' == 'true'">
     <AppxPackage>false</AppxPackage>
     <WindowsPackageType>None</WindowsPackageType>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+  <PropertyGroup Condition="'$(CoolWslIsInstallFolder)' == 'true'">
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' != 'Debug' and '$(CoolWslIsAppPackage)' == 'true'">
+    <AppxBundle>Never</AppxBundle>
     <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
 
@@ -34,7 +43,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' != 'Debug'">
-    <Manifest Include="Package.appxmanifest" />
+  <ItemGroup Condition="'$(Configuration)' != 'Debug' and '$(CoolWslIsAppPackage)' == 'true'">
+    <AppxManifest Include="$(PackageManifestPath)" />
   </ItemGroup>
 </Project>

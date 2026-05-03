@@ -1,0 +1,26 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Name="CoolWSL"
+    Manufacturer="CoolWSL"
+    Version="$(CoolWslInstallerVersion)"
+    UpgradeCode="6D2A8580-57C6-4267-A6F7-5F29B671E6C3"
+    Scope="perMachine">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Icon Id="CoolWSLProductIcon" SourceFile="$(CoolWslInstallerIconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="CoolWSLProductIcon" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="CoolWSL" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="CoolWSLProgramMenuFolder" Name="CoolWSL" />
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="CoolWSL" Level="1">
+      <ComponentGroupRef Id="InstallFiles" />
+    </Feature>
+  </Package>
+</Wix>
