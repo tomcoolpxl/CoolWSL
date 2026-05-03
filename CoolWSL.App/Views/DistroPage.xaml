@@ -29,7 +29,7 @@
 
                     <StackPanel
                         x:Name="SelectedHeader"
-                        x:Load="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+                        Visibility="{x:Bind GetVisibleWhen(ViewModel.HasSelection), Mode=OneWay}"
                         Spacing="6">
                         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <FontIcon
@@ -61,12 +61,12 @@
                                 Text="{x:Bind ViewModel.HeaderWslVersion, Mode=OneWay}" />
                             <TextBlock
                                 x:Name="DefaultLabelBlock"
-                                x:Load="{x:Bind ViewModel.HasDefaultLabel, Mode=OneWay}"
+                                Visibility="{x:Bind GetVisibleWhen(ViewModel.HasDefaultLabel), Mode=OneWay}"
                                 Style="{StaticResource SecondaryTextStyle}"
                                 Text="{x:Bind ViewModel.HeaderDefault, Mode=OneWay}" />
                             <TextBlock
                                 x:Name="ManagementLabelBlock"
-                                x:Load="{x:Bind ViewModel.HasManagementLabel, Mode=OneWay}"
+                                Visibility="{x:Bind GetVisibleWhen(ViewModel.HasManagementLabel), Mode=OneWay}"
                                 Style="{StaticResource SecondaryTextStyle}"
                                 Text="{x:Bind ViewModel.HeaderManagementLabel, Mode=OneWay}" />
                         </StackPanel>
@@ -99,14 +99,14 @@
 
             <TextBlock
                 x:Name="WarningBlock"
-                x:Load="{x:Bind ViewModel.HasWarning, Mode=OneWay}"
+                Visibility="{x:Bind GetVisibleWhen(ViewModel.HasWarning), Mode=OneWay}"
                 Foreground="{ThemeResource SystemFillColorCautionBrush}"
                 Text="{x:Bind ViewModel.WarningText, Mode=OneWay}"
                 TextWrapping="WrapWholeWords" />
 
             <TextBlock
                 x:Name="ActionStatusBlock"
-                x:Load="{x:Bind ViewModel.HasActionStatus, Mode=OneWay}"
+                Visibility="{x:Bind GetVisibleWhen(ViewModel.HasActionStatus), Mode=OneWay}"
                 Text="{x:Bind ViewModel.ActionStatusText, Mode=OneWay}"
                 TextWrapping="WrapWholeWords" />
         </StackPanel>
@@ -115,7 +115,7 @@
         <Border
             Grid.Row="1"
             x:Name="EmptyStateCard"
-            x:Load="{x:Bind ViewModel.ShowEmptyState, Mode=OneWay}"
+            Visibility="{x:Bind GetVisibleWhen(ViewModel.ShowEmptyState), Mode=OneWay}"
             Margin="32,12,32,32"
             MaxWidth="{StaticResource WidePageContentMaxWidth}"
             HorizontalAlignment="Center"
@@ -134,7 +134,7 @@
         <Pivot
             Grid.Row="1"
             x:Name="DistroPivot"
-            x:Load="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+            Visibility="{x:Bind GetVisibleWhen(ViewModel.HasSelection), Mode=OneWay}"
             Margin="20,8,20,0">
 
             <PivotItem Header="Overview">
@@ -296,7 +296,7 @@
                                 <StackPanel Spacing="4">
                                     <TextBlock Style="{ThemeResource TitleTextBlockStyle}">
                                         <Run Text="Settings - " />
-                                        <Run Text="{x:Bind ViewModel.SelectedDistro.Name, Mode=OneWay}" />
+                                        <Run Text="{x:Bind ViewModel.HeaderName, Mode=OneWay}" />
                                     </TextBlock>
                                     <TextBlock Style="{StaticResource SecondaryTextStyle}" FontFamily="Consolas" Text="/etc/wsl.conf" />
                                     <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind ViewModel.Settings.StatusMessage, Mode=OneWay}" />
@@ -336,7 +336,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border x:Name="ValidationPanel" Style="{StaticResource CardBorderStyle}" Padding="16" x:Load="{x:Bind ViewModel.Settings.IsModified, Mode=OneWay}">
+                        <Border x:Name="ValidationPanel" Style="{StaticResource CardBorderStyle}" Padding="16" Visibility="{x:Bind GetVisibleWhen(ViewModel.Settings.IsModified), Mode=OneWay}">
                             <StackPanel Spacing="8">
                                 <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Validation" />
                                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.Settings.Errors, Mode=OneWay}">
@@ -363,7 +363,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border x:Name="RestartPanel" Style="{StaticResource CardBorderStyle}" Padding="16" x:Load="{x:Bind ViewModel.Settings.ShowRestartPanel, Mode=OneWay}">
+                        <Border x:Name="RestartPanel" Style="{StaticResource CardBorderStyle}" Padding="16" Visibility="{x:Bind GetVisibleWhen(ViewModel.Settings.ShowRestartPanel), Mode=OneWay}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />

@@ -75,7 +75,15 @@ public sealed partial class DashboardPage : Page
                     nvi.Tag is WslDistro distro &&
                     string.Equals(distro.Name, distroName, StringComparison.Ordinal))
                 {
-                    navigationView.SelectedItem = nvi;
+                    if (!ReferenceEquals(navigationView.SelectedItem, nvi))
+                    {
+                        navigationView.SelectedItem = nvi;
+                    }
+                    else
+                    {
+                        Frame?.Navigate(typeof(DistroPage), distroName);
+                    }
+
                     return;
                 }
             }

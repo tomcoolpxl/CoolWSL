@@ -17,6 +17,8 @@
 
 Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through F have shipped (see `DONE.md`); the item below covers the remaining phase G.
 
+Recent distro-detail rendering, dashboard-card navigation, and rail-selection crash hotfixes are complete; the remaining UX backlog is the accessibility pass below.
+
 ### UX Phase G - Accessibility pass
 
 - [ ] Ensure `AutomationProperties.Name` on every per-distro action button includes the distro name in its label.

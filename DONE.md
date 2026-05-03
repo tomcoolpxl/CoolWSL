@@ -172,6 +172,7 @@
 - Added persisted System, Light, and Dark theme selection backed by a new local `ThemePreferenceService`, wired the active selection into the Settings Appearance card, and applied the chosen theme to the main window root on startup and on change.
 - Updated the custom title-bar button foreground and hover colours to track the active light or dark theme so minimize, maximize, and close remain legible when the window is active instead of falling back to black on dark surfaces.
 - Switched the WSL Settings handoff to launch the installed app through its registered `shell:AppsFolder` identity after confirming the local Start-menu registration exposed `WSL Settings` under `shell:AppsFolder\{6D809377-6AF0-444B-8957-A3773F02200E}\WSL\wslsettings\wslsettings.exe`.
+- Followed up the Distro page layout pass by removing a null-sensitive compiled binding to `SelectedDistro.Name` in the Settings pivot header; the page now binds to the safe `HeaderName` property so distro content can render while selection is still being established.
 - Verified `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug --filter "FullyQualifiedName~SettingsViewModelTests|FullyQualifiedName~ServiceRegistrationTests"`, `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-build` with `COOLWSL_SMOKE_TEST=1`, and the registered WSL Settings shell launch command on 2026-05-03.
 
 ## Code review remediation - CODE_REVIEW findings resolved
@@ -181,3 +182,12 @@
 - Preserved raw quoted INI values in the document model, added an explicit unquoted semantic value for validation and structured-editor consumers, and tightened serialization to reuse `RawLine` only when an entry is unchanged.
 - Reduced localized distro-state degradation by combining `wsl.exe --list --verbose` with `wsl.exe --list --running --quiet` so running and stopped states can still be inferred when verbose state labels are localized.
 - Verified `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug` (77 passed) and `dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-build` with `COOLWSL_SMOKE_TEST=1` on 2026-05-02.
+
+## UX hotfix - distro detail rendering and dashboard card navigation delivered
+
+- Replaced the async selection gates on `DistroPage` that used `x:Load` with live `Visibility` bindings so the page now reacts when `DistroViewModel.EnsureLoadedAsync(preferredDistroName)` selects a distro after navigation instead of leaving the empty-state card visible.
+- Kept the per-distro header labels, warning/action status blocks, empty-state card, overview/settings/diagnostics pivot, and settings validation/restart panels in the visual tree so they can switch immediately when the selected distro changes.
+- Hardened `DashboardPage.OnDistroTileClick` so clicking a distro card still opens the detail page when the matching shell rail item is already selected, instead of silently no-oping on a same-item `SelectedItem` assignment.
+- Fixed the rail-selection crash by changing `WslConfigKeyCard` so its settings value column uses a `GridLength` resource (`SettingsValueColumnWidth`) instead of reusing the `Double`-typed `SettingsValueControlWidth` resource on `ColumnDefinition.Width`, which was throwing a runtime `XamlParseException` when `DistroPage` was constructed.
+- Added `DistroPageXamlTests` to block the invalid `ColumnDefinition.Width="{StaticResource SettingsValueControlWidth}"` pattern from returning.
+- Verified `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj -c Debug --filter "FullyQualifiedName~DistroPageXamlTests|FullyQualifiedName~DistroViewModelTests"`, `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore`, and a live runtime rail-click check that kept the process alive and rendered the distro page on 2026-05-03.

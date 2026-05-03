@@ -24,6 +24,9 @@ public sealed partial class DistroPage : Page
 
     public DistroViewModel ViewModel { get; }
 
+    private Visibility GetVisibleWhen(bool value)
+        => value ? Visibility.Visible : Visibility.Collapsed;
+
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);

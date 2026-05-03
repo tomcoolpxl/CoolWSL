@@ -10,7 +10,7 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="{StaticResource SettingsValueControlWidth}" />
+                <ColumnDefinition Width="{StaticResource SettingsValueColumnWidth}" />
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="4">
                 <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.Label, Mode=OneWay}" />
