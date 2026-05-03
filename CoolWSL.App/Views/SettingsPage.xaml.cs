@@ -33,7 +33,7 @@ public sealed partial class SettingsPage : Page
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        await ViewModel.EnsureLoadedAsync();
+        await ViewModel.RefreshAsync();
     }
 
     private async void OnRefreshClick(object sender, RoutedEventArgs e)

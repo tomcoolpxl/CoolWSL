@@ -99,6 +99,14 @@ public sealed partial class DistroPage : Page
         await ViewModel.SetDefaultDistroAsync();
     }
 
+    private async void OnDistroPivotSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ReferenceEquals(DistroPivot.SelectedItem, SettingsPivotItem))
+        {
+            await ViewModel.Settings.LoadAsync();
+        }
+    }
+
     private async void OnReloadSettingsClick(object sender, RoutedEventArgs e)
     {
         await ViewModel.Settings.LoadAsync();

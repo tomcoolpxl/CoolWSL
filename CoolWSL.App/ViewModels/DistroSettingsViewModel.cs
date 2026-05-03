@@ -192,7 +192,6 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
     public void SetSelectedDistro(string? distroName)
     {
         selectedDistroName = distroName;
-        _ = LoadAsync();
     }
 
     public async Task LoadAsync()

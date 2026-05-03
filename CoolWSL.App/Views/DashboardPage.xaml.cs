@@ -29,7 +29,7 @@ public sealed partial class DashboardPage : Page
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         UpdateDashboardContentWidth();
-        await ViewModel.EnsureLoadedAsync();
+        await ViewModel.RefreshAsync();
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)

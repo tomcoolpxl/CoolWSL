@@ -253,7 +253,6 @@ public sealed class DistroViewModel : INotifyPropertyChanged
 
             var selectedName = ResolveSelectedDistroName(preferredDistroName, snapshot.EnvironmentStatus.DefaultDistroName);
             SetSelectedDistro(Distros.FirstOrDefault(distro => string.Equals(distro.Name, selectedName, StringComparison.Ordinal)));
-            await Diagnostics.RefreshAsync();
         }
         catch (OperationCanceledException) when (!pageRefreshCoordinator.IsLatest(lease.Version))
         {
@@ -280,7 +279,7 @@ public sealed class DistroViewModel : INotifyPropertyChanged
     {
         var selectedItem = Distros.FirstOrDefault(distro => string.Equals(distro.Name, distroName, StringComparison.Ordinal));
         SetSelectedDistro(selectedItem);
-        return Diagnostics.RefreshAsync();
+        return Task.CompletedTask;
     }
 
     public Task OpenTerminalAsync()

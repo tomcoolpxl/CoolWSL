@@ -130,6 +130,7 @@
             Visibility="{x:Bind GetVisibleWhen(ViewModel.HasSelection), Mode=OneWay}"
             MaxWidth="{StaticResource WidePageContentMaxWidth}"
             HorizontalAlignment="Center"
+            SelectionChanged="OnDistroPivotSelectionChanged"
             Margin="0,8,0,0">
 
             <PivotItem Header="Overview">
@@ -256,16 +257,12 @@
                             </Grid>
                         </Border>
 
-                        <TextBlock
-                            Style="{StaticResource SecondaryTextStyle}"
-                            Text="{x:Bind ViewModel.HeaderCapabilityMessage, Mode=OneWay}"
-                            TextWrapping="WrapWholeWords" />
                     </StackPanel>
                     </Grid>
                 </ScrollViewer>
             </PivotItem>
 
-            <PivotItem Header="Settings">
+            <PivotItem x:Name="SettingsPivotItem" Header="Settings">
                 <ScrollViewer x:Name="DistroSettingsScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
                     <Grid x:Name="DistroSettingsContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
                     <StackPanel Width="{Binding ActualWidth, ElementName=DistroSettingsContentHost}" Padding="12,16,12,32" Spacing="12">
