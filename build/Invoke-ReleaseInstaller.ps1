@@ -231,23 +231,6 @@ function New-WixFilesFragment {
 
             if ($file.Name -eq 'CoolWSL.App.exe') {
                 $componentElement.SetAttributeValue('Guid', (New-DeterministicGuid -Value $fileRelativePath))
-
-                $shortcutElement = [System.Xml.Linq.XElement]::new($wixNamespace + 'Shortcut')
-                $shortcutElement.SetAttributeValue('Id', 'StartMenuShortcut')
-                $shortcutElement.SetAttributeValue('Advertise', 'yes')
-                $shortcutElement.SetAttributeValue('Directory', 'CoolWSLProgramMenuFolder')
-                $shortcutElement.SetAttributeValue('Name', 'CoolWSL')
-                $shortcutElement.SetAttributeValue('Description', 'WSL Control Center for Windows 11')
-                $shortcutElement.SetAttributeValue('WorkingDirectory', 'INSTALLFOLDER')
-
-                $fileElement.Add($shortcutElement)
-
-                $removeFolderElement = [System.Xml.Linq.XElement]::new($wixNamespace + 'RemoveFolder')
-                $removeFolderElement.SetAttributeValue('Id', 'RemoveCoolWSLProgramMenuFolder')
-                $removeFolderElement.SetAttributeValue('Directory', 'CoolWSLProgramMenuFolder')
-                $removeFolderElement.SetAttributeValue('On', 'uninstall')
-
-                $componentElement.Add($removeFolderElement)
             }
 
             $componentElement.Add($fileElement)
@@ -278,6 +261,46 @@ function New-WixFilesFragment {
     }
 
     Add-DirectoryItems -ParentElement $directoryRefElement -DirectoryPath $PublishDirectory -RelativePath ''
+
+    $programMenuDirectoryRefElement = [System.Xml.Linq.XElement]::new($wixNamespace + 'DirectoryRef')
+    $programMenuDirectoryRefElement.SetAttributeValue('Id', 'CoolWSLProgramMenuFolder')
+
+    $shortcutComponentElement = [System.Xml.Linq.XElement]::new($wixNamespace + 'Component')
+    $shortcutComponentElement.SetAttributeValue('Id', 'cmpStartMenuShortcut')
+    $shortcutComponentElement.SetAttributeValue('Guid', (New-DeterministicGuid -Value 'StartMenuShortcutComponent'))
+
+    $shortcutElement = [System.Xml.Linq.XElement]::new($wixNamespace + 'Shortcut')
+    $shortcutElement.SetAttributeValue('Id', 'StartMenuShortcut')
+    $shortcutElement.SetAttributeValue('Advertise', 'no')
+    $shortcutElement.SetAttributeValue('Name', 'CoolWSL')
+    $shortcutElement.SetAttributeValue('Description', 'WSL Control Center for Windows 11')
+    $shortcutElement.SetAttributeValue('Target', '[INSTALLFOLDER]CoolWSL.App.exe')
+    $shortcutElement.SetAttributeValue('WorkingDirectory', 'INSTALLFOLDER')
+    $shortcutElement.SetAttributeValue('Icon', 'CoolWSLProductIcon.ico')
+    $shortcutElement.SetAttributeValue('IconIndex', '0')
+    $shortcutComponentElement.Add($shortcutElement)
+
+    $removeFolderElement = [System.Xml.Linq.XElement]::new($wixNamespace + 'RemoveFolder')
+    $removeFolderElement.SetAttributeValue('Id', 'RemoveCoolWSLProgramMenuFolder')
+    $removeFolderElement.SetAttributeValue('Directory', 'CoolWSLProgramMenuFolder')
+    $removeFolderElement.SetAttributeValue('On', 'uninstall')
+    $shortcutComponentElement.Add($removeFolderElement)
+
+    $registryValueElement = [System.Xml.Linq.XElement]::new($wixNamespace + 'RegistryValue')
+    $registryValueElement.SetAttributeValue('Root', 'HKCU')
+    $registryValueElement.SetAttributeValue('Key', 'Software\\CoolWSL')
+    $registryValueElement.SetAttributeValue('Name', 'StartMenuShortcut')
+    $registryValueElement.SetAttributeValue('Type', 'integer')
+    $registryValueElement.SetAttributeValue('Value', '1')
+    $registryValueElement.SetAttributeValue('KeyPath', 'yes')
+    $shortcutComponentElement.Add($registryValueElement)
+
+    $programMenuDirectoryRefElement.Add($shortcutComponentElement)
+    $fragmentElement.Add($programMenuDirectoryRefElement)
+
+    $shortcutComponentRefElement = [System.Xml.Linq.XElement]::new($wixNamespace + 'ComponentRef')
+    $shortcutComponentRefElement.SetAttributeValue('Id', 'cmpStartMenuShortcut')
+    $componentGroupElement.Add($shortcutComponentRefElement)
 
     $document = [System.Xml.Linq.XDocument]::new(
         [System.Xml.Linq.XDeclaration]::new('1.0', 'utf-8', $null),
