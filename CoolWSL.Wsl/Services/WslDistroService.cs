@@ -61,7 +61,7 @@ public sealed class WslDistroService : IWslDistroService
 
         var windowsTerminalCommand = WslCommandFactory.CreateOpenDistroInWindowsTerminalCommand(distroName);
         var startedAt = timeProvider.GetUtcNow();
-        using var process = new Process { StartInfo = CreateLaunchStartInfo(windowsTerminalCommand) };
+        using var process = new Process { StartInfo = CreateWindowsTerminalStartInfo(windowsTerminalCommand) };
 
         try
         {
@@ -129,6 +129,22 @@ public sealed class WslDistroService : IWslDistroService
         {
             FileName = command.FileName,
             UseShellExecute = true,
+        };
+
+        foreach (var argument in command.Arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+
+        return startInfo;
+    }
+
+    private static ProcessStartInfo CreateWindowsTerminalStartInfo(WslCommand command)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = command.FileName,
+            UseShellExecute = false,
         };
 
         foreach (var argument in command.Arguments)

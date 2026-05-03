@@ -9,6 +9,7 @@
     mc:Ignorable="d"
     UseLayoutRounding="True">
     <ScrollViewer
+        x:Name="LogsScroller"
         Background="Transparent"
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Disabled"
@@ -98,7 +99,7 @@
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
                         CornerRadius="8"
-                        Padding="20">
+                        Padding="16">
                         <StackPanel Spacing="8">
                             <FontIcon
                                 FontFamily="{ThemeResource SymbolThemeFontFamily}"
@@ -115,6 +116,7 @@
 
                     <ItemsRepeater
                         x:Name="LogRepeater"
+                        HorizontalAlignment="Stretch"
                         ItemsSource="{x:Bind ViewModel.Entries, Mode=OneWay}">
                         <ItemsRepeater.Layout>
                             <StackLayout Spacing="8" />

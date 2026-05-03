@@ -36,7 +36,7 @@ public static class WslCommandFactory
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(distroName);
 
-        return new("wt.exe", new[] { "-p", distroName }, null, "Open a WSL distribution in Windows Terminal");
+        return new("wt.exe", new[] { "new-tab", "--profile", distroName }, null, "Open a WSL distribution in Windows Terminal");
     }
 
     public static WslCommand CreateStartDistroCommand(string distroName, TimeSpan? timeout = null)

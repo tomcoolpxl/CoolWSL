@@ -16,8 +16,8 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" x:Name="DistroHeaderContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
-        <StackPanel Width="{Binding ActualWidth, ElementName=DistroHeaderContentHost}" Padding="12,32,12,8" Spacing="12">
+        <Grid Grid.Row="0" x:Name="DistroHeaderContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Stretch">
+        <StackPanel Padding="12,32,12,8" Spacing="12">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -25,24 +25,24 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Spacing="6">
-                    <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="Distros" />
+                    <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="Distros" TextWrapping="WrapWholeWords" />
 
                     <StackPanel
                         x:Name="SelectedHeader"
                         Visibility="{x:Bind GetVisibleWhen(ViewModel.HasSelection), Mode=OneWay}"
-                        Spacing="6">
-                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                            <FontIcon
-                                FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                FontSize="22"
-                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                Glyph="&#xEC7A;"
-                                VerticalAlignment="Center" />
+                        Spacing="4">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
                             <TextBlock
                                 Style="{ThemeResource SubtitleTextBlockStyle}"
                                 Text="{x:Bind ViewModel.HeaderName, Mode=OneWay}"
+                                TextWrapping="WrapWholeWords"
                                 VerticalAlignment="Center" />
                             <Border
+                                Grid.Column="1"
                                 Background="{ThemeResource ControlFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
@@ -53,23 +53,31 @@
                                     Style="{ThemeResource CaptionTextBlockStyle}"
                                     Text="{x:Bind ViewModel.HeaderState, Mode=OneWay}" />
                             </Border>
-                        </StackPanel>
+                        </Grid>
 
-                        <StackPanel Orientation="Horizontal" Spacing="12">
+                        <ItemsControl>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
                             <TextBlock
+                                Margin="0,0,12,0"
                                 Style="{StaticResource SecondaryTextStyle}"
                                 Text="{x:Bind ViewModel.HeaderWslVersion, Mode=OneWay}" />
                             <TextBlock
+                                Margin="0,0,12,0"
                                 x:Name="DefaultLabelBlock"
                                 Visibility="{x:Bind GetVisibleWhen(ViewModel.HasDefaultLabel), Mode=OneWay}"
                                 Style="{StaticResource SecondaryTextStyle}"
                                 Text="{x:Bind ViewModel.HeaderDefault, Mode=OneWay}" />
                             <TextBlock
+                                Margin="0,0,12,0"
                                 x:Name="ManagementLabelBlock"
                                 Visibility="{x:Bind GetVisibleWhen(ViewModel.HasManagementLabel), Mode=OneWay}"
                                 Style="{StaticResource SecondaryTextStyle}"
                                 Text="{x:Bind ViewModel.HeaderManagementLabel, Mode=OneWay}" />
-                        </StackPanel>
+                        </ItemsControl>
                     </StackPanel>
                 </StackPanel>
 
@@ -112,24 +120,28 @@
         </StackPanel>
         </Grid>
 
-        <Border
+        <Grid
             Grid.Row="1"
-            x:Name="EmptyStateCard"
+            x:Name="EmptyStateContentHost"
             Visibility="{x:Bind GetVisibleWhen(ViewModel.ShowEmptyState), Mode=OneWay}"
-            Margin="12,12,12,32"
             MaxWidth="{StaticResource WidePageContentMaxWidth}"
             HorizontalAlignment="Center"
-            VerticalAlignment="Top"
-            Style="{StaticResource CardBorderStyle}">
-            <StackPanel Spacing="8">
-                <TextBlock
-                    Style="{ThemeResource BodyStrongTextBlockStyle}"
-                    Text="{x:Bind ViewModel.EmptyStateTitle, Mode=OneWay}" />
-                <TextBlock
-                    Text="{x:Bind ViewModel.EmptyStateMessage, Mode=OneWay}"
-                    TextWrapping="WrapWholeWords" />
+            VerticalAlignment="Top">
+            <StackPanel Width="{Binding ActualWidth, ElementName=EmptyStateContentHost}" Padding="12,12,12,32">
+                <Border
+                    x:Name="EmptyStateCard"
+                    Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            Style="{ThemeResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind ViewModel.EmptyStateTitle, Mode=OneWay}" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.EmptyStateMessage, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
-        </Border>
+        </Grid>
 
         <Pivot
             Grid.Row="1"
@@ -138,9 +150,9 @@
             Margin="0,8,0,0">
 
             <PivotItem Header="Overview">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <Grid x:Name="OverviewContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
-                    <StackPanel Width="{Binding ActualWidth, ElementName=OverviewContentHost}" Padding="12,16,12,32" Spacing="12">
+                <ScrollViewer x:Name="OverviewScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                    <Grid x:Name="OverviewContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Stretch">
+                    <StackPanel Padding="12,16,12,32" Spacing="12">
 
                         <Border Style="{StaticResource CardBorderStyle}">
                             <Grid ColumnSpacing="14">
@@ -156,10 +168,11 @@
                                     Glyph="&#xEC7A;"
                                     VerticalAlignment="Center" />
                                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Open terminal" />
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Open terminal" TextWrapping="WrapWholeWords" />
                                     <TextBlock
                                         Style="{StaticResource SecondaryTextStyle}"
-                                        Text="Launch the default Windows Terminal session for this distro." />
+                                        Text="Launch the default Windows Terminal session for this distro."
+                                        TextWrapping="WrapWholeWords" />
                                 </StackPanel>
                                 <Button
                                     Grid.Column="2"
@@ -188,10 +201,11 @@
                                     Glyph="&#xE768;"
                                     VerticalAlignment="Center" />
                                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Start" />
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Start" TextWrapping="WrapWholeWords" />
                                     <TextBlock
                                         Style="{StaticResource SecondaryTextStyle}"
-                                        Text="Boot the distro VM if it is currently stopped." />
+                                        Text="Boot the distro VM if it is currently stopped."
+                                        TextWrapping="WrapWholeWords" />
                                 </StackPanel>
                                 <Button
                                     Grid.Column="2"
@@ -216,7 +230,7 @@
                                     Glyph="&#xE71A;"
                                     VerticalAlignment="Center" />
                                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Terminate" />
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Terminate" TextWrapping="WrapWholeWords" />
                                     <TextBlock
                                         Style="{StaticResource SecondaryTextStyle}"
                                         Text="Immediately stop the distro and any processes running inside it."
@@ -244,10 +258,11 @@
                                     Glyph="&#xE735;"
                                     VerticalAlignment="Center" />
                                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Set as default" />
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Set as default" TextWrapping="WrapWholeWords" />
                                     <TextBlock
                                         Style="{StaticResource SecondaryTextStyle}"
-                                        Text="Make this distro the target of plain wsl commands." />
+                                        Text="Make this distro the target of plain wsl commands."
+                                        TextWrapping="WrapWholeWords" />
                                 </StackPanel>
                                 <Button
                                     Grid.Column="2"
@@ -268,20 +283,20 @@
             </PivotItem>
 
             <PivotItem Header="Settings">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                <ScrollViewer x:Name="DistroSettingsScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
                     <Grid x:Name="DistroSettingsContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
                     <StackPanel Width="{Binding ActualWidth, ElementName=DistroSettingsContentHost}" Padding="12,16,12,32" Spacing="12">
                         
-                        <Border Style="{StaticResource CardBorderStyle}" Padding="16">
+                        <Border Style="{StaticResource CardBorderStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Spacing="4">
-                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Global WSL settings" />
-                                    <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind ViewModel.Settings.GlobalWslSummary, Mode=OneWay}" />
-                                    <TextBlock Style="{StaticResource TertiaryTextStyle}" Text="Settings applied at the WSL VM level affect every distro." />
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Global WSL settings" TextWrapping="WrapWholeWords" />
+                                    <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind ViewModel.Settings.GlobalWslSummary, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                                    <TextBlock Style="{StaticResource TertiaryTextStyle}" Text="Settings applied at the WSL VM level affect every distro." TextWrapping="WrapWholeWords" />
                                 </StackPanel>
                                 <Button Grid.Column="1" Content="WSL Settings" Click="OnOpenWslSettingsClick" VerticalAlignment="Center" />
                             </Grid>
@@ -304,19 +319,19 @@
                             </StackPanel>
                         </Grid>
 
-                        <Border Style="{StaticResource CardBorderStyle}" Padding="16">
+                        <Border Style="{StaticResource CardBorderStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Spacing="4">
-                                    <TextBlock Style="{ThemeResource TitleTextBlockStyle}">
+                                    <TextBlock Style="{ThemeResource TitleTextBlockStyle}" TextWrapping="WrapWholeWords">
                                         <Run Text="Settings - " />
                                         <Run Text="{x:Bind ViewModel.HeaderName, Mode=OneWay}" />
                                     </TextBlock>
-                                    <TextBlock Style="{StaticResource SecondaryTextStyle}" FontFamily="Consolas" Text="/etc/wsl.conf" />
-                                    <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind ViewModel.Settings.StatusMessage, Mode=OneWay}" />
+                                    <TextBlock Style="{StaticResource SecondaryTextStyle}" FontFamily="Consolas" Text="/etc/wsl.conf" TextWrapping="WrapWholeWords" />
+                                    <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind ViewModel.Settings.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
                                     <Button Content="Verify" Click="OnVerifySettingsClick" IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}" />
@@ -325,9 +340,9 @@
                             </Grid>
                         </Border>
 
-                        <Border Style="{StaticResource CardBorderStyle}" Padding="16">
+                        <Border Style="{StaticResource CardBorderStyle}">
                             <StackPanel Spacing="8">
-                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Structured settings" />
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Structured settings" TextWrapping="WrapWholeWords" />
                                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.Settings.Rows, Mode=OneWay}">
                                     <ItemsRepeater.Layout>
                                         <StackLayout Spacing="8" />
@@ -358,9 +373,9 @@
                             </StackPanel>
                         </Grid>
 
-                        <Border Style="{StaticResource CardBorderStyle}" Padding="16">
+                        <Border Style="{StaticResource CardBorderStyle}">
                             <StackPanel Spacing="8">
-                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Raw editor" />
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Raw editor" TextWrapping="WrapWholeWords" />
                                 <TextBox
                                     AcceptsReturn="True"
                                     FontFamily="Consolas"
@@ -370,41 +385,41 @@
                             </StackPanel>
                         </Border>
 
-                        <Border x:Name="ValidationPanel" Style="{StaticResource CardBorderStyle}" Padding="16" Visibility="{x:Bind GetVisibleWhen(ViewModel.Settings.IsModified), Mode=OneWay}">
+                        <Border x:Name="ValidationPanel" Style="{StaticResource CardBorderStyle}" Visibility="{x:Bind GetVisibleWhen(ViewModel.Settings.IsModified), Mode=OneWay}">
                             <StackPanel Spacing="8">
-                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Validation" />
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Validation" TextWrapping="WrapWholeWords" />
                                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.Settings.Errors, Mode=OneWay}">
                                     <ItemsRepeater.ItemTemplate>
                                         <DataTemplate x:DataType="core:WslConfigValidationIssue">
-                                            <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind Message}" />
+                                            <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind Message}" TextWrapping="WrapWholeWords" />
                                         </DataTemplate>
                                     </ItemsRepeater.ItemTemplate>
                                 </ItemsRepeater>
                                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.Settings.Warnings, Mode=OneWay}">
                                     <ItemsRepeater.ItemTemplate>
                                         <DataTemplate x:DataType="core:WslConfigValidationIssue">
-                                            <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}" Text="{x:Bind Message}" />
+                                            <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}" Text="{x:Bind Message}" TextWrapping="WrapWholeWords" />
                                         </DataTemplate>
                                     </ItemsRepeater.ItemTemplate>
                                 </ItemsRepeater>
                                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.Settings.Information, Mode=OneWay}">
                                     <ItemsRepeater.ItemTemplate>
                                         <DataTemplate x:DataType="core:WslConfigValidationIssue">
-                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Message}" />
+                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Message}" TextWrapping="WrapWholeWords" />
                                         </DataTemplate>
                                     </ItemsRepeater.ItemTemplate>
                                 </ItemsRepeater>
                             </StackPanel>
                         </Border>
 
-                        <Border x:Name="RestartPanel" Style="{StaticResource CardBorderStyle}" Padding="16" Visibility="{x:Bind GetVisibleWhen(ViewModel.Settings.ShowRestartPanel), Mode=OneWay}">
+                        <Border x:Name="RestartPanel" Style="{StaticResource CardBorderStyle}" Visibility="{x:Bind GetVisibleWhen(ViewModel.Settings.ShowRestartPanel), Mode=OneWay}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Spacing="8">
-                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Restart required" />
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Restart required" TextWrapping="WrapWholeWords" />
                                     <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="Changes require restarting the distro. This takes about 8 seconds." TextWrapping="WrapWholeWords" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -414,7 +429,7 @@
                             </Grid>
                         </Border>
 
-                        <Border Style="{StaticResource CardBorderStyle}" Padding="16" Visibility="{x:Bind GetVisibleWhen(ViewModel.Settings.HasBackupPath), Mode=OneWay}">
+                        <Border Style="{StaticResource CardBorderStyle}" Visibility="{x:Bind GetVisibleWhen(ViewModel.Settings.HasBackupPath), Mode=OneWay}">
                             <TextBlock
                                 Style="{StaticResource SecondaryTextStyle}"
                                 Text="{x:Bind ViewModel.Settings.BackupPath, Mode=OneWay}"
@@ -428,9 +443,9 @@
             </PivotItem>
 
             <PivotItem Header="Diagnostics">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <Grid x:Name="DiagnosticsContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
-                    <StackPanel Width="{Binding ActualWidth, ElementName=DiagnosticsContentHost}" Padding="12,16,12,32" Spacing="12">
+                <ScrollViewer x:Name="DiagnosticsScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                    <Grid x:Name="DiagnosticsContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Stretch">
+                    <StackPanel Padding="12,16,12,32" Spacing="12">
 
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
@@ -456,7 +471,7 @@
                             </StackPanel>
                         </Grid>
 
-                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Diagnostics.Results, Mode=OneWay}">
+                        <ItemsRepeater HorizontalAlignment="Stretch" ItemsSource="{x:Bind ViewModel.Diagnostics.Results, Mode=OneWay}">
                             <ItemsRepeater.Layout>
                                 <StackLayout Spacing="8" />
                             </ItemsRepeater.Layout>

@@ -9,10 +9,12 @@
     mc:Ignorable="d"
     UseLayoutRounding="True">
     <ScrollViewer
+        x:Name="DashboardScroller"
         Background="Transparent"
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Disabled"
         HorizontalScrollBarVisibility="Disabled">
+        <Grid HorizontalAlignment="Stretch">
         <Grid x:Name="DashboardContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
         <StackPanel Width="{Binding ActualWidth, ElementName=DashboardContentHost}" Padding="12,32,12,32" Spacing="20">
 
@@ -154,6 +156,7 @@
 
             <ItemsRepeater
                 x:Name="DistroRepeater"
+                HorizontalAlignment="Stretch"
                 ItemsSource="{x:Bind ViewModel.State.Distros, Mode=OneWay}">
                 <ItemsRepeater.Layout>
                     <StackLayout Spacing="8" />
@@ -224,6 +227,7 @@
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>
         </StackPanel>
+        </Grid>
         </Grid>
     </ScrollViewer>
 </Page>

@@ -19,6 +19,10 @@ Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through F have shipp
 
 Recent distro-detail rendering, dashboard-card navigation, rail-selection crash, and the 2026-05-03 card-width / settings-button-reorder / defaults-flow / terminal-cursor / Logs-Clear hotfix are complete; the remaining UX backlog is the accessibility pass below.
 
+### Active UX Fix
+
+- [ ] Restore Dashboard card host centering while keeping settings-width cards.
+
 ### UX Phase G - Accessibility pass
 
 - [ ] Ensure `AutomationProperties.Name` on every per-distro action button includes the distro name in its label.

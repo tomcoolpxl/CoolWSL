@@ -5,8 +5,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:CoolWSL.App.ViewModels"
+    HorizontalAlignment="Stretch"
     mc:Ignorable="d">
-    <Border Style="{StaticResource CardBorderStyle}" Padding="16">
+    <Border Style="{StaticResource CardBorderStyle}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -31,7 +32,7 @@
                     TextWrapping="WrapWholeWords" />
             </StackPanel>
             
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+            <Grid Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch">
                 <ToggleSwitch
                     x:Name="BoolToggle"
                     x:Load="{x:Bind ViewModel.IsBoolean, Mode=OneWay}"
@@ -40,6 +41,7 @@
                     OnContent=""
                     OffContent=""
                     MinWidth="0"
+                    Width="56"
                     HorizontalAlignment="Right" />
 
                 <TextBox
@@ -48,7 +50,7 @@
                     Text="{x:Bind ViewModel.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}"
                     HorizontalAlignment="Stretch" />
-            </StackPanel>
+            </Grid>
         </Grid>
     </Border>
 </UserControl>

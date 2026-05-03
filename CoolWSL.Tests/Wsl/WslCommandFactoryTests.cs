@@ -46,6 +46,16 @@ public sealed class WslCommandFactoryTests
     }
 
     [TestMethod]
+    public void CreateOpenDistroInWindowsTerminalCommand_UsesProfileLaunch()
+    {
+        var command = WslCommandFactory.CreateOpenDistroInWindowsTerminalCommand("Ubuntu Dev");
+
+        Assert.AreEqual("wt.exe", command.FileName);
+        CollectionAssert.AreEqual(new[] { "new-tab", "--profile", "Ubuntu Dev" }, command.Arguments.ToArray());
+        Assert.AreEqual("wt.exe new-tab --profile \"Ubuntu Dev\"", command.CommandText);
+    }
+
+    [TestMethod]
     public void CreateStartDistroCommand_UsesNoOpShellCommand()
     {
         var command = WslCommandFactory.CreateStartDistroCommand("Ubuntu Dev");

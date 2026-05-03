@@ -8,6 +8,7 @@
     mc:Ignorable="d"
     UseLayoutRounding="True">
     <ScrollViewer
+        x:Name="SettingsScroller"
         Background="Transparent"
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Disabled"

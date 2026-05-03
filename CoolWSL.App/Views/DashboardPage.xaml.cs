@@ -21,13 +21,31 @@ public sealed partial class DashboardPage : Page
         ViewModel = viewModel;
         InitializeComponent();
         Loaded += OnLoaded;
+        SizeChanged += OnSizeChanged;
     }
 
     public DashboardViewModel ViewModel { get; }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
+        UpdateDashboardContentWidth();
         await ViewModel.EnsureLoadedAsync();
+    }
+
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        UpdateDashboardContentWidth();
+    }
+
+    private void UpdateDashboardContentWidth()
+    {
+        if (ActualWidth <= 0 ||
+            Application.Current.Resources["WidePageContentMaxWidth"] is not double maxWidth)
+        {
+            return;
+        }
+
+        DashboardContentHost.Width = Math.Min(ActualWidth, maxWidth);
     }
 
     private async void OnRefreshClick(object sender, RoutedEventArgs e)

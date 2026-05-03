@@ -21,4 +21,5 @@ public sealed class DistroPageXamlTests
             keyCardXaml.Contains("<ColumnDefinition Width=\"{StaticResource SettingsValueControlWidth}\" />", StringComparison.Ordinal),
             "ColumnDefinition.Width must not use the Double-based SettingsValueControlWidth resource.");
     }
+
 }
