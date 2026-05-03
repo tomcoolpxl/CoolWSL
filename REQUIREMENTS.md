@@ -43,14 +43,15 @@ CoolWSL should not:
 
 - Windows 11 version 24H2 (build 26100) or later with current cumulative updates
 - Microsoft Store-distributed WSL 0.67.6 or later
-- packaged WinUI 3 desktop app using single-project MSIX
+- unpackaged WinUI 3 desktop app released via installer-first artifacts (MSI and ZIP)
 - C# on .NET 10 LTS
 - Windows App SDK 2.0.1 or later 2.0.x servicing patch
 
 ## Delivery Baseline
 
-- CoolWSL ships as a packaged WinUI 3 desktop app using single-project MSIX.
-- Windows App SDK deployment is framework-dependent on the stable 2.0 line.
+- CoolWSL ships as an unpackaged WinUI 3 desktop app in a self-contained install-folder build.
+- Windows App SDK deployment stays on the stable 2.0 line.
+- Release delivery is installer-first using MSI, ZIP, and checksums assets.
 - The initial scaffold targets `net10.0-windows10.0.26100.0`.
 - App-owned logs, settings, temp files, and future persistent profiles live under `%LocalAppData%\CoolWSL\`.
 - Exports and backups must always use explicit user-selected locations.
@@ -149,7 +150,7 @@ The dashboard must show:
 - Distro WSL version.
 - Default distro marker.
 - Quick global actions.
-- Compact health or diagnostic summary with links to the full Diagnostics page.
+- Compact health or diagnostic summary with links to the selected distro Diagnostics pivot.
 
 Required actions:
 
@@ -204,7 +205,7 @@ Each distro detail page must show:
 - WSL version.
 - Whether it is the default distro.
 - Capability messaging when the distro is WSL1 or system-managed.
-- A pivot with Overview, Terminal, Configuration, and Diagnostics.
+- A pivot with Overview, Settings, and Diagnostics.
 
 Required actions:
 
@@ -212,9 +213,8 @@ Required actions:
 - Start distro.
 - Terminate distro.
 - Set as default.
-- Run command.
 
-The command runner must be reachable directly from the Terminal pivot and should not be buried below unrelated lifecycle content.
+The terminal entry point must remain clearly available from the Overview pivot.
 
 ## MVP Command Runner
 
@@ -781,13 +781,12 @@ The MVP is acceptable when:
 - It shows the default distro.
 - It shows a persistent status bar with global WSL state and last refresh information.
 - The dashboard presents a summary card, distro inventory surface, quick actions, and a diagnostics summary.
-- Each distro opens in a detail page with Overview, Terminal, Configuration, and Diagnostics.
+- Each distro opens in a detail page with Overview, Settings, and Diagnostics.
 - It can open a distro.
 - It can terminate a distro.
 - It can set the default distro.
 - It can shutdown WSL with confirmation.
-- It can run a command inside a distro.
-- It can show stdout, stderr, and exit code.
+- It can open a distro terminal from the Overview pivot.
 - It provides mouse-wheel and keyboard scrolling that works on the main content pages.
 - It can read `.wslconfig` and hand off to the official WSL Settings app.
 - It can read and edit `/etc/wsl.conf`.

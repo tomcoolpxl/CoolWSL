@@ -4,7 +4,9 @@
 
 Date: 2026-05-01
 
-### Decision
+Superseded by ADR 0003.
+
+### Decision (ADR 0001)
 
 - CoolWSL ships as a packaged WinUI 3 desktop app using single-project MSIX.
 - Windows App SDK deployment is framework-dependent on the stable 2.0 line, starting from `Microsoft.WindowsAppSDK` `2.0.1`.
@@ -17,7 +19,7 @@ Date: 2026-05-01
 - App-owned logs, settings, temp files, and future persistent profiles live under `%LocalAppData%\CoolWSL\`. Exports and backups use explicit user-chosen destinations.
 - Logging is metadata-only by default, retains 30 days of history, and does not persist command stdout or stderr unless the user explicitly opts in.
 
-### Rationale
+### Rationale (ADR 0001)
 
 - Microsoft recommends MSIX for most WinUI 3 apps, and WinUI 3 templates are packaged by default.
 - Microsoft documents unpackaged WinUI 3 as a niche path with extra runtime and bootstrapper requirements, no package identity, no built-in update flow, and no single-file EXE option.
@@ -27,7 +29,7 @@ Date: 2026-05-01
 - Windows 11 24H2 is the oldest Home and Pro release still in support in May 2026.
 - WSL `0.67.6+` is the earliest documented version with systemd support, which sets a safe baseline for the later service-management phase while still allowing capability gating above that floor.
 
-### Delivery Implications
+### Delivery Implications (ADR 0001)
 
 - Phase 2 must scaffold a packaged MSIX solution and avoid introducing an unpackaged bootstrapper path.
 - Phase 2 smoke verification must prove that the packaged desktop process can launch `wsl.exe` and read and write `%UserProfile%\.wslconfig` as designed.
@@ -48,19 +50,19 @@ Date: 2026-05-01
 
 Date: 2026-05-02
 
-### Decision
+### Decision (ADR 0002)
 
 - CoolWSL uses a single WinUI shell with fixed global destinations for Dashboard, Logs, and Settings plus a dynamic Distros group in the left navigation rail.
 - Each distro is a first-class navigation target. The MVP does not rely on a separate top-level Distros page before a user can inspect or act on a distro.
 - The window includes a persistent bottom status bar that remains visible across global pages and distro detail pages.
 - The dashboard is a summary surface, not the primary home for every distro action. It presents environment status, quick global actions, a distro inventory surface that opens detail pages, and a compact diagnostics summary.
-- Each distro opens in a dedicated detail page with the pivots Overview, Terminal, Configuration, and Diagnostics.
+- Each distro opens in a dedicated detail page with the pivots Overview, Settings, and Diagnostics. Terminal launch remains available from the Overview pivot action.
 - Diagnostics live inside the per-distro Diagnostics pivot. That pivot owns both the global checks (`wsl --status`, `wsl --version`, inventory, default distro, host note) and the per-distro probes (DNS, internet) for the selected distro context. Other surfaces may summarize, but the shell does not expose a separate Diagnostics destination.
 - Logs and Settings remain fixed global destinations. Logs expose the metadata-only `IAppLogger` history; backups, import and export flows, and other secondary workflows are entered through Settings or contextual actions until they justify first-class navigation.
 - The UX rebuild is confined to `CoolWSL.App`. The existing service and model contracts in `CoolWSL.Core`, `CoolWSL.Wsl`, `CoolWSL.Diagnostics`, and `CoolWSL.Configuration` remain the data and command boundary for the new shell.
 - Shared visual primitives such as card surfaces, typography, spacing, status indicators, and reusable page-level components should be centralized in app-level resources and shared controls instead of being redefined per page.
 
-### Rationale
+### Rationale (ADR 0002)
 
 - The user mental model is distro-centric. Treating each distro as a primary navigation entity shortens the common path to start, inspect, configure, or diagnose a distro.
 - The previous flat page model distributed related information across Dashboard, Distros, and Diagnostics, which increased duplication and made it unclear where a given workflow belonged.
@@ -69,7 +71,7 @@ Date: 2026-05-02
 - Keeping the backend boundary unchanged allows the UI layer to be rebuilt without destabilizing the tested command, parsing, and diagnostics services.
 - Centralizing shared UI primitives reduces repeated XAML patterns and keeps the application visually and structurally consistent as more surfaces are added.
 
-### Delivery Implications
+### Delivery Implications (ADR 0002)
 
 - `CoolWSL.App` should be organized around a shell composition model: a navigation host, a persistent status bar, global pages, and dedicated distro detail pages.
 - The shell navigation state should be driven from distro inventory and environment status rather than from a hard-coded list of flat feature pages.
@@ -93,4 +95,31 @@ Overview, Settings, Diagnostics. The Terminal pivot was removed. The
 sanctioned terminal entry point. The Configuration pivot was renamed to
 Settings to match the Windows 11 system vocabulary; disambiguation from
 the global Settings destination is provided by the distro header and a
-"<DistroName> settings - /etc/wsl.conf" sub-header inside the pivot.
+"[DistroName] settings - /etc/wsl.conf" sub-header inside the pivot.
+
+## ADR 0003 - Installer-first release packaging baseline
+
+Date: 2026-05-03
+
+### Decision (ADR 0003)
+
+- CoolWSL release automation uses installer-first distribution rather than MSIX-first distribution.
+- Release packaging builds a self-contained unpackaged install folder from `CoolWSL.App` using `CoolWslDistributionKind=InstallFolder`.
+- The release pipeline generates three public artifacts per stable release tag:
+  - `CoolWSL-<version>-win-x64.msi`
+  - `CoolWSL-<version>-win-x64.zip`
+  - `CoolWSL-<version>-win-x64.checksums.txt`
+- MSI packaging is authored with WiX Toolset (`WixToolset.Sdk`) via `build/CoolWSL.Installer.wixproj` and `build/Invoke-ReleaseInstaller.ps1`.
+
+### Rationale (ADR 0003)
+
+- Installer-first artifacts are immediately winget-compatible without requiring MSIX identity, package-signing, and sideload policy setup as the primary delivery path.
+- The self-contained install-folder output matches current Windows App SDK unpackaged deployment guidance for custom installer scenarios.
+- MSI + ZIP gives both standard installer and portable extraction options while keeping release automation straightforward.
+
+### Delivery Implications (ADR 0003)
+
+- `.github/workflows/release.yml` must call `build/Invoke-ReleaseInstaller.ps1` and upload/publish MSI, ZIP, and checksums artifacts.
+- `Directory.Build.props` version automation (`COOLWSL_VERSION`) remains the source for stamped app versions used by installer releases.
+- Documentation and release instructions should reference installer-first winget publishing flow.
+- MSIX packaging remains optional/future and is no longer the default first-release channel.

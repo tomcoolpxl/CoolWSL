@@ -1,6 +1,15 @@
 # CoolWSL Done
 
-## Delivery automation - CI, release packaging, and winget-friendly MSIX flow delivered
+## Delivery automation update - installer-first release artifacts delivered
+
+- Added `build/Invoke-ReleaseInstaller.ps1` to produce stable release artifacts from a self-contained install-folder publish: MSI installer, ZIP portable package, and SHA-256 checksums file.
+- Added WiX-based packaging project files (`build/CoolWSL.Installer.wixproj` and `build/CoolWSL.Installer.Package.wxs`) and wired them into the release packaging flow.
+- Updated `.github/workflows/release.yml` to publish installer-first release assets (`.msi`, `.zip`, `.checksums.txt`) for stable version tags.
+- Resolved WiX packaging blockers encountered during local validation (EULA acceptance, shortcut authoring, component GUID rules, and menu-folder uninstall cleanup) and retained targeted ICE suppression where Windows App SDK file metadata required it.
+- Verified local end-to-end packaging on 2026-05-03 using `pwsh -NoProfile -File .\build\Invoke-ReleaseInstaller.ps1 -Version 0.1.3 -OutputDirectory artifacts\release-local-installer`, producing `CoolWSL-0.1.3-win-x64.msi`, `CoolWSL-0.1.3-win-x64.zip`, and `CoolWSL-0.1.3-win-x64.checksums.txt`.
+- Updated release documentation to installer-first baseline in `README.md` and architecture decision records in `ARCHITECTURE.md`.
+
+## Delivery automation - CI, release packaging, and winget-friendly MSIX flow delivered (historical, superseded)
 
 - Added `.github/workflows/ci.yml` using the official GitHub Actions .NET path on `windows-latest`: `actions/checkout`, `actions/setup-dotnet` with `global.json`, solution restore/build, test execution, non-interactive smoke launch, and artifact upload for test results.
 - Added `.github/workflows/release.yml` for stable `vX.Y.Z` tags. The workflow restores, tests, decodes a signing certificate from repository secrets, builds a signed Release package, uploads artifacts, and publishes assets to the matching GitHub Release with generated notes.

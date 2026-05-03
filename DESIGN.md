@@ -11,13 +11,13 @@ The shell is organized around:
 - fixed destinations: Dashboard, Logs, Settings
 - a dynamic Distros group where each distro is its own navigation item
 - a persistent bottom status bar
-- a distro detail page with a pivot: Overview, Terminal, Configuration, Diagnostics — the Diagnostics pivot is the only home for full diagnostic results
+- a distro detail page with a pivot: Overview, Settings, Diagnostics — the Diagnostics pivot is the only home for full diagnostic results
 
 The design should feel like a Windows 11 control center rather than a generic admin console.
 
 ## Delivery Baseline
 
-- Packaged WinUI 3 desktop app delivered as signed MSIX.
+- Unpackaged WinUI 3 desktop app released through installer-first artifacts (MSI and ZIP).
 - WSL2-first UX with explicit degraded states for WSL1 and older WSL surfaces.
 - Docker Desktop distros stay visible, but they are treated as system-managed targets.
 - The app remains unelevated in the first release; admin-only actions are disabled and explained.
@@ -154,7 +154,7 @@ The Dashboard answers:
 - Are there urgent warnings?
 - What are the safest quick actions right now?
 
-### Layout
+### Distro Layout
 
 ```text
 +--------------------------------------------------------------+
@@ -223,7 +223,7 @@ The dashboard may show a compact list of the most important warnings. Each summa
 +--------------------------------------------------------------+
 | Header: name, status, version, default                       |
 +--------------------------------------------------------------+
-| Pivot: Overview | Terminal | Configuration | Diagnostics     |
+| Pivot: Overview | Settings | Diagnostics                    |
 +--------------------------------------------------------------+
 | Active pivot content                                         |
 +--------------------------------------------------------------+
@@ -263,33 +263,9 @@ Shows:
 
 This pivot should act as the user's primary management surface for safe per-distro actions.
 
-### Terminal Pivot
+### Settings Pivot
 
-Purpose:
-
-Run commands inside the selected distro.
-
-Layout:
-
-```text
-Command input + Run + Cancel
-
-Primary output area
-Status / exit code / timing
-
-History expander
-```
-
-Rules:
-
-- Use one primary output area instead of a permanent split pane.
-- Stdout and stderr remain distinguishable through styling, labels, or inline markers.
-- Output is monospace, scrollable, copyable, and clearable.
-- Command history is session-scoped by default and collapsed when not needed.
-
-### Configuration Pivot
-
-The distro configuration pivot owns `/etc/wsl.conf` editing and later structured controls.
+The distro settings pivot owns `/etc/wsl.conf` editing and later structured controls.
 
 It should support:
 
@@ -298,6 +274,8 @@ It should support:
 - save and revert actions
 - restart-required messaging
 - future structured controls when supported
+
+Terminal launch remains available from the Overview pivot through the "Open terminal" action.
 
 ### Diagnostics Pivot
 
