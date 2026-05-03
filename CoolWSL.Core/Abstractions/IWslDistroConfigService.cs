@@ -23,4 +23,17 @@ public interface IWslDistroConfigService
         string distroName,
         IniDocument document,
         CancellationToken cancellationToken = default);
+
+    Task<WslDistroConfigDeleteResult> RestoreDefaultsAsync(
+        string distroName,
+        CancellationToken cancellationToken = default);
 }
+
+public sealed record WslDistroConfigDeleteResult(
+    string DistroName,
+    string FilePath,
+    bool DidExist,
+    string? BackupPath,
+    bool IsSuccess,
+    string? ErrorMessage,
+    DateTimeOffset CompletedAt);

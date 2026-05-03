@@ -56,7 +56,30 @@ public sealed class WslDistroService : IWslDistroService
         => LaunchAsync(WslCommandFactory.CreateOpenDefaultDistroCommand(), cancellationToken);
 
     public Task<CommandResult> OpenDistroAsync(string distroName, CancellationToken cancellationToken = default)
-        => LaunchAsync(WslCommandFactory.CreateOpenDistroCommand(distroName), cancellationToken);
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var windowsTerminalCommand = WslCommandFactory.CreateOpenDistroInWindowsTerminalCommand(distroName);
+        var startedAt = timeProvider.GetUtcNow();
+        using var process = new Process { StartInfo = CreateLaunchStartInfo(windowsTerminalCommand) };
+
+        try
+        {
+            if (process.Start())
+            {
+                var completedAt = timeProvider.GetUtcNow();
+                var result = CommandResult.Launched(windowsTerminalCommand, startedAt, completedAt);
+                logger.LogInfo("WSL.Command", CommandLogFormatter.Format(result));
+                return Task.FromResult(result);
+            }
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or Win32Exception)
+        {
+            // Windows Terminal not available; fall back to wsl.exe directly.
+        }
+
+        return LaunchAsync(WslCommandFactory.CreateOpenDistroCommand(distroName), cancellationToken);
+    }
 
     public Task<CommandResult> StartDistroAsync(string distroName, CancellationToken cancellationToken = default)
         => commandService.ExecuteAsync(WslCommandFactory.CreateStartDistroCommand(distroName), cancellationToken);

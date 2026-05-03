@@ -86,4 +86,33 @@ public sealed class WslDistroFileService : IWslDistroFileService
         var result = await commandService.ExecuteAsync(command, cancellationToken);
         return result.IsSuccess;
     }
+
+    public async Task<DistroFileDeleteResult> DeleteAsync(
+        string distroName,
+        string linuxPath,
+        bool deleteAsRoot = true,
+        CancellationToken cancellationToken = default)
+    {
+        var didExist = await ExistsAsync(distroName, linuxPath, cancellationToken);
+        if (!didExist)
+        {
+            return new DistroFileDeleteResult(true, false, null);
+        }
+
+        var args = new List<string> { "-d", distroName };
+        if (deleteAsRoot)
+        {
+            args.Add("-u");
+            args.Add("root");
+        }
+        args.Add("--exec");
+        args.Add("rm");
+        args.Add("-f");
+        args.Add("--");
+        args.Add(linuxPath);
+
+        var command = new WslCommand("wsl.exe", args.ToArray());
+        var result = await commandService.ExecuteAsync(command, cancellationToken);
+        return new DistroFileDeleteResult(result.IsSuccess, true, result.IsSuccess ? null : result.Error);
+    }
 }

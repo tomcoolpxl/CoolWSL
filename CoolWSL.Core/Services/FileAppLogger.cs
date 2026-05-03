@@ -12,6 +12,7 @@ public sealed class FileAppLogger : IAppLogger, IAppLogReader
     private readonly object gate = new();
     private readonly TimeProvider timeProvider;
     private readonly string logDirectory;
+    private DateTimeOffset sessionStart;
 
     public FileAppLogger(TimeProvider timeProvider)
         : this(timeProvider, GetDefaultLogDirectory())
@@ -22,6 +23,7 @@ public sealed class FileAppLogger : IAppLogger, IAppLogReader
     {
         this.timeProvider = timeProvider;
         this.logDirectory = logDirectory;
+        sessionStart = timeProvider.GetUtcNow();
     }
 
     public void LogInfo(string area, string message)
@@ -48,13 +50,23 @@ public sealed class FileAppLogger : IAppLogger, IAppLogReader
             Directory.CreateDirectory(logDirectory);
             PruneExpiredFiles(timeProvider.GetUtcNow());
 
+            var minTimestamp = sessionStart;
             return Directory
                 .EnumerateFiles(logDirectory, "*.log", SearchOption.TopDirectoryOnly)
                 .SelectMany(ReadEntries)
                 .Where(IsWithinRetention)
+                .Where(entry => entry.Timestamp >= minTimestamp)
                 .OrderByDescending(static entry => entry.Timestamp)
                 .Take(MaximumEntriesToRead)
                 .ToArray();
+        }
+    }
+
+    public void ClearDisplayedEntries()
+    {
+        lock (gate)
+        {
+            sessionStart = timeProvider.GetUtcNow();
         }
     }
 

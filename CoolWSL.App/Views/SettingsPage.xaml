@@ -13,7 +13,7 @@
         HorizontalScrollMode="Disabled"
         HorizontalScrollBarVisibility="Disabled">
         <Grid x:Name="SettingsContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
-        <StackPanel Width="{Binding ActualWidth, ElementName=SettingsContentHost}" Padding="32" Spacing="20">
+        <StackPanel Width="{Binding ActualWidth, ElementName=SettingsContentHost}" Padding="12,32,12,32" Spacing="20">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -89,13 +89,13 @@
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button
-                                AutomationProperties.Name="Open default distro terminal"
+                                AutomationProperties.Name="Open default WSL terminal"
                                 Click="OnOpenDefaultClick"
                                 IsEnabled="{x:Bind ViewModel.CanOpenDefaultDistro, Mode=OneWay}"
                                 Style="{ThemeResource AccentButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE756;" />
-                                    <TextBlock Text="Open default terminal" />
+                                    <TextBlock Text="Open default WSL terminal" />
                                 </StackPanel>
                             </Button>
                             <Button
@@ -137,12 +137,12 @@
 
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
                                         <Button
-                                            AutomationProperties.Name="Open official WSL Settings"
+                                            AutomationProperties.Name="WSL Settings"
                                             Click="OnOpenWslSettingsClick"
                                             Style="{ThemeResource AccentButtonStyle}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xE713;" />
-                                                <TextBlock Text="Open official WSL Settings" />
+                                                <TextBlock Text="WSL Settings" />
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>

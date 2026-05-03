@@ -16,7 +16,7 @@
             SelectionChanged="OnSelectionChanged">
 
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="Dashboard" Tag="Dashboard">
+                <NavigationViewItem x:Name="DashboardNavItem" Content="Dashboard" Tag="Dashboard" IsSelected="True">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE80F;" />
                     </NavigationViewItem.Icon>

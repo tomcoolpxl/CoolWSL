@@ -9,7 +9,8 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "PowerShell(dotnet run *)",
-      "WebFetch(domain:documentation.ubuntu.com)"
+      "WebFetch(domain:documentation.ubuntu.com)",
+      "Bash(dotnet clean *)"
     ]
   }
 }

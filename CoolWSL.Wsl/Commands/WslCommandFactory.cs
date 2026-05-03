@@ -32,6 +32,13 @@ public static class WslCommandFactory
         return CreateMutationCommand("Open a WSL distribution", timeout, "--distribution", distroName);
     }
 
+    public static WslCommand CreateOpenDistroInWindowsTerminalCommand(string distroName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(distroName);
+
+        return new("wt.exe", new[] { "-p", distroName }, null, "Open a WSL distribution in Windows Terminal");
+    }
+
     public static WslCommand CreateStartDistroCommand(string distroName, TimeSpan? timeout = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(distroName);

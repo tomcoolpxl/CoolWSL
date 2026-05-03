@@ -34,6 +34,11 @@ public sealed partial class ShellPage : Page
             RootNavigationView.SelectedItem = RootNavigationView.MenuItems[0];
         }
 
+        if (RootNavigationView.SelectedItem is NavigationViewItem selectedItem)
+        {
+            selectedItem.Focus(FocusState.Programmatic);
+        }
+
         await PopulateDistrosAsync();
     }
 

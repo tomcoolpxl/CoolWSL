@@ -100,9 +100,52 @@ public sealed partial class DistroPage : Page
         }
     }
 
-    private void OnRevertSettingsClick(object sender, RoutedEventArgs e)
+    private async void OnRevertSettingsClick(object sender, RoutedEventArgs e)
     {
+        if (!ViewModel.Settings.IsModified)
+        {
+            return;
+        }
+
+        var distroLabel = string.IsNullOrWhiteSpace(ViewModel.SelectedDistroName)
+            ? "selected distro"
+            : ViewModel.SelectedDistroName;
+
+        var request = new OperationRequest(
+            "Revert unsaved changes?",
+            "Revert",
+            distroLabel,
+            "This discards every edit since the last load of /etc/wsl.conf.",
+            "Saved files on the distro are not modified.");
+
+        if (!await ConfirmAsync(request))
+        {
+            return;
+        }
+
         ViewModel.Settings.Revert();
+    }
+
+    private async void OnRestoreDefaultsClick(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(ViewModel.SelectedDistroName))
+        {
+            return;
+        }
+
+        var request = new OperationRequest(
+            $"Restore defaults for {ViewModel.SelectedDistroName}?",
+            "Restore defaults",
+            ViewModel.SelectedDistroName,
+            "This deletes /etc/wsl.conf inside the distro so WSL falls back to its built-in defaults.",
+            "A timestamped backup of the current file is kept under %LocalAppData%\\CoolWSL\\Backups\\WslDistroConfig before the file is removed.");
+
+        if (!await ConfirmAsync(request))
+        {
+            return;
+        }
+
+        await ViewModel.Settings.RestoreDefaultsAsync();
     }
 
     private void OnOpenWslSettingsClick(object sender, RoutedEventArgs e)

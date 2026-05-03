@@ -13,8 +13,8 @@
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Disabled"
         HorizontalScrollBarVisibility="Disabled">
-        <Grid x:Name="DashboardContentHost" MaxWidth="1040" HorizontalAlignment="Center">
-        <StackPanel Width="{Binding ActualWidth, ElementName=DashboardContentHost}" Padding="32" Spacing="20">
+        <Grid x:Name="DashboardContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
+        <StackPanel Width="{Binding ActualWidth, ElementName=DashboardContentHost}" Padding="12,32,12,32" Spacing="20">
 
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
@@ -110,13 +110,13 @@
 
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <Button
-                    AutomationProperties.Name="Open default distro terminal"
+                    AutomationProperties.Name="Open default WSL terminal"
                     Click="OnOpenDefaultClick"
                     IsEnabled="{x:Bind ViewModel.State.CanOpenDefaultDistro, Mode=OneWay}"
                     Style="{ThemeResource AccentButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="14" Glyph="&#xEC7A;" />
-                        <TextBlock Text="Open default terminal" />
+                        <TextBlock Text="Open default WSL terminal" />
                     </StackPanel>
                 </Button>
                 <Button

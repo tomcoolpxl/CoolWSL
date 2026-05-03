@@ -76,6 +76,12 @@ public sealed class LogsViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(ShowEmptyState));
     }
 
+    public void Clear(string levelFilter, string searchText)
+    {
+        logReader.ClearDisplayedEntries();
+        Refresh(levelFilter, searchText);
+    }
+
     private static IEnumerable<AppLogEntry> Filter(
         IEnumerable<AppLogEntry> entries,
         string levelFilter,

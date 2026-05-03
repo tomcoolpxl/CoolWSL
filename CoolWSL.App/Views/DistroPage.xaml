@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" x:Name="DistroHeaderContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
-        <StackPanel Width="{Binding ActualWidth, ElementName=DistroHeaderContentHost}" Padding="32,32,32,8" Spacing="12">
+        <StackPanel Width="{Binding ActualWidth, ElementName=DistroHeaderContentHost}" Padding="12,32,12,8" Spacing="12">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -116,7 +116,7 @@
             Grid.Row="1"
             x:Name="EmptyStateCard"
             Visibility="{x:Bind GetVisibleWhen(ViewModel.ShowEmptyState), Mode=OneWay}"
-            Margin="32,12,32,32"
+            Margin="12,12,12,32"
             MaxWidth="{StaticResource WidePageContentMaxWidth}"
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
@@ -135,7 +135,7 @@
             Grid.Row="1"
             x:Name="DistroPivot"
             Visibility="{x:Bind GetVisibleWhen(ViewModel.HasSelection), Mode=OneWay}"
-            Margin="20,8,20,0">
+            Margin="0,8,0,0">
 
             <PivotItem Header="Overview">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
@@ -283,9 +283,26 @@
                                     <TextBlock Style="{StaticResource SecondaryTextStyle}" Text="{x:Bind ViewModel.Settings.GlobalWslSummary, Mode=OneWay}" />
                                     <TextBlock Style="{StaticResource TertiaryTextStyle}" Text="Settings applied at the WSL VM level affect every distro." />
                                 </StackPanel>
-                                <Button Grid.Column="1" Content="Open official WSL Settings" Click="OnOpenWslSettingsClick" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Content="WSL Settings" Click="OnOpenWslSettingsClick" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button
+                                AutomationProperties.Name="Restore default /etc/wsl.conf"
+                                Content="Defaults"
+                                Click="OnRestoreDefaultsClick"
+                                IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}" />
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                <Button Content="Revert" Click="OnRevertSettingsClick" IsEnabled="{x:Bind ViewModel.Settings.IsModified, Mode=OneWay}" />
+                                <Button Style="{ThemeResource AccentButtonStyle}" Content="Save" Click="OnSaveSettingsClick" IsEnabled="{x:Bind ViewModel.Settings.IsModified, Mode=OneWay}" />
+                            </StackPanel>
+                        </Grid>
 
                         <Border Style="{StaticResource CardBorderStyle}" Padding="16">
                             <Grid>
@@ -323,6 +340,23 @@
                                 </ItemsRepeater>
                             </StackPanel>
                         </Border>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button
+                                AutomationProperties.Name="Restore default /etc/wsl.conf"
+                                Content="Defaults"
+                                Click="OnRestoreDefaultsClick"
+                                IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}" />
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                <Button Content="Revert" Click="OnRevertSettingsClick" IsEnabled="{x:Bind ViewModel.Settings.IsModified, Mode=OneWay}" />
+                                <Button Style="{ThemeResource AccentButtonStyle}" Content="Save" Click="OnSaveSettingsClick" IsEnabled="{x:Bind ViewModel.Settings.IsModified, Mode=OneWay}" />
+                            </StackPanel>
+                        </Grid>
 
                         <Border Style="{StaticResource CardBorderStyle}" Padding="16">
                             <StackPanel Spacing="8">
@@ -380,22 +414,12 @@
                             </Grid>
                         </Border>
 
-                        <Border Style="{StaticResource CardBorderStyle}" Padding="16">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Style="{StaticResource SecondaryTextStyle}"
-                                    Text="{x:Bind ViewModel.Settings.BackupPath, Mode=OneWay}"
-                                    TextWrapping="WrapWholeWords"
-                                    VerticalAlignment="Center" />
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <Button Content="Revert" Click="OnRevertSettingsClick" IsEnabled="{x:Bind ViewModel.Settings.IsModified, Mode=OneWay}" />
-                                    <Button Style="{ThemeResource AccentButtonStyle}" Content="Save" Click="OnSaveSettingsClick" IsEnabled="{x:Bind ViewModel.Settings.IsModified, Mode=OneWay}" />
-                                </StackPanel>
-                            </Grid>
+                        <Border Style="{StaticResource CardBorderStyle}" Padding="16" Visibility="{x:Bind GetVisibleWhen(ViewModel.Settings.HasBackupPath), Mode=OneWay}">
+                            <TextBlock
+                                Style="{StaticResource SecondaryTextStyle}"
+                                Text="{x:Bind ViewModel.Settings.BackupPath, Mode=OneWay}"
+                                TextWrapping="WrapWholeWords"
+                                VerticalAlignment="Center" />
                         </Border>
 
                     </StackPanel>

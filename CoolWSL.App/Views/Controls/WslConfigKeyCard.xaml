@@ -31,15 +31,18 @@
                     TextWrapping="WrapWholeWords" />
             </StackPanel>
             
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Width="{StaticResource SettingsValueControlWidth}">
-                <ToggleSwitch 
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                <ToggleSwitch
                     x:Name="BoolToggle"
                     x:Load="{x:Bind ViewModel.IsBoolean, Mode=OneWay}"
                     IsOn="{x:Bind ViewModel.BooleanValue, Mode=TwoWay}"
                     IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}"
+                    OnContent=""
+                    OffContent=""
+                    MinWidth="0"
                     HorizontalAlignment="Right" />
-                    
-                <TextBox 
+
+                <TextBox
                     x:Name="StringBox"
                     x:Load="{x:Bind ViewModel.IsString, Mode=OneWay}"
                     Text="{x:Bind ViewModel.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

@@ -17,7 +17,7 @@
 
 Parallel UI rework derived from `UX_REVIEW.md`. UX Phases A through F have shipped (see `DONE.md`); the item below covers the remaining phase G.
 
-Recent distro-detail rendering, dashboard-card navigation, and rail-selection crash hotfixes are complete; the remaining UX backlog is the accessibility pass below.
+Recent distro-detail rendering, dashboard-card navigation, rail-selection crash, and the 2026-05-03 card-width / settings-button-reorder / defaults-flow / terminal-cursor / Logs-Clear hotfix are complete; the remaining UX backlog is the accessibility pass below.
 
 ### UX Phase G - Accessibility pass
 

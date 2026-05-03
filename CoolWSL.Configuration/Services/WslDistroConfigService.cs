@@ -78,6 +78,31 @@ public sealed class WslDistroConfigService : IWslDistroConfigService
             WslConfigRestartImpact.TerminateDistro);
     }
 
+    public async Task<WslDistroConfigDeleteResult> RestoreDefaultsAsync(string distroName, CancellationToken cancellationToken = default)
+    {
+        var current = await fileService.ReadTextAsync(distroName, "/etc/wsl.conf", readAsRoot: true, cancellationToken);
+        string? backupPath = null;
+
+        if (current.Exists)
+        {
+            var distroBackupDir = Path.Combine(backupRoot, distroName);
+            Directory.CreateDirectory(distroBackupDir);
+            var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMddTHHmmssZ");
+            backupPath = Path.Combine(distroBackupDir, $"wsl.conf.{timestamp}.before-defaults.bak");
+            await File.WriteAllTextAsync(backupPath, current.Content, cancellationToken);
+        }
+
+        var deleteResult = await fileService.DeleteAsync(distroName, "/etc/wsl.conf", deleteAsRoot: true, cancellationToken);
+        return new WslDistroConfigDeleteResult(
+            distroName,
+            "/etc/wsl.conf",
+            deleteResult.DidExist,
+            backupPath,
+            deleteResult.IsSuccess,
+            deleteResult.IsSuccess ? null : deleteResult.Error?.Summary,
+            DateTimeOffset.Now);
+    }
+
     public async Task<IReadOnlyList<WslConfigProbeResult>> ProbeAsync(string distroName, IniDocument document, CancellationToken cancellationToken = default)
     {
         var results = new List<WslConfigProbeResult>();

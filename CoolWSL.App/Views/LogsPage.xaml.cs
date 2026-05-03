@@ -31,6 +31,12 @@ public sealed partial class LogsPage : Page
         RefreshLogs();
     }
 
+    private void OnClearClick(object sender, RoutedEventArgs e)
+    {
+        var levelFilter = (LevelFilterBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "All";
+        ViewModel.Clear(levelFilter, SearchBox.Text);
+    }
+
     private void OnFilterChanged(object sender, SelectionChangedEventArgs e)
     {
         if (!IsLoaded)

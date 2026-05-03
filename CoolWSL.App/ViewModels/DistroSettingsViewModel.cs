@@ -400,6 +400,50 @@ public sealed class DistroSettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public async Task RestoreDefaultsAsync()
+    {
+        var distroName = selectedDistroName;
+        if (distroName == null)
+        {
+            return;
+        }
+
+        IsLoading = true;
+        StatusMessage = "Restoring defaults...";
+
+        try
+        {
+            var result = await configService.RestoreDefaultsAsync(distroName, CancellationToken.None);
+
+            if (!result.IsSuccess)
+            {
+                StatusMessage = $"Restore defaults failed: {result.ErrorMessage}";
+                return;
+            }
+
+            BackupPath = result.BackupPath;
+            RestartImpact = result.DidExist ? WslConfigRestartImpact.TerminateDistro : WslConfigRestartImpact.None;
+
+            var settingsContext = await LoadSettingsContextAsync(distroName, CancellationToken.None);
+            GlobalWslSummary = settingsContext.GlobalSummary;
+            var savedDocument = await configService.ReadAsync(distroName, CancellationToken.None);
+            ApplyDocument(savedDocument, settingsContext.Capabilities);
+            IsModified = false;
+
+            StatusMessage = result.DidExist
+                ? $"Restored defaults at {result.CompletedAt:T}. Backup created."
+                : $"Already at defaults — /etc/wsl.conf did not exist.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Restore defaults failed: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
     private void RefreshValidationCollections()
     {
         OnPropertyChanged(nameof(Errors));

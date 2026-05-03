@@ -4,6 +4,7 @@ namespace CoolWSL.Core.Abstractions;
 
 public sealed record DistroFileReadResult(string Content, bool Exists, WslCommandError? Error);
 public sealed record DistroFileWriteResult(bool IsSuccess, WslCommandError? Error);
+public sealed record DistroFileDeleteResult(bool IsSuccess, bool DidExist, WslCommandError? Error);
 
 public interface IWslDistroFileService
 {
@@ -23,5 +24,11 @@ public interface IWslDistroFileService
     Task<bool> ExistsAsync(
         string distroName,
         string linuxPath,
+        CancellationToken cancellationToken = default);
+
+    Task<DistroFileDeleteResult> DeleteAsync(
+        string distroName,
+        string linuxPath,
+        bool deleteAsRoot = true,
         CancellationToken cancellationToken = default);
 }

@@ -5,4 +5,6 @@ namespace CoolWSL.Core.Abstractions;
 public interface IAppLogReader
 {
     IReadOnlyList<AppLogEntry> GetEntries();
+
+    void ClearDisplayedEntries();
 }

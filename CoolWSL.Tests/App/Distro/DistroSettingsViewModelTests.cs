@@ -121,6 +121,9 @@ public sealed class DistroSettingsViewModelTests
 
         public Task<IReadOnlyList<WslConfigProbeResult>> ProbeAsync(string distroName, IniDocument document, CancellationToken cancellationToken = default)
             => throw new NotSupportedException();
+
+        public Task<WslDistroConfigDeleteResult> RestoreDefaultsAsync(string distroName, CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
     }
 
     private sealed class StubDashboardStatusService : IDashboardStatusService
