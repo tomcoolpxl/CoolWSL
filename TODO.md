@@ -23,6 +23,7 @@ Recent distro-detail rendering, dashboard-card navigation, rail-selection crash,
 
 - [x] Restore Dashboard card host centering while keeping settings-width cards.
 - [ ] Align Distro pivot tabs and Overview cards to the Settings card envelope.
+- [ ] Generate packaged app icons and wire the unpackaged app window icon from the repository logo asset.
 
 ### UX Phase G - Accessibility pass
 
