@@ -73,8 +73,10 @@ Before marking work as done:
 * `WslListParser` and `WslStatusParser` must degrade safely when WSL output is unsupported, localized, or missing expected fields instead of guessing inventory or environment details.
 * Agent shell commands on this Windows machine should run PowerShell with `login=false` / no profile loading. The user's PowerShell profile writes outside the workspace and probes console/CIM state, which causes sandbox access-denied noise before the intended command runs.
 * EXTRA1 introduces a lossless INI document model under CoolWSL.Core/Models/Configuration. Both the per-distro and (later) global config services should round-trip user input byte-for-byte; never serialize via System.Configuration or other lossy libraries.
-* For release automation monitoring, prefer non-interactive polling via `gh api repos/<owner>/<repo>/actions/runs/<run_id>` (`status`, `conclusion`, `updated_at`) and `.../jobs` step state over `gh run watch`; in this environment, watch output can enter alternate-buffer mode and obscure completion state.
-* If a release run is stalled (no `updated_at` movement and same in-progress step), recover by canceling the run, re-pushing the same release tag to retrigger CI, and then polling the new run ID until `status=completed`.
+* Release flow must be tag-driven through CI/CD only: push `main`, create tag `vX.Y.Z`, and push the tag. Do not manually create/edit the release unless explicitly requested.
+* After triggering a release, use one blocking wait command and let it finish before doing anything else: `gh run watch <run_id> --repo tomcoolpxl/CoolWSL --exit-status`.
+* Do not run repeated status polling loops while waiting for release completion. Only check release assets after the blocking wait returns.
+* After the blocking wait completes, verify the release once with `gh release view vX.Y.Z --repo tomcoolpxl/CoolWSL` and confirm MSI/ZIP/checksums assets are present.
 
 ## 1. Think Before Coding
 
