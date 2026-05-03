@@ -48,12 +48,14 @@ Recent distro-detail rendering, dashboard-card navigation, rail-selection crash,
 ### Superseded by EXTRA1
 
 #### Phase 9 - Raw per-distro WSL configuration editor delivered
+
 - [ ] Add the raw /etc/wsl.conf editor for a selected distro with load, save, and conservative validation behavior.
 - [ ] Create per-distro backups before overwrite where feasible and expose the save limitations when a backup is not possible.
 - [ ] Warn clearly when a save changes boot, systemd, or networking behavior and when a distro restart is required.
 - [ ] Add automated coverage for parse, serialize, warning, and save-path behavior plus manual checks for permissions and stopped-distro cases.
 
 #### Phase 12 - Structured per-distro settings UI delivered
+
 - [ ] Add structured controls for the supported /etc/wsl.conf settings while keeping the raw editor available.
 - [ ] Reuse and expose explicit warnings for boot, systemd, and networking changes.
 - [ ] Gate unsupported per-distro settings and preserve round-trip integrity for raw content.
