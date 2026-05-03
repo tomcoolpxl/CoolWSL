@@ -10,8 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
-    <PackageReference Include="WixToolset.Util.wixext" Version="7.0.0" />
     <Compile Include="$(GeneratedWixFragmentPath)" Condition="'$(GeneratedWixFragmentPath)' != ''" />
   </ItemGroup>
 </Project>
