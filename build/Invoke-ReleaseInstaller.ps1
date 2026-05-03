@@ -307,6 +307,7 @@ $resolvedProjectPath = Resolve-RepoPath -Path $ProjectPath
 $resolvedInstallerProjectPath = Resolve-RepoPath -Path $InstallerProjectPath
 $resolvedOutputDirectory = Resolve-RepoPath -Path $OutputDirectory
 $resolvedIconPath = Resolve-RepoPath -Path 'CoolWSL.App/Assets/AppIcon.ico'
+$projectDirectory = Split-Path -Parent $resolvedProjectPath
 $resolvedVersion = Get-StableSemanticVersion -Value $Version
 
 if (-not (Test-Path -LiteralPath $resolvedProjectPath -PathType Leaf)) {
@@ -338,17 +339,15 @@ $wixOutputDirectory = Join-Path $temporaryDirectory 'wix-bin'
 $wixIntermediateDirectory = Join-Path $temporaryDirectory 'wix-obj'
 
 try {
-    $publishArguments = @(
-        'publish',
+    $buildArguments = @(
+        'build',
         $resolvedProjectPath,
         '-c',
         'Release',
         '-r',
         $RuntimeIdentifier,
-        '--self-contained',
-        'true',
-        '-p:CoolWslDistributionKind=InstallFolder',
-        "-p:PublishDir=$publishDirectory\\"
+        '--no-self-contained',
+        '-p:CoolWslDistributionKind=InstallFolder'
     )
 
     $previousCoolWslVersion = $env:COOLWSL_VERSION
@@ -356,9 +355,9 @@ try {
     $env:COOLWSL_VERSION = $Version
 
     try {
-        & dotnet @publishArguments
+        & dotnet @buildArguments
         if ($LASTEXITCODE -ne 0) {
-            throw "dotnet publish failed with exit code $LASTEXITCODE."
+            throw "dotnet build failed with exit code $LASTEXITCODE."
         }
     }
     finally {
@@ -369,6 +368,13 @@ try {
             Remove-Item Env:COOLWSL_VERSION -ErrorAction SilentlyContinue
         }
     }
+
+    $releaseOutputDirectory = Join-Path $projectDirectory (Join-Path 'bin\Release\net10.0-windows10.0.26100.0' $RuntimeIdentifier)
+    if (-not (Test-Path -LiteralPath $releaseOutputDirectory -PathType Container)) {
+        throw "Expected Release output directory '$releaseOutputDirectory' was not found."
+    }
+
+    Copy-Item -LiteralPath $releaseOutputDirectory -Destination $publishDirectory -Recurse -Force
 
     Get-ChildItem -LiteralPath $publishDirectory -Recurse -File -Filter '*.pdb' |
         Remove-Item -Force
