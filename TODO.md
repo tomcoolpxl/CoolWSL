@@ -21,7 +21,8 @@ Recent distro-detail rendering, dashboard-card navigation, rail-selection crash,
 
 ### Active UX Fix
 
-- [ ] Restore Dashboard card host centering while keeping settings-width cards.
+- [x] Restore Dashboard card host centering while keeping settings-width cards.
+- [ ] Align Distro pivot tabs and Overview cards to the Settings card envelope.
 
 ### UX Phase G - Accessibility pass
 

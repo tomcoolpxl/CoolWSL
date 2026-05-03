@@ -20,6 +20,8 @@ public sealed partial class DistroPage : Page
     {
         ViewModel = viewModel;
         InitializeComponent();
+        Loaded += OnLoaded;
+        SizeChanged += OnSizeChanged;
     }
 
     public DistroViewModel ViewModel { get; }
@@ -32,6 +34,27 @@ public sealed partial class DistroPage : Page
         base.OnNavigatedTo(e);
 
         await ViewModel.EnsureLoadedAsync(e.Parameter as string);
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        UpdateOverviewContentWidth();
+    }
+
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        UpdateOverviewContentWidth();
+    }
+
+    private void UpdateOverviewContentWidth()
+    {
+        if (ActualWidth <= 0 ||
+            Application.Current.Resources["WidePageContentMaxWidth"] is not double maxWidth)
+        {
+            return;
+        }
+
+        OverviewContentHost.Width = Math.Min(ActualWidth, maxWidth);
     }
 
     private async void OnRefreshClick(object sender, RoutedEventArgs e)

@@ -67,6 +67,12 @@ public sealed class DistroViewModel : INotifyPropertyChanged
 
     public string HeaderManagementLabel => selectedDistro?.ManagementLabel ?? string.Empty;
 
+    public string HeaderMetadataText
+        => string.Join(
+            " - ",
+            new[] { HeaderWslVersion, HeaderDefault, HeaderManagementLabel }
+                .Where(static value => !string.IsNullOrWhiteSpace(value)));
+
     public string HeaderCapabilityMessage => selectedDistro?.CapabilityMessage ?? emptyStateMessage;
 
     public bool HasSelection => selectedDistro is not null;
@@ -355,6 +361,7 @@ public sealed class DistroViewModel : INotifyPropertyChanged
         nameof(HeaderWslVersion),
         nameof(HeaderDefault),
         nameof(HeaderManagementLabel),
+        nameof(HeaderMetadataText),
         nameof(HeaderCapabilityMessage),
         nameof(HasSelection),
         nameof(ShowEmptyState),

@@ -55,29 +55,10 @@
                             </Border>
                         </Grid>
 
-                        <ItemsControl>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <ItemsWrapGrid Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <TextBlock
-                                Margin="0,0,12,0"
-                                Style="{StaticResource SecondaryTextStyle}"
-                                Text="{x:Bind ViewModel.HeaderWslVersion, Mode=OneWay}" />
-                            <TextBlock
-                                Margin="0,0,12,0"
-                                x:Name="DefaultLabelBlock"
-                                Visibility="{x:Bind GetVisibleWhen(ViewModel.HasDefaultLabel), Mode=OneWay}"
-                                Style="{StaticResource SecondaryTextStyle}"
-                                Text="{x:Bind ViewModel.HeaderDefault, Mode=OneWay}" />
-                            <TextBlock
-                                Margin="0,0,12,0"
-                                x:Name="ManagementLabelBlock"
-                                Visibility="{x:Bind GetVisibleWhen(ViewModel.HasManagementLabel), Mode=OneWay}"
-                                Style="{StaticResource SecondaryTextStyle}"
-                                Text="{x:Bind ViewModel.HeaderManagementLabel, Mode=OneWay}" />
-                        </ItemsControl>
+                        <TextBlock
+                            Style="{StaticResource SecondaryTextStyle}"
+                            Text="{x:Bind ViewModel.HeaderMetadataText, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords" />
                     </StackPanel>
                 </StackPanel>
 
@@ -147,12 +128,14 @@
             Grid.Row="1"
             x:Name="DistroPivot"
             Visibility="{x:Bind GetVisibleWhen(ViewModel.HasSelection), Mode=OneWay}"
+            MaxWidth="{StaticResource WidePageContentMaxWidth}"
+            HorizontalAlignment="Center"
             Margin="0,8,0,0">
 
             <PivotItem Header="Overview">
                 <ScrollViewer x:Name="OverviewScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <Grid x:Name="OverviewContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Stretch">
-                    <StackPanel Padding="12,16,12,32" Spacing="12">
+                    <Grid x:Name="OverviewContentHost" MaxWidth="{StaticResource WidePageContentMaxWidth}" HorizontalAlignment="Center">
+                    <StackPanel Width="{Binding ActualWidth, ElementName=OverviewContentHost}" Padding="12,16,12,32" Spacing="12">
 
                         <Border Style="{StaticResource CardBorderStyle}">
                             <Grid ColumnSpacing="14">
