@@ -11,6 +11,7 @@ permissions:
 jobs:
   package-and-publish:
     runs-on: windows-latest
+    timeout-minutes: 60
     env:
       DOTNET_NOLOGO: true
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
@@ -18,10 +19,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
+      - name: Validate .NET SDK
+        shell: pwsh
+        run: |
+          $sdkVersion = dotnet --version
+          if (-not $sdkVersion.StartsWith('10.')) {
+              throw "Expected .NET SDK 10.x from global.json, got '$sdkVersion'."
+          }
+          dotnet --info
 
       - name: Resolve release version
         id: version
