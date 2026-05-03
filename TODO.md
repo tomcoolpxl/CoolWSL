@@ -24,6 +24,8 @@ Recent distro-detail rendering, dashboard-card navigation, rail-selection crash,
 - [x] Restore Dashboard card host centering while keeping settings-width cards.
 - [ ] Align Distro pivot tabs and Overview cards to the Settings card envelope.
 - [x] Generate packaged app icons and wire the unpackaged app window icon from the repository logo asset.
+- [x] Add the CoolWSL logo to the Dashboard header and Settings About section.
+- [x] Restore the original shell rail and restyle the Dashboard logo to use the transparent asset directly.
 
 ### UX Phase G - Accessibility pass
 

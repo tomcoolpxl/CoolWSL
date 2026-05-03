@@ -214,3 +214,10 @@
 - Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore -m:1 /p:UseSharedCompilation=false`, `dotnet test .\CoolWSL.Tests\CoolWSL.Tests.csproj --no-restore -m:1 /p:UseSharedCompilation=false -v:q` (85 passed), and the non-interactive CoolWSL smoke launch marker on 2026-05-03.
 
 - Removed the leading icon offset from the Distro header so `Distros`, the selected distro name, running state, WSL version, default label, and last-refreshed text all start on the same left edge as the cards.
+
+## UX hotfix - in-app logo placements refined
+
+- Restored the shell rail in `ShellPage` to its original state by removing the experimental leading logo block and returning the initial fallback selection path to the first menu item.
+- Kept the CoolWSL logo in the Dashboard header and Settings About section, but restyled the Dashboard logo to render as a larger plain transparent image instead of a bordered tile so it reads as artwork rather than an app icon.
+- Left the Settings About logo block in place as the larger product identity surface.
+- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore -m:1 /p:UseSharedCompilation=false` and a `COOLWSL_SMOKE_TEST=1` startup run that wrote the smoke marker and logged no fresh `Application Error` events for `CoolWSL.App.exe` on 2026-05-03.
