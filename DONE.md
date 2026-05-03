@@ -218,6 +218,14 @@
 ## UX hotfix - in-app logo placements refined
 
 - Restored the shell rail in `ShellPage` to its original state by removing the experimental leading logo block and returning the initial fallback selection path to the first menu item.
+
+## UX hotfix - About version metadata normalized
+
+- Set a repo-wide default version of `0.1.0` in `Directory.Build.props` so SDK-style projects stop falling back to the implicit `1.0.0` default.
+- Disabled `IncludeSourceRevisionInInformationalVersion` so the .NET SDK no longer appends the Git commit hash to `AssemblyInformationalVersion` for repository builds.
+- Added a `COOLWSL_VERSION` MSBuild/environment override so CI or release builds can stamp a newer app version without editing project files.
+- Hardened the Settings About version display so any future SemVer build metadata suffix after `+` is trimmed from the user-facing label.
+- Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore` and confirmed the generated `CoolWSL.App.AssemblyInfo.cs` now emits `AssemblyInformationalVersion("0.1.0")` on 2026-05-03.
 - Kept the CoolWSL logo in the Dashboard header and Settings About section, but restyled the Dashboard logo to render as a larger plain transparent image instead of a bordered tile so it reads as artwork rather than an app icon.
 - Left the Settings About logo block in place as the larger product identity surface.
 - Verified `dotnet build .\CoolWSL.App\CoolWSL.App.csproj -c Debug --no-restore -m:1 /p:UseSharedCompilation=false` and a `COOLWSL_SMOKE_TEST=1` startup run that wrote the smoke marker and logged no fresh `Application Error` events for `CoolWSL.App.exe` on 2026-05-03.

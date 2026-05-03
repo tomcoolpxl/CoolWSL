@@ -91,8 +91,13 @@ public sealed partial class SettingsPage : Page
     {
         var assembly = typeof(SettingsPage).Assembly;
         var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-        return string.IsNullOrWhiteSpace(informationalVersion)
+        var version = string.IsNullOrWhiteSpace(informationalVersion)
             ? assembly.GetName().Version?.ToString() ?? "Development build"
             : informationalVersion;
+
+        var buildMetadataSeparatorIndex = version.IndexOf('+');
+        return buildMetadataSeparatorIndex >= 0
+            ? version[..buildMetadataSeparatorIndex]
+            : version;
     }
 }

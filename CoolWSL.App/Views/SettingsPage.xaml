@@ -56,7 +56,10 @@
                 TextWrapping="WrapWholeWords" />
 
             <Border Style="{StaticResource CardBorderStyle}">
-                <Expander IsExpanded="True">
+                <Expander
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    IsExpanded="True">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEC7A;" />
@@ -183,7 +186,9 @@
             </Border>
 
             <Border Style="{StaticResource CardBorderStyle}">
-                <Expander>
+                <Expander
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE790;" />
@@ -225,7 +230,9 @@
             </Border>
 
             <Border Style="{StaticResource CardBorderStyle}">
-                <Expander>
+                <Expander
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8B0;" />
@@ -266,7 +273,9 @@
             </Border>
 
             <Border Style="{StaticResource CardBorderStyle}">
-                <Expander>
+                <Expander
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE946;" />

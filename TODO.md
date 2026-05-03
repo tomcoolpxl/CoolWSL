@@ -22,6 +22,8 @@ Recent distro-detail rendering, dashboard-card navigation, rail-selection crash,
 ### Active UX Fix
 
 - [x] Restore Dashboard card host centering while keeping settings-width cards.
+- [x] Normalize About version metadata and hide SDK git hashes.
+- [ ] Normalize Settings expander widths in collapsed and expanded states.
 - [ ] Align Distro pivot tabs and Overview cards to the Settings card envelope.
 - [x] Generate packaged app icons and wire the unpackaged app window icon from the repository logo asset.
 - [x] Add the CoolWSL logo to the Dashboard header and Settings About section.

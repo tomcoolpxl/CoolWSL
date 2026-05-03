@@ -23,6 +23,7 @@ Phase 2 solution skeleton is implemented and verified. The repository now contai
 - App-owned logs, settings, temp files, and future persistent profiles live under `%LocalAppData%\CoolWSL\`.
 - Exports and user backups remain explicit, user-chosen locations rather than package-owned storage.
 - The initial release stays unelevated. Admin-only operations are disabled and explained instead of triggering self-elevation.
+- The repo defaults the app version to `0.1.0`. Set `COOLWSL_VERSION` before build or packaging if you want to stamp a newer assembly/About version without editing project files.
 
 ## Local Prerequisites
 
