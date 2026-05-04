@@ -18,7 +18,7 @@ Optional: if you enable GitHub Pages for this repo, you can later point `Publish
 
 ## Generate manifests from a CoolWSL release
 
-For tagged releases (`vX.Y.Z`), CI now also generates and uploads a `winget-manifests-<tag>` artifact automatically from the release checksums file.
+For tagged releases (`vX.Y.Z`), CI now generates `winget-manifests-<tag>` after the GitHub Release is published, deriving checksums from the live release assets.
 
 You can still generate manifests locally when preparing or iterating before submission:
 
@@ -26,9 +26,12 @@ From the CoolWSL repo root:
 
 ```powershell
 pwsh -NoProfile -File .\build\Export-WingetManifest.ps1 `
-  -Version 1.0.4 `
-  -ChecksumsFile .\artifacts\release-1.0.4-buildoutput\CoolWSL-1.0.4-win-x64.checksums.txt
+  -Version 1.0.4
 ```
+
+The script defaults to downloading `CoolWSL-<version>-win-x64.checksums.txt` from the tagged GitHub Release so `InstallerSha256` matches the live MSI asset.
+
+Optional: pass `-ChecksumsFile` to force a specific checksums file.
 
 This generates files under:
 
@@ -60,7 +63,7 @@ Expected files:
 1. Confirm the GitHub Release has all three files (`.msi`, `.zip`, `.checksums.txt`).
 2. Confirm the MSI filename matches `CoolWSL-<version>-win-x64.msi`.
 3. Confirm the checksums file contains the MSI hash entry.
-4. Test install from URL locally after merge (or from your branch with a local manifest):
+4. Test install from URL locally after merge (or from your branch with a local manifest) from an elevated terminal (Run as Administrator), because this package is machine-scope MSI:
 
   ```powershell
   winget install --manifest .\manifests\t\tomcoolpxl\CoolWSL\1.0.4

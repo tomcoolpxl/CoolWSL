@@ -107,6 +107,32 @@ function Get-ArtifactHashFromChecksums {
     return $hash.ToUpperInvariant()
 }
 
+function Get-ReleaseChecksumsPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Repository,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Tag,
+
+        [Parameter(Mandatory = $true)]
+        [string]$AssetBaseName
+    )
+
+    $checksumsFileName = "$AssetBaseName.checksums.txt"
+    $checksumsUrl = "https://github.com/$Repository/releases/download/$Tag/$checksumsFileName"
+    $temporaryPath = Join-Path ([System.IO.Path]::GetTempPath()) ("$checksumsFileName." + [Guid]::NewGuid().ToString('N'))
+
+    try {
+        $ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri $checksumsUrl -OutFile $temporaryPath
+        return $temporaryPath
+    }
+    catch {
+        throw "Failed to download release checksums from '$checksumsUrl'. Provide -ChecksumsFile explicitly or verify the release assets exist."
+    }
+}
+
 function Write-Utf8NoBomFile {
     param(
         [Parameter(Mandatory = $true)]
@@ -136,16 +162,26 @@ if ($Repository -notmatch '^[^/]+/[^/]+$') {
     throw "Repository '$Repository' must be in the format owner/name."
 }
 
+$temporaryChecksumsPath = $null
 if ([string]::IsNullOrWhiteSpace($ChecksumsFile)) {
-    throw "-ChecksumsFile is required so installer SHA256 matches the release artifact exactly."
+    $temporaryChecksumsPath = Get-ReleaseChecksumsPath -Repository $Repository -Tag $tag -AssetBaseName $assetBaseName
+    $resolvedChecksumsPath = $temporaryChecksumsPath
+}
+else {
+    $resolvedChecksumsPath = Resolve-RepoPath -Path $ChecksumsFile
+    if (-not (Test-Path -LiteralPath $resolvedChecksumsPath -PathType Leaf)) {
+        throw "Checksums file '$resolvedChecksumsPath' was not found."
+    }
 }
 
-$resolvedChecksumsPath = Resolve-RepoPath -Path $ChecksumsFile
-if (-not (Test-Path -LiteralPath $resolvedChecksumsPath -PathType Leaf)) {
-    throw "Checksums file '$resolvedChecksumsPath' was not found."
+try {
+    $installerSha256 = Get-ArtifactHashFromChecksums -ChecksumsPath $resolvedChecksumsPath -ArtifactFileName $msiFileName
 }
-
-$installerSha256 = Get-ArtifactHashFromChecksums -ChecksumsPath $resolvedChecksumsPath -ArtifactFileName $msiFileName
+finally {
+    if (-not [string]::IsNullOrWhiteSpace($temporaryChecksumsPath) -and (Test-Path -LiteralPath $temporaryChecksumsPath -PathType Leaf)) {
+        Remove-Item -LiteralPath $temporaryChecksumsPath -Force -ErrorAction SilentlyContinue
+    }
+}
 
 $owner = ($Repository -split '/')[0]
 $releaseTagUrl = "https://github.com/$Repository/releases/tag/$tag"
@@ -170,6 +206,7 @@ PackageIdentifier: $PackageIdentifier
 PackageVersion: $Version
 InstallerType: wix
 Scope: machine
+ElevationRequirement: elevationRequired
 Installers:
 - Architecture: x64
   InstallerUrl: $installerUrl
