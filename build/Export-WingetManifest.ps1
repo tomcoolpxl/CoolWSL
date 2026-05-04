@@ -194,6 +194,8 @@ $installerManifestPath = Join-Path $manifestDirectory "$PackageIdentifier.instal
 $defaultLocaleManifestPath = Join-Path $manifestDirectory "$PackageIdentifier.locale.$PackageLocale.yaml"
 
 $versionManifest = @"
+# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.10.0.schema.json
+
 PackageIdentifier: $PackageIdentifier
 PackageVersion: $Version
 DefaultLocale: $PackageLocale
@@ -202,6 +204,8 @@ ManifestVersion: 1.10.0
 "@
 
 $installerManifest = @"
+# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+
 PackageIdentifier: $PackageIdentifier
 PackageVersion: $Version
 InstallerType: wix
@@ -216,6 +220,8 @@ ManifestVersion: 1.10.0
 "@
 
 $defaultLocaleManifest = @"
+# yaml-language-server: `$schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
 PackageIdentifier: $PackageIdentifier
 PackageVersion: $Version
 PackageLocale: $PackageLocale
