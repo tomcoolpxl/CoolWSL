@@ -11,9 +11,11 @@ Do not start or switch to a different project unless explicitly instructed by th
 
 The following files define the source of truth for the project:
 
-* `REQUIREMENTS.md` – scope and acceptance criteria
-* `IMPLEMENTATION_PLAN.md` – phases and work ordering
-* `TODO.md` – current actionable tasks
+* `REQUIREMENTS.md` – current v1 product scope and acceptance boundaries
+* `DESIGN.md` – current shipped UX and interaction model
+* `ARCHITECTURE.md` – current shipped architecture and active technical decisions
+* `EXTRA_FEATURES.md` – approved future product direction and expansion ideas
+* `TODO.md` – current actionable tasks when the user wants an explicit work queue
 * `DONE.md` – completed and verified work
 
 ## Workflow Rules
@@ -21,8 +23,9 @@ The following files define the source of truth for the project:
 ### Task Management
 
 * Each item in `TODO.md` must be small enough to complete within one review cycle.
-* Always derive `TODO.md` items from the current phase in `IMPLEMENTATION_PLAN.md`.
-* Update `TODO.md` **before** starting any new implementation work.
+* Derive `TODO.md` items from the current approved work, not from retired roadmap planning.
+* Use `EXTRA_FEATURES.md` as the source for future ideas only when the user is explicitly planning or scheduling future work.
+* Update `TODO.md` **before** starting any new multi-step implementation work when the user wants task tracking.
 * After completing work, update both `TODO.md` and `DONE.md`.
 
 ### Completion Criteria
@@ -38,8 +41,9 @@ Move a task to `DONE.md` only when all of the following are true:
 
 ### File Maintenance
 
-* Update `REQUIREMENTS.md` when scope or acceptance criteria change.
-* Update `IMPLEMENTATION_PLAN.md` when task order, phases, or grouping changes.
+* Update `REQUIREMENTS.md`, `DESIGN.md`, and `ARCHITECTURE.md` when shipped product scope, UX, or technical structure changes.
+* Update `EXTRA_FEATURES.md` when the approved future direction changes.
+* Do not reintroduce retired roadmap or speculative planning content into `REQUIREMENTS.md`, `DESIGN.md`, or `ARCHITECTURE.md`.
 
 ### Change Control
 
@@ -63,16 +67,16 @@ Before marking work as done:
 
 ## Repository Notes
 
-* `TODO.md` can keep the current phase explicit and still include remaining plan-derived phase checklists as backlog when the user asks for the full set of TODO items from `IMPLEMENTATION_PLAN.md`.
-* Prefer preserving exact `Exact TODO.md entries` wording from `IMPLEMENTATION_PLAN.md` when rebuilding `TODO.md`.
+* `TODO.md` may be intentionally minimal or empty when there is no active user-approved work queue. Do not fabricate backlog from retired plans.
+* Keep future work in `EXTRA_FEATURES.md`; keep `REQUIREMENTS.md`, `DESIGN.md`, and `ARCHITECTURE.md` focused on shipped behavior only.
 * WinUI 3 startup can crash in `Microsoft.UI.Xaml.dll` if `App.xaml` omits `XamlControlsResources` while using controls like `NavigationView`; keep the merged dictionary in `App.xaml`.
 * WinUI compiled XAML fails if an element uses `x:Load` without an `x:Name`; on the new Distros and Diagnostics pages, keep deferred elements explicitly named instead of dropping `x:Bind` to work around compiler failures.
 * Redirected host-side `wsl.exe` metadata commands (`--status`, `--version`, `--list --verbose`, and similar non-`--exec` mutations) emit UTF-16LE on this machine; keep explicit Unicode stream encoding on those commands, but do not force that encoding onto in-distro `--exec` commands.
 * CoolWSL supports non-interactive startup verification with `COOLWSL_SMOKE_TEST=1` and an optional `COOLWSL_SMOKE_TEST_FILE` marker path. This is the preferred local smoke-launch check.
-* Phase 3 uses `ProcessStartInfo.ArgumentList` for WSL command execution so distro names with spaces and shell metacharacters stay as raw arguments instead of shell-interpreted text.
+* WSL command execution uses `ProcessStartInfo.ArgumentList` so distro names with spaces and shell metacharacters stay as raw arguments instead of shell-interpreted text.
 * `WslListParser` and `WslStatusParser` must degrade safely when WSL output is unsupported, localized, or missing expected fields instead of guessing inventory or environment details.
 * Agent shell commands on this Windows machine should run PowerShell with `login=false` / no profile loading. The user's PowerShell profile writes outside the workspace and probes console/CIM state, which causes sandbox access-denied noise before the intended command runs.
-* EXTRA1 introduces a lossless INI document model under CoolWSL.Core/Models/Configuration. Both the per-distro and (later) global config services should round-trip user input byte-for-byte; never serialize via System.Configuration or other lossy libraries.
+* The lossless INI document model under `CoolWSL.Core/Models/Configuration` is the required path for WSL config editing. Per-distro config must round-trip user input byte-for-byte; do not serialize through lossy libraries.
 * Release flow must be tag-driven through CI/CD only: push `main`, create tag `vX.Y.Z`, and push the tag. Do not manually create/edit the release unless explicitly requested.
 * After triggering a release, use one blocking wait command and let it finish before doing anything else: `gh run watch <run_id> --repo tomcoolpxl/CoolWSL --exit-status`.
 * Do not run repeated status polling loops while waiting for release completion. Only check release assets after the blocking wait returns.
