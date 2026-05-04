@@ -1,5 +1,7 @@
 # CoolWSL
 
+![Screenshot](./assets/screenshot.png)
+
 CoolWSL is a desktop control center for Windows Subsystem for Linux on Windows 11. It gives you a cleaner, safer way to inspect distro state, run diagnostics, and manage common WSL tasks without memorizing command flags.
 
 ## Features
