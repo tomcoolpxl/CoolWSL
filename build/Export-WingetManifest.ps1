@@ -9,17 +9,21 @@ param(
 
     [string]$PackageName = "CoolWSL",
 
-    [string]$Publisher = "tomcoolpxl",
+    [string]$Publisher = "CoolWSL",
+
+    [string]$Author,
 
     [string]$PackageLocale = "en-US",
 
     [string]$License = "MIT",
 
-    [string]$ShortDescription = "WSL Control Center for Windows 11.",
+    [string]$ShortDescription = "Desktop app for managing WSL distros and diagnostics on Windows 11.",
 
-    [string]$Description = "CoolWSL is a desktop control center for Windows Subsystem for Linux on Windows 11.",
+    [string]$Description = "CoolWSL is a Windows 11 desktop app for inspecting WSL distro state, viewing diagnostics and logs, and performing common WSL management tasks without memorizing command flags.",
 
     [string]$RuntimeIdentifier = "win-x64",
+
+    [string]$InstallerPath,
 
     [string]$ChecksumsFile,
 
@@ -120,16 +124,83 @@ function Get-ReleaseChecksumsPath {
     )
 
     $checksumsFileName = "$AssetBaseName.checksums.txt"
-    $checksumsUrl = "https://github.com/$Repository/releases/download/$Tag/$checksumsFileName"
-    $temporaryPath = Join-Path ([System.IO.Path]::GetTempPath()) ("$checksumsFileName." + [Guid]::NewGuid().ToString('N'))
+    return Get-ReleaseAssetPath -Repository $Repository -Tag $Tag -AssetFileName $checksumsFileName -FailureMessage "Failed to download release checksums for '$Repository' tag '$Tag'. Provide -ChecksumsFile explicitly or verify the release assets exist."
+}
+
+function Get-ReleaseAssetPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Repository,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Tag,
+
+        [Parameter(Mandatory = $true)]
+        [string]$AssetFileName,
+
+        [Parameter(Mandatory = $true)]
+        [string]$FailureMessage
+    )
+
+    $assetUrl = "https://github.com/$Repository/releases/download/$Tag/$AssetFileName"
+    $assetStem = [System.IO.Path]::GetFileNameWithoutExtension($AssetFileName)
+    $assetExtension = [System.IO.Path]::GetExtension($AssetFileName)
+    $temporaryFileName = "{0}.{1}{2}" -f $assetStem, [Guid]::NewGuid().ToString('N'), $assetExtension
+    $temporaryPath = Join-Path ([System.IO.Path]::GetTempPath()) $temporaryFileName
 
     try {
         $ProgressPreference = 'SilentlyContinue'
-        Invoke-WebRequest -Uri $checksumsUrl -OutFile $temporaryPath
+        Invoke-WebRequest -Uri $assetUrl -OutFile $temporaryPath
         return $temporaryPath
     }
     catch {
-        throw "Failed to download release checksums from '$checksumsUrl'. Provide -ChecksumsFile explicitly or verify the release assets exist."
+        throw $FailureMessage
+    }
+}
+
+function Get-MsiPropertyValue {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Database,
+
+        [Parameter(Mandatory = $true)]
+        [string]$PropertyName
+    )
+
+    $view = $Database.GetType().InvokeMember('OpenView', 'InvokeMethod', $null, $Database, @("SELECT `Value` FROM `Property` WHERE `Property`='$PropertyName'"))
+
+    try {
+        $view.GetType().InvokeMember('Execute', 'InvokeMethod', $null, $view, $null) | Out-Null
+        $record = $view.GetType().InvokeMember('Fetch', 'InvokeMethod', $null, $view, $null)
+
+        if ($null -eq $record) {
+            return $null
+        }
+
+        return $record.StringData(1)
+    }
+    finally {
+        if ($null -ne $view) {
+            $view.GetType().InvokeMember('Close', 'InvokeMethod', $null, $view, $null) | Out-Null
+        }
+    }
+}
+
+function Get-MsiMetadata {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$InstallerFilePath
+    )
+
+    $installer = New-Object -ComObject WindowsInstaller.Installer
+    $database = $installer.GetType().InvokeMember('OpenDatabase', 'InvokeMethod', $null, $installer, @($InstallerFilePath, 0))
+
+    return [pscustomobject]@{
+        ProductName = Get-MsiPropertyValue -Database $database -PropertyName 'ProductName'
+        Manufacturer = Get-MsiPropertyValue -Database $database -PropertyName 'Manufacturer'
+        ProductVersion = Get-MsiPropertyValue -Database $database -PropertyName 'ProductVersion'
+        ProductCode = Get-MsiPropertyValue -Database $database -PropertyName 'ProductCode'
+        UpgradeCode = Get-MsiPropertyValue -Database $database -PropertyName 'UpgradeCode'
     }
 }
 
@@ -174,16 +245,53 @@ else {
     }
 }
 
+$temporaryInstallerPath = $null
+if ([string]::IsNullOrWhiteSpace($InstallerPath)) {
+    $candidateInstallerPath = Join-Path (Split-Path -Parent $resolvedChecksumsPath) $msiFileName
+    if (Test-Path -LiteralPath $candidateInstallerPath -PathType Leaf) {
+        $resolvedInstallerPath = $candidateInstallerPath
+    }
+    else {
+        $temporaryInstallerPath = Get-ReleaseAssetPath -Repository $Repository -Tag $tag -AssetFileName $msiFileName -FailureMessage "Failed to download installer '$msiFileName' from '$Repository' tag '$tag'. Provide -InstallerPath explicitly or verify the release asset exists."
+        $resolvedInstallerPath = $temporaryInstallerPath
+    }
+}
+else {
+    $resolvedInstallerPath = Resolve-RepoPath -Path $InstallerPath
+    if (-not (Test-Path -LiteralPath $resolvedInstallerPath -PathType Leaf)) {
+        throw "Installer file '$resolvedInstallerPath' was not found."
+    }
+}
+
 try {
     $installerSha256 = Get-ArtifactHashFromChecksums -ChecksumsPath $resolvedChecksumsPath -ArtifactFileName $msiFileName
+    $installerMetadata = Get-MsiMetadata -InstallerFilePath $resolvedInstallerPath
 }
 finally {
     if (-not [string]::IsNullOrWhiteSpace($temporaryChecksumsPath) -and (Test-Path -LiteralPath $temporaryChecksumsPath -PathType Leaf)) {
         Remove-Item -LiteralPath $temporaryChecksumsPath -Force -ErrorAction SilentlyContinue
     }
+
+    if (-not [string]::IsNullOrWhiteSpace($temporaryInstallerPath) -and (Test-Path -LiteralPath $temporaryInstallerPath -PathType Leaf)) {
+        Remove-Item -LiteralPath $temporaryInstallerPath -Force -ErrorAction SilentlyContinue
+    }
+}
+
+if (-not [string]::IsNullOrWhiteSpace($installerMetadata.ProductVersion) -and $installerMetadata.ProductVersion -ne $Version) {
+    throw "Installer ProductVersion '$($installerMetadata.ProductVersion)' did not match requested version '$Version'."
 }
 
 $owner = ($Repository -split '/')[0]
+$manifestAuthor = if ([string]::IsNullOrWhiteSpace($Author)) { $owner } else { $Author }
+
+if (-not $PSBoundParameters.ContainsKey('PackageName') -and -not [string]::IsNullOrWhiteSpace($installerMetadata.ProductName)) {
+    $PackageName = $installerMetadata.ProductName
+}
+
+if (-not $PSBoundParameters.ContainsKey('Publisher') -and -not [string]::IsNullOrWhiteSpace($installerMetadata.Manufacturer)) {
+    $Publisher = $installerMetadata.Manufacturer
+}
+
 $releaseTagUrl = "https://github.com/$Repository/releases/tag/$tag"
 $manifestRelativePath = Get-ManifestRelativeDirectory -Identifier $PackageIdentifier -PackageVersion $Version
 $resolvedOutputRoot = Resolve-RepoPath -Path $OutputDirectory
@@ -203,6 +311,34 @@ ManifestType: version
 ManifestVersion: 1.10.0
 "@
 
+$installerMetadataBlockLines = @()
+if (-not [string]::IsNullOrWhiteSpace($installerMetadata.ProductCode)) {
+    $installerMetadataBlockLines += "ProductCode: '$($installerMetadata.ProductCode)'"
+}
+
+$appsAndFeaturesEntryLines = @()
+if (-not [string]::IsNullOrWhiteSpace($PackageName)) {
+    $appsAndFeaturesEntryLines += "- DisplayName: $PackageName"
+}
+if (-not [string]::IsNullOrWhiteSpace($Publisher)) {
+    $appsAndFeaturesEntryLines += "  Publisher: $Publisher"
+}
+if (-not [string]::IsNullOrWhiteSpace($installerMetadata.ProductCode)) {
+    $appsAndFeaturesEntryLines += "  ProductCode: '$($installerMetadata.ProductCode)'"
+}
+if (-not [string]::IsNullOrWhiteSpace($installerMetadata.UpgradeCode)) {
+    $appsAndFeaturesEntryLines += "  UpgradeCode: '$($installerMetadata.UpgradeCode)'"
+}
+if ($appsAndFeaturesEntryLines.Count -gt 0) {
+    $installerMetadataBlockLines += 'AppsAndFeaturesEntries:'
+    $installerMetadataBlockLines += $appsAndFeaturesEntryLines
+}
+
+$installerMetadataBlock = ''
+if ($installerMetadataBlockLines.Count -gt 0) {
+    $installerMetadataBlock = ([string]::Join("`r`n", $installerMetadataBlockLines)) + "`r`n"
+}
+
 $installerManifest = @"
 # yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
 
@@ -211,6 +347,7 @@ PackageVersion: $Version
 InstallerType: wix
 Scope: machine
 ElevationRequirement: elevationRequired
+$installerMetadataBlock
 Installers:
 - Architecture: x64
   InstallerUrl: $installerUrl
@@ -228,7 +365,7 @@ PackageLocale: $PackageLocale
 Publisher: $Publisher
 PublisherUrl: https://github.com/$owner
 PublisherSupportUrl: https://github.com/$Repository/issues
-Author: $Publisher
+Author: $manifestAuthor
 PackageName: $PackageName
 PackageUrl: https://github.com/$Repository
 License: $License

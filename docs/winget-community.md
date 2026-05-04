@@ -31,7 +31,11 @@ pwsh -NoProfile -File .\build\Export-WingetManifest.ps1 `
 
 The script defaults to downloading `CoolWSL-<version>-win-x64.checksums.txt` from the tagged GitHub Release so `InstallerSha256` matches the live MSI asset.
 
+It also reads MSI metadata to populate `Publisher`, `PackageName`, `ProductCode`, and `AppsAndFeaturesEntries`, and validates that the MSI `ProductVersion` matches the requested `-Version`.
+
 Optional: pass `-ChecksumsFile` to force a specific checksums file.
+
+If you use a local checksums file, keep the matching `CoolWSL-<version>-win-x64.msi` beside it or pass `-InstallerPath` explicitly so the generated ARP correlation metadata comes from the same installer you plan to publish.
 
 This generates files under:
 
