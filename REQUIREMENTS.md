@@ -1,863 +1,242 @@
-# CoolWSL
+# CoolWSL Requirements
 
-A WSL Control Center for Windows 11.
+This document defines the current v1 product.
 
-## Purpose
+Historical roadmap material has been retired from this file. Future product ideas and expansion areas belong in [EXTRA_FEATURES.md](EXTRA_FEATURES.md).
 
-CoolWSL is a Windows 11 desktop application for managing WSL distributions, with WSL2 as the full-featured baseline and explicit degraded behavior for WSL1 and partially supported environments.
+## Product Definition
 
-The application should provide a clear overview of the local WSL environment while also offering a focused per-distro detail experience.
+CoolWSL is a Windows 11 desktop control center for Windows Subsystem for Linux.
 
-CoolWSL should avoid brittle or undocumented implementation techniques. It should rely on supported WSL commands, documented configuration files, and safe Windows APIs.
+Its job is to give users a safe, distro-first view of local WSL state, expose supported lifecycle and configuration actions, and surface diagnostics without depending on undocumented WSL internals.
 
-## Goals
+## Supported Environment
 
-CoolWSL should:
+- Windows 11 24H2, build 26100 or later.
+- Microsoft Store-distributed WSL 0.67.6 or later.
+- x64 only.
+- WinUI 3 desktop app on .NET 10.
+- Windows App SDK 2.0.x.
+- Installer-first release delivery using MSI, ZIP, and checksums assets.
+- App-owned data stored under `%LocalAppData%\CoolWSL\`.
 
-- Provide a Windows 11-native application shell with fixed global destinations and distro-first navigation.
-- Provide a single overview dashboard plus dedicated per-distro detail pages for focused management.
-- Provide a persistent status bar for global WSL state and refresh recency.
-- Support common WSL lifecycle actions.
-- Show distro status, version, default state, and basic health information.
-- Edit supported WSL configuration files safely.
-- Run commands inside distros and show clear output.
-- Offer useful diagnostics for WSL, networking, DNS, and distro health.
-- Support safe backup/export operations.
-- Avoid undocumented registry scraping, private WSL internals, or direct unsafe VHD manipulation.
-- Be suitable for technical users without becoming a fragile low-level VM manager.
+## Product Scope
 
-## Non-Goals
+### Shell
 
-CoolWSL should not:
+The app must provide a single shell with:
 
-- Act as a general Hyper-V VM manager.
-- Depend on undocumented WSL registry structures.
-- Depend on private WSL service internals.
-- Modify distro VHD files directly while WSL is running.
-- Hide destructive actions behind casual UI controls.
-- Pretend that WSL exposes a rich public management API.
-- Automatically repair complex networking or filesystem problems without user review.
-- Require users to understand every WSL command manually.
+- a fixed `Dashboard` destination.
+- a dynamic `Distros` group where each discovered distro is its own navigation target.
+- fixed footer destinations for `Logs` and `Settings`.
+- a persistent bottom status bar visible across the shell.
 
-## Target Platform
+The shell must remain usable when WSL is unavailable, partially supported, or reports no distros.
 
-- Windows 11 version 24H2 (build 26100) or later with current cumulative updates
-- Microsoft Store-distributed WSL 0.67.6 or later
-- unpackaged WinUI 3 desktop app released via installer-first artifacts (MSI and ZIP)
-- C# on .NET 10 LTS
-- Windows App SDK 2.0.1 or later 2.0.x servicing patch
-
-## Delivery Baseline
-
-- CoolWSL ships as an unpackaged WinUI 3 desktop app in a self-contained install-folder build.
-- Windows App SDK deployment stays on the stable 2.0 line.
-- Release delivery is installer-first using MSI, ZIP, and checksums assets.
-- The initial scaffold targets `net10.0-windows10.0.26100.0`.
-- App-owned logs, settings, temp files, and future persistent profiles live under `%LocalAppData%\CoolWSL\`.
-- Exports and backups must always use explicit user-selected locations.
-- The first supported release stays unelevated and disables admin-only actions with clear guidance.
-
-## Supported Backends
-
-CoolWSL should use the following supported mechanisms:
-
-- `wsl.exe`
-- `wslapi.dll` where appropriate
-- `%UserProfile%\.wslconfig`
-- `/etc/wsl.conf`
-- commands executed inside distros using `wsl -d <distro> -- <command>`
-- Windows process and performance APIs for host-side metrics
-
-## Unsupported or Avoided Backends
-
-CoolWSL should avoid:
-
-- undocumented `Lxss` registry parsing
-- private WSL service APIs
-- Hyper-V VM enumeration as a source of truth for WSL distros
-- direct modification of `ext4.vhdx`
-- assumptions based on localized `wsl.exe` output where avoidable
-
-## User Experience Model
-
-CoolWSL should use a single shell with:
-
-- fixed left-rail destinations for Dashboard, Logs, and Settings
-- a dynamic Distros group where each distro is its own first-class navigation item
-- a persistent bottom status bar showing WSL availability, default distro, running-distro count, and last refresh time
-- a Windows 11-native visual language built from real cards, Fluent icons, theme brushes, and standard window chrome
-
-## Dashboard
-
-The dashboard is the main landing page.
-
-It should answer:
-
-- Is WSL installed and working?
-- Which distros exist?
-- Which distros are running?
-- Which distro is the default?
-- Are there obvious problems?
-- Are global WSL settings pending restart?
-- What quick actions are available?
-
-## Distro Detail
-
-Selecting a distro from the rail should open its dedicated detail page.
-
-It should answer:
-
-- What is the state of this distro?
-- What configuration applies to it?
-- Can I run commands inside it?
-- Are services healthy?
-- Is networking working?
-- Is disk usage concerning?
-- What safe actions can I perform?
-
-The MVP detail page should be organized as:
-
-```text
-Overview
-Settings
-Diagnostics
-```
-
-## Global Destinations
-
-Diagnostics live inside the per-distro detail page as the Diagnostics pivot. Global checks (`wsl --status`, `wsl --version`, inventory, default distro) are surfaced inside that pivot alongside per-distro probes; the dashboard may summarize top findings but the shell does not expose a separate Diagnostics destination.
-
-Logs should remain a fixed global destination for metadata-only app and command history.
-
-Settings should remain a fixed global destination for application settings and global WSL configuration.
-
-Backups and other secondary workflows may be reached from Settings or contextual actions rather than occupying first-class shell positions in MVP.
-
-## MVP Requirements
-
-## MVP Dashboard
+### Dashboard
 
 The dashboard must show:
 
-- WSL installed or unavailable status.
-- WSL version where available.
-- WSL kernel version where available.
-- Default WSL version where available.
-- Plain-language environment summary.
-- List or tile surface of registered distros.
-- Distro name.
-- Distro running state.
-- Distro WSL version.
-- Default distro marker.
-- Quick global actions.
-- Compact health or diagnostic summary with links to the selected distro Diagnostics pivot.
+- WSL availability and a plain-language environment summary.
+- WSL version when available.
+- kernel version when available.
+- default WSL version when available.
+- distro inventory as clickable tiles or rows.
+- distro name, running state, WSL generation label, default marker, and safe management label when applicable.
+- degraded or empty-state messaging when inventory cannot be fully resolved.
 
-Required actions:
+The dashboard must support:
 
-- Refresh status.
-- Open default distro.
-- Navigate to selected distro detail.
-- Shutdown all WSL instances.
+- refresh.
+- opening the default WSL terminal.
+- shutting down all running WSL distros.
+- navigating directly to a selected distro detail page.
 
-Lifecycle actions such as start, terminate, and set default must remain available, but they should live on the distro detail page or in a per-distro overflow surface rather than forcing four inline actions onto every dashboard row.
+The dashboard must not be the primary home for dense per-distro action stacks.
 
-The shutdown action must clearly warn that it affects all running WSL distros.
-
-## MVP Shell Navigation
-
-The shell navigation must support:
-
-- Fixed top-level destinations for Dashboard, Logs, and Settings.
-- A Distros group bound to all registered distros.
-- Selecting a distro as a first-class navigation action.
-- Distinguishing running and stopped distros with clear state indicators.
-- Showing the default distro clearly.
-- Handling distro names with spaces.
-- Handling no distros installed.
-- Handling WSL not installed.
-- Handling old WSL versions with reduced feature availability.
-- Showing WSL1 distros with explicit reduced-capability messaging.
-- Labeling Docker Desktop distros distinctly when they can be identified safely.
-
-Selecting a distro should open its dedicated detail page. The MVP should not require a separate top-level Distros page before a user can act on a distro.
-
-WSL1 distros remain first-class inventory items, but any WSL2-only feature must be disabled with a plain-language explanation.
-
-Docker Desktop distros must never be the default target for destructive or config-editing flows in the initial release.
-
-## MVP Status Bar
+### Status Bar
 
 The persistent status bar must show:
 
-- WSL version or availability state.
-- Default distro.
-- Running distro count.
-- Last refresh time.
+- WSL availability or version.
+- default distro.
+- running-distro count.
+- last refresh time.
 
-It must remain visible across Dashboard, Logs, Settings, and distro detail pages and degrade safely when data is unavailable.
+It must degrade safely when data is unavailable.
 
-## MVP Distro Detail
+### Distro Detail
 
 Each distro detail page must show:
 
-- Distro name.
-- Running state.
-- WSL version.
-- Whether it is the default distro.
-- Capability messaging when the distro is WSL1 or system-managed.
-- A pivot with Overview, Settings, and Diagnostics.
+- distro name.
+- running or stopped state.
+- WSL generation.
+- default-distro indicator when applicable.
+- capability or management messaging when the distro is WSL1 or system-managed.
+- a pivot with `Overview`, `Settings`, and `Diagnostics`.
 
-Required actions:
+The `Overview` pivot must expose:
 
-- Open terminal.
-- Start distro.
-- Terminate distro.
-- Set as default.
+- `Open terminal`.
+- `Start`.
+- `Terminate`.
+- `Set default`.
 
-The terminal entry point must remain clearly available from the Overview pivot.
+Unavailable actions must be disabled with explanation instead of being silently removed.
 
-## MVP Command Runner
+### Per-Distro Settings
 
-This section is superseded by EXTRA1's "Open terminal" overview card and the validation runner. The `IWslDistroService.RunInDistroAsync` interface stays in the codebase as a service-level primitive for probes.
+The app must support reading and editing `/etc/wsl.conf` for the selected distro.
 
-## MVP Global Configuration
+The per-distro settings surface must provide:
 
-CoolWSL must support reading:
+- a read/write raw editor.
+- structured controls for the supported documented key set.
+- validation messages split into errors, warnings, and informational issues.
+- backup-before-overwrite behavior.
+- restore-defaults behavior by deleting `/etc/wsl.conf` safely.
+- explicit restart-impact guidance.
+- verification probes that test whether selected settings are effective inside the distro.
 
-```text
-%UserProfile%\.wslconfig
-```
+The structured editor must cover the currently supported sections:
 
-The MVP should provide:
+- `boot`.
+- `automount`.
+- `network`.
+- `interop`.
+- `user`.
+- `gpu`.
+- `time`.
 
-- Read-only visibility of the current file contents when the file exists.
-- Clear missing-file state when `.wslconfig` is absent.
-- Basic validation messaging for malformed content.
-- Explicit handoff to the official WSL Settings app for editing.
-- Clear notice when restart is required.
+Edits must preserve user intent as closely as possible, including comments, ordering, unknown keys, and raw formatting where the user did not change the entry.
 
-The app must not silently restart WSL after config changes.
+### Global WSL Settings
 
-The UI must clearly state that `.wslconfig` applies only to WSL2 distributions.
+The app must support reading `%UserProfile%\.wslconfig`.
 
-## MVP Per-Distro Configuration
+The v1 product must treat global WSL settings as a handoff flow, not as an in-app full editor.
 
-CoolWSL must support reading and editing:
+The global settings experience must provide:
 
-```text
-/etc/wsl.conf
-```
+- current file path.
+- read-only file contents when the file exists.
+- clear missing-file state when the file does not exist.
+- validation messaging for malformed content.
+- a prominent `WSL Settings` handoff action.
+- clear messaging that global changes affect WSL 2 and typically require WSL restart semantics.
 
-The MVP should provide:
+The app must not silently edit `.wslconfig` from the user-facing v1 UX.
 
-- Raw text editor.
-- Basic validation.
-- Backup before save where feasible.
-- Save changes using commands executed inside the distro.
-- Clear notice when distro restart is required.
+### Diagnostics
 
-## MVP Diagnostics
+Diagnostics must live on the per-distro `Diagnostics` pivot.
 
-The MVP diagnostics experience must include:
+That pivot must own both:
 
-- A Diagnostics pivot within each distro detail page that owns the full diagnostics view, covering both per-distro probes and global checks for the chosen distro context.
-- `wsl --status`
-- `wsl --version` where available
-- Distro list diagnostics
-- Default distro
-- Internet connectivity test from selected distro
-- DNS resolution test from selected distro
-- Basic host-to-WSL notes
+- global checks such as `wsl --status`, `wsl --version`, distro inventory, and default-distro health.
+- selected-distro probes such as DNS and internet reachability.
 
-Diagnostics should be presented in plain language, with raw command output available.
+Each diagnostic result must support:
 
-The dashboard may surface only a compact summary of top findings. Full diagnostic detail lives in the per-distro Diagnostics pivot rather than being duplicated across multiple shell destinations.
+- a title.
+- severity labeling.
+- a plain-language summary.
+- optional detail text.
+- optional suggested next step.
+- optional raw command text.
+- optional raw output.
 
-## MVP Export
+Diagnostics must summarize and explain problems. They must not attempt automatic repair.
 
-CoolWSL must support exporting a distro.
+### Logs
 
-Requirements:
+The app must provide a dedicated `Logs` page for metadata-only logging.
 
-- Select distro.
-- Select destination.
-- Run export.
-- Show progress state where feasible.
-- Show final result.
-- Show error output on failure.
-- Prevent export from being treated as destructive.
+The logs experience must provide:
 
-## MVP Logging
+- newest-first entries.
+- filtering by log level.
+- text search over area and message.
+- a `Clear` action that clears the currently displayed session view without deleting retained files.
+- a `Refresh` action.
 
-CoolWSL must keep an application log containing:
+Log entries must remain metadata-only. They must not persist command stdout or stderr.
 
-- WSL commands executed by the app.
-- Start time.
-- End time.
-- Exit code.
-- Errors.
-- Configuration changes.
-- Export operations.
+The current page contract is session-scoped display over a retained on-disk log store.
 
-Logs must avoid storing sensitive command output by default unless the user enables it.
+### Settings
 
-Logs must be written under `%LocalAppData%\CoolWSL\Logs`.
+The `Settings` page must provide:
 
-Metadata-only logs are retained for 30 days by default.
+- current WSL status, default distro, and inventory summary.
+- safe global actions such as opening the default terminal and shutting down WSL.
+- read-only global `.wslconfig` visibility and WSL Settings handoff.
+- persisted theme selection with `System`, `Light`, and `Dark` choices.
+- about information and repository / issue links.
 
-## Version 1.0 Requirements
+Only theme preference is a persisted user-facing app preference in v1.
 
-## 1.0 Dashboard Enhancements
+If the UI shows future preference placeholders, those controls do not define a supported saved-preference contract yet.
 
-The dashboard should add:
+## Supported Technical Boundaries
 
-- Running distro count.
-- Approximate WSL memory usage.
-- Approximate WSL CPU usage.
-- Disk usage summary.
-- Health warnings.
-- Pending restart warnings.
-- Recent actions.
-- Failed diagnostics summary.
+CoolWSL may rely on:
 
-## 1.0 Health Detection
+- `wsl.exe`.
+- supported WSL configuration files.
+- Windows process launch APIs.
+- local app-data storage under `%LocalAppData%\CoolWSL\`.
+- supported WinUI 3 and Windows App SDK behavior.
 
-CoolWSL should detect:
+CoolWSL must avoid using undocumented internals as a source of truth.
 
-- Failed systemd services.
-- DNS failure.
-- No internet connectivity.
-- Disk almost full.
-- WSL version too old for selected features.
-- Missing default distro.
-- Unsupported configuration settings.
-- Config changes requiring restart.
+## Capability Rules
 
-Health warnings must be explainable and dismissible.
-
-## 1.0 Service Management
-
-For distros with systemd enabled, CoolWSL should support:
-
-- List services.
-- Show running services.
-- Show failed services.
-- Start service.
-- Stop service.
-- Restart service.
-- View service status.
-- View recent journal output.
-
-Service actions must show the exact distro affected.
-
-## 1.0 Disk Management
-
-CoolWSL should support:
-
-- Show Linux filesystem usage using `df`.
-- Show distro disk usage where safely available.
-- Resize distro VHD using supported WSL commands where available.
-- Warn before disk operations.
-- Refuse unsupported disk operations instead of using brittle workarounds.
-
-Shrink and compact operations should remain out of scope unless implemented through a safe, documented workflow.
-
-## 1.0 Backup and Import
-
-CoolWSL should support:
-
-- Export distro to `.tar`.
-- Export distro to `.vhd` where supported.
-- Import distro from backup.
-- Clone distro through export/import.
-- Unregister distro with strong confirmation.
-
-Unregister must require a destructive-action confirmation, such as typing the distro name.
-
-## 1.0 Networking Diagnostics
-
-CoolWSL should show:
-
-- Distro IP address.
-- Default route.
-- DNS servers.
-- DNS resolution test.
-- Internet connectivity test.
-- Windows host reachability test.
-- Localhost forwarding status where inferable.
-- Mirrored networking configuration where configured.
-
-The app should diagnose before offering fixes.
-
-## 1.0 Global Settings UI
-
-Instead of raw `.wslconfig` editing only, CoolWSL should provide structured controls for:
-
-- memory
-- processors
-- swap
-- swap file
-- localhost forwarding
-- networking mode
-- DNS tunneling
-- firewall
-- auto proxy
-- nested virtualization
-- auto memory reclaim
-- sparse VHD
-- VM idle timeout
-- custom kernel path
-
-The raw editor should remain available.
-
-## 1.0 Per-Distro Settings UI
-
-Delivered by EXTRA1 ahead of Phase 12. Structured controls cover the seven officially documented sections; raw editor is preserved.
-
-## 1.0 Command Profiles
-
-CoolWSL should support saved command profiles.
-
-Each profile should include:
-
-- name
-- distro
-- command
-- run as default user or root
-- timeout
-- description
-- whether output should be logged
-
-Example profiles:
-
-- Update packages.
-- Show failed services.
-- Restart SSH.
-- Show Docker containers.
-- Show Kubernetes contexts.
-- Show disk usage.
-
-## 1.0 Application Settings
-
-CoolWSL should provide settings for:
-
-- default terminal integration
-- command timeout
-- logging behavior
-- whether to store command output
-- theme
-- refresh interval
-- confirmation behavior
-- export default location
-
-## Architecture Requirements
-
-## Suggested Project Structure
-
-```text
-CoolWSL.App
-CoolWSL.Core
-CoolWSL.Wsl
-CoolWSL.Configuration
-CoolWSL.Diagnostics
-CoolWSL.Tests
-```
-
-## Core Interfaces
-
-```csharp
-public interface IWslCommandService
-{
-    Task<CommandResult> RunAsync(
-        string arguments,
-        CancellationToken cancellationToken = default);
-}
-
-public interface IWslDistroService
-{
-    Task<IReadOnlyList<WslDistro>> ListAsync(
-        CancellationToken cancellationToken = default);
-
-    Task TerminateAsync(
-        string distroName,
-        CancellationToken cancellationToken = default);
-
-    Task SetDefaultAsync(
-        string distroName,
-        CancellationToken cancellationToken = default);
-
-    Task<CommandResult> RunInDistroAsync(
-        string distroName,
-        string command,
-        CancellationToken cancellationToken = default);
-}
-
-public interface IWslGlobalConfigService
-{
-    Task<WslGlobalConfig> ReadAsync(
-        CancellationToken cancellationToken = default);
-
-    Task SaveAsync(
-        WslGlobalConfig config,
-        CancellationToken cancellationToken = default);
-}
-
-public interface IWslDistroConfigService
-{
-    Task<WslDistroConfig> ReadAsync(
-        string distroName,
-        CancellationToken cancellationToken = default);
-
-    Task SaveAsync(
-        string distroName,
-        WslDistroConfig config,
-        CancellationToken cancellationToken = default);
-}
-```
-
-## Command Execution Requirements
-
-All command execution must:
-
-- Avoid shell injection.
-- Quote distro names safely.
-- Support cancellation.
-- Support timeout.
-- Capture stdout.
-- Capture stderr.
-- Capture exit code.
-- Log command metadata.
-- Avoid logging sensitive output by default.
-- Handle missing `wsl.exe`.
-- Handle non-zero exit codes.
-- Handle commands that write warnings to stderr but still succeed.
-
-## Parser Requirements
-
-Parsers must be tested against:
-
-- normal `wsl --list --verbose` output
-- no distros installed
-- stopped distros
-- running distros
-- default distro marker
-- distro names containing spaces
-- old WSL versions
-- missing `wsl --version`
-- unexpected whitespace
-- localized output risks
-
-Where parsing is unreliable, the app should expose reduced functionality rather than guessing.
+- WSL 2 is the full-featured baseline.
+- WSL 1 distros must remain visible, but WSL 2-only behavior must be gated with plain-language explanations.
+- Docker Desktop or similarly system-managed distros must remain visible, but destructive and config-editing flows must be restricted when safe identification is available.
+- The app remains unelevated in v1. Admin-only workflows are out of scope for the supported product path.
+- The app must not silently restart WSL after configuration changes.
 
 ## Safety Requirements
 
-CoolWSL must:
+- Destructive actions such as terminating a distro, shutting down WSL, reverting settings, or restoring defaults must require explicit user intent.
+- The app must prefer supported command and file-based workflows over brittle inference.
+- Command execution must pass arguments without shell-concatenation hazards.
+- Parser behavior must degrade safely on localized, partial, or unsupported output instead of guessing.
+- Refresh flows must reject stale results when a newer refresh supersedes them.
 
-- Confirm destructive operations.
-- Never silently unregister a distro.
-- Never silently shutdown WSL after config save.
-- Never edit VHD files directly.
-- Create backups before overwriting config files.
-- Show affected distro before running an operation.
-- Show raw command output for failed operations.
-- Prefer refusing unsupported actions over using undocumented workarounds.
-- Disable admin-only actions until an explicit elevation model is approved.
-- Treat identified Docker Desktop distros as system-managed and protect them from destructive flows by default.
+## Data and Privacy Requirements
 
-## Destructive Operations
+- Logs must default to metadata only.
+- Log retention must default to 30 days.
+- App-owned settings, logs, and backups must stay under `%LocalAppData%\CoolWSL\` unless the user explicitly chooses another export destination.
+- Backups and exports must be explicit user actions.
 
-The following operations require confirmation:
+## Quality Requirements
 
-- Shutdown all WSL.
-- Terminate distro.
-- Unregister distro.
-- Import over existing distro.
-- Resize disk.
-- Save config that changes boot behavior.
-- Save config that changes systemd behavior.
-- Save config that changes networking behavior.
+- The solution must remain buildable through the checked-in .NET toolchain.
+- Automated tests must cover command construction, parsing, diagnostics mapping, configuration handling, dependency injection, and key view-model behavior.
+- The app must support non-interactive smoke launch verification through `COOLWSL_SMOKE_TEST=1`.
+- Keyboard-triggered refresh and focusable primary controls must remain available on major pages.
+- Visual styling must preserve text clarity and theme contrast on supported Windows themes.
 
-The following operations require strong confirmation:
+## Explicit Non-Goals
 
-- Unregister distro.
-- Delete backup.
-- Replace existing distro.
-- Any operation that may destroy distro data.
+The v1 product does not attempt to be:
 
-## Error Handling Requirements
+- a general Hyper-V or VM manager.
+- a full in-app editor for global WSL VM settings.
+- a disk or VHD management tool.
+- a backup, import, or export workbench.
+- a service manager for arbitrary Linux daemons.
+- an automatic repair tool for broken networking, filesystem, or distro state.
+- a UI over undocumented registry structures, private service APIs, or direct `ext4.vhdx` mutation.
+- an in-app freeform command-runner product surface.
 
-CoolWSL must handle:
+## Future Work
 
-- WSL not installed.
-- WSL installed but unavailable.
-- `wsl.exe` command failure.
-- Unsupported WSL feature.
-- Access denied.
-- Distro not found.
-- Distro currently running.
-- Distro currently stopped.
-- Network failure.
-- DNS failure.
-- Config file missing.
-- Config parse failure.
-- Export failure.
-- Timeout.
-- Cancellation.
+Potential future work is tracked only in [EXTRA_FEATURES.md](EXTRA_FEATURES.md).
 
-Errors should include:
-
-- plain-language summary
-- command attempted
-- exit code where available
-- stderr where available
-- suggested next step where safe
-
-## Testing Requirements
-
-Unit tests must cover:
-
-- command argument building
-- distro list parsing
-- status parsing
-- config parsing
-- config serialization
-- command result handling
-- timeout handling
-- cancellation handling
-- error mapping
-
-Integration tests should cover:
-
-- WSL unavailable
-- no distros installed
-- one stopped distro
-- one running distro
-- command execution inside distro
-- reading `/etc/wsl.conf`
-- reading `.wslconfig`
-
-Tests should avoid destructive operations unless explicitly marked.
-
-## Security Requirements
-
-CoolWSL must:
-
-- Avoid privilege escalation unless explicitly required.
-- Show when an operation requires administrator rights.
-- Avoid storing sensitive command output by default.
-- Avoid leaking environment variables in logs.
-- Avoid executing user-provided commands through an intermediate shell unless necessary.
-- Escape and quote arguments safely.
-- Keep backups in a predictable and user-visible location.
-
-## Accessibility Requirements
-
-The UI should support:
-
-- keyboard navigation
-- screen readers
-- high contrast mode
-- scalable text
-- clear focus states
-- accessible labels for action buttons that include the affected distro when applicable
-- live announcements for long-running operation results and command completion
-- page scrolling that works predictably with mouse, keyboard, and assistive technology
-- confirmation dialogs that are readable and specific
-
-## UX Requirements
-
-## Shell UX
-
-The main shell should use this structure:
-
-```text
-Dashboard
-Logs
-Settings
-Distros
-    Ubuntu
-    Debian
-    docker-desktop
-```
-
-The shell should also include a persistent bottom status bar.
-
-Backups and other secondary workflows should be entered from Settings or contextual actions until they justify first-class navigation.
-
-## Dashboard UX
-
-The dashboard should prioritize:
-
-- current WSL status
-- running distros
-- warnings
-- quick actions
-
-The distro surface should prefer tiles or simple card rows over an action-dense table.
-
-Each dashboard distro item should:
-
-- show name, state, version, and default status clearly
-- use a primary click or tap action to open the distro detail page
-- keep secondary lifecycle actions in the detail page or an overflow surface
-
-## Distro Detail UX
-
-The distro detail page should use this structure in MVP:
-
-```text
-Overview
-Settings
-Diagnostics
-```
-
-Version 1.0 may extend this with Services, Filesystem, and Networking as additional pivots or secondary routes without changing the primary shell model.
-
-## Diagnostics UX
-
-Diagnostics should:
-
-- live in the per-distro Diagnostics pivot as the only full-results home
-- present results in a severity-first or otherwise easy-to-triage structure
-- keep raw output available on demand
-- allow the dashboard to summarize top findings without duplicating the full pivot
-
-## Visual UX
-
-The app should:
-
-- use real card surfaces instead of transparent content containers
-- use theme brushes instead of opacity-based typography for secondary text
-- use Fluent-style icons and standard Windows 11 title-bar behavior
-- support a Windows 11 backdrop treatment such as Mica when it does not compromise text clarity
-- keep page scrolling natural and avoid dead mouse-wheel zones caused by nested scroll surfaces
-
-## Confirmation UX
-
-Confirmation dialogs must include:
-
-- operation name
-- affected distro
-- whether the operation is destructive
-- whether data loss is possible
-- exact consequence
-- cancel as the default option for dangerous operations
-
-## Status UX
-
-The shell must maintain a persistent status bar that surfaces WSL availability, default distro, running-distro count, and refresh recency independently of the active page.
-
-Long-running operations must show:
-
-- operation name
-- target distro
-- elapsed time
-- current status
-- cancel button where safe
-- final result
-
-## Implementation Principles
-
-CoolWSL should be:
-
-- safe first
-- explicit about side effects
-- conservative with unsupported features
-- clear about when restart is required
-- tolerant of older WSL installations
-- useful without requiring administrator rights
-- testable at the command-wrapper layer
-- honest about feature availability
-
-## MVP Acceptance Criteria
-
-The MVP is acceptable when:
-
-- The app starts on Windows 11.
-- It detects whether WSL is available.
-- It uses a fixed shell with Dashboard, Logs, Settings, and per-distro navigation items.
-- It lists registered distros.
-- It shows running or stopped state.
-- It shows the default distro.
-- It shows a persistent status bar with global WSL state and last refresh information.
-- The dashboard presents a summary card, distro inventory surface, quick actions, and a diagnostics summary.
-- Each distro opens in a detail page with Overview, Settings, and Diagnostics.
-- It can open a distro.
-- It can terminate a distro.
-- It can set the default distro.
-- It can shutdown WSL with confirmation.
-- It can open a distro terminal from the Overview pivot.
-- It provides mouse-wheel and keyboard scrolling that works on the main content pages.
-- It can read `.wslconfig` and hand off to the official WSL Settings app.
-- It can read and edit `/etc/wsl.conf`.
-- It can run basic diagnostics inside the per-distro Diagnostics pivot, which owns both global and per-distro checks.
-- It can export a distro.
-- It logs operations safely.
-- It avoids undocumented WSL internals.
-
-## Version 1.0 Acceptance Criteria
-
-Version 1.0 is acceptable when:
-
-- The dashboard includes health warnings.
-- The app provides structured global WSL settings.
-- The app provides structured per-distro settings.
-- The app supports service inspection for systemd distros.
-- The app supports safe import and clone workflows.
-- The app supports disk usage inspection.
-- The app supports supported disk resizing where available.
-- The app supports networking diagnostics.
-- The app supports saved command profiles.
-- The app has robust error handling.
-- The app has unit tests for parsers and command services.
-- The app has clear warnings for destructive operations.
-- The app remains free of undocumented WSL internals.
-
-## Open Questions
-
-Phase 1 resolved the delivery baseline as follows:
-
-- CoolWSL is WSL2-first, but WSL1 distros remain visible and only documented shared actions stay enabled.
-- Docker Desktop distros remain visible, are labeled as system-managed when identifiable, and stay out of destructive and config-editing flows by default.
-- Command output is not stored by default; metadata-only logs are retained for 30 days unless the user changes retention later.
-- Admin-only actions are disabled with guidance instead of prompting for elevation in the initial release.
-
-Remaining open questions:
-
-- Should exports be managed as first-class backups?
-- Should CoolWSL support scheduled backups?
-- Should there be a portable mode?
-- Should the app expose raw command history?
-- Should per-distro settings be editable while the distro is stopped only?
-- Should the app support remote WSL instances in the future?
-
-## Recommended MVP Scope
-
-Build first:
-
-- Dashboard
-- Shell navigation with distro entries
-- Open distro
-- Terminate distro
-- Shutdown all WSL
-- Set default distro
-- Per-distro detail shell
-- Command runner
-- Raw `.wslconfig` editor
-- Raw `/etc/wsl.conf` editor
-- Basic diagnostics
-- Distro export
-- Safe operation logging
-
-Defer:
-
-- Service manager
-- Disk resize
-- Import and clone
-- Structured settings UI
-- Networking assistant
-- Resource graphs
-- Backup scheduler
-- Docker integration
-- Kubernetes integration
-- Health scoring
+If a feature is not implemented in source and not described in this document as current behavior, it should be treated as future work rather than implied scope.

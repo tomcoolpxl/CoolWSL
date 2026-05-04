@@ -1,560 +1,361 @@
 # CoolWSL Design
 
-## Overview
+This document describes the current v1 user experience and visual design.
 
-CoolWSL is a WinUI 3 desktop application for managing WSL environments on Windows 11.
+Historical roadmap sections have been removed. Future UX expansion ideas belong in [EXTRA_FEATURES.md](EXTRA_FEATURES.md).
 
-The UI direction is a Windows 11-native shell that combines the entity-first navigation of Docker Desktop with the visual language of Windows Terminal Settings. Users should move through one shell with fixed global destinations, first-class distro navigation, real card surfaces, and a persistent status bar instead of hopping between a flat set of unrelated top-level pages.
+## Design Intent
 
-The shell is organized around:
+CoolWSL should feel like a Windows 11 control center for WSL rather than a generic admin console.
 
-- fixed destinations: Dashboard, Logs, Settings
-- a dynamic Distros group where each distro is its own navigation item
-- a persistent bottom status bar
-- a distro detail page with a pivot: Overview, Settings, Diagnostics — the Diagnostics pivot is the only home for full diagnostic results
+The design direction is:
 
-The design should feel like a Windows 11 control center rather than a generic admin console.
+- distro-first navigation.
+- honest diagnostics.
+- safe lifecycle and configuration actions.
+- readable, width-bound layouts.
+- consistent card-based surfaces.
+- minimal duplication between global and per-distro workflows.
 
-## Delivery Baseline
-
-- Unpackaged WinUI 3 desktop app released through installer-first artifacts (MSI and ZIP).
-- WSL2-first UX with explicit degraded states for WSL1 and older WSL surfaces.
-- Docker Desktop distros stay visible, but they are treated as system-managed targets.
-- The app remains unelevated in the first release; admin-only actions are disabled and explained.
-- Logs are metadata-only by default and retain 30 days unless the user changes retention later.
-- The window should use standard Windows 11 chrome, a native backdrop treatment when text clarity remains intact, and app-wide shared styles for cards, typography, spacing, and status indicators.
-
----
-
-## Design Principles
+## Core Principles
 
 ### Windows-native fidelity
 
-- The app should look and behave like a first-party Windows 11 desktop utility.
-- Standard title-bar behavior, Fluent icons, theme brushes, and card surfaces should be the default.
-- Typography should follow a small, consistent type ramp instead of page-specific magic numbers.
+- Use WinUI 3 controls, theme brushes, standard window controls, and Fluent iconography.
+- Prefer calm Windows utility styling over custom chrome theatrics.
+- Keep the title bar slim and integrated with the rest of the shell.
 
 ### Distro-first navigation
 
-- A distro is a primary entity, not a secondary dropdown choice.
-- Selecting a distro should be one click from the rail.
-- The shell should not require a top-level Distros page before a user can act on a distro.
+- A distro is a first-class entity in the navigation rail.
+- Users should not have to enter a separate Distros hub before acting on a distro.
+- Diagnostics are contextual to a selected distro rather than split into a disconnected global page.
 
 ### Clarity over density
 
-- Show the most relevant information first.
-- Avoid action overload in repeated lists.
-- Use progressive disclosure for advanced or destructive workflows.
+- Lead with state and next actions, not raw command output.
+- Use summaries first and details on demand.
+- Avoid turning repeated inventory rows into action toolbars.
 
-### Safety-first UX
+### Safety over cleverness
 
-- Destructive actions must be explicit and confirmed.
-- Side effects must be visible before execution.
-- Global actions must remain visually distinct from per-distro actions.
+- Destructive actions stay explicit.
+- Unsupported or reduced-capability states are explained in plain language.
+- Global settings are handed off to the official WSL Settings app instead of being recreated in full.
 
-### Honest diagnostics
+### Readability first
 
-- Diagnostics live in the per-distro Diagnostics pivot, which acts as the only full-detail home.
-- Summaries may appear elsewhere (for example a compact dashboard health card), but the full diagnostic story is not duplicated as a separate shell destination.
-- Raw evidence should stay available behind the summary.
+- Text must stay crisp on opaque surfaces.
+- Secondary and tertiary emphasis should come from theme brushes rather than control opacity.
+- Pages should avoid nested scrolling regions that trap the mouse wheel.
 
-### Resilient UI
+## Shell Composition
 
-- UI must remain usable even when WSL is unavailable.
-- Partial failures must not break navigation.
-- Empty states should always explain the next useful action.
-
-### Readable and scrollable content
-
-- Text must remain crisp on supported DPI scales.
-- Secondary text should use theme brushes instead of opacity-based demotion.
-- Page layouts should avoid nested scroll regions that trap the mouse wheel.
-
----
-
-## Layout Structure
-
-### Main Window
+The current shell is a four-part composition:
 
 ```text
 +--------------------------------------------------------------+
-| Standard title bar / drag region                             |
+| Slim title bar                                               |
 +--------------+-----------------------------------------------+
-|              |                                               |
-| Navigation   | Content area                                  |
+| Navigation   | Content frame                                 |
 | rail         |                                               |
-|              |                                               |
 +--------------+-----------------------------------------------+
 | Persistent status bar                                        |
 +--------------------------------------------------------------+
 ```
 
-The title bar should stay close to the standard Windows 11 height instead of consuming a large custom chrome band.
+### Navigation model
 
-### Shell Navigation
+The navigation rail is organized as:
 
 ```text
 Dashboard
-Logs
-Settings
 
 Distros
   Ubuntu
   Debian
   docker-desktop
+
+Logs
+Settings
 ```
 
 Rules:
 
-- Dashboard, Logs, and Settings are the fixed global destinations.
-- Distros is a dynamic group driven by the live distro inventory.
-- Each distro item shows name plus a compact state indicator.
-- The currently selected distro item opens the distro detail page.
-- Diagnostics are reached through the Diagnostics pivot inside a distro detail page rather than through a global rail destination.
-- Backups and other secondary workflows should be entered from Settings or contextual actions until they justify first-class placement.
+- `Dashboard` is the landing page.
+- `Distros` is generated from live inventory.
+- `Logs` and `Settings` live in the footer.
+- There is no separate top-level Diagnostics destination.
+- Selecting a distro opens one dedicated distro detail page.
 
-### Status Bar
+### Status bar
 
-The bottom status bar is always visible and should surface:
+The bottom status bar remains visible across the shell and carries:
 
-- WSL availability or version
-- default distro
-- running-distro count
-- last refresh time
+- WSL availability or version.
+- default distro.
+- running-distro count.
+- last refresh time.
 
-The status bar provides persistent global context so users do not need to return to the Dashboard to answer basic questions.
+It provides persistent global context so the user does not need to keep returning to the dashboard.
 
----
+## Shared Visual System
 
-## Shared UI Primitives
+The app uses a small set of shared primitives rather than page-specific one-off styles.
 
-The shell should standardize a small set of reusable primitives instead of styling each page independently.
+### Cards and layout
 
-- Card: opaque background, 1 px stroke, 8 px corner radius, standard inner padding
-- Page header: title, subtitle, optional action slot
-- Status pill: running, stopped, warning, system-managed, unavailable
-- Empty state: glyph, headline, explanatory body, primary action
-- Output block: monospace output region with copy and clear affordances
-- Status bar: global summary surface bound to refresh state
-- SettingsCard and SettingsExpander patterns for settings-like and diagnostics-like content
+- Opaque card surfaces with rounded corners and a light stroke.
+- Centered, width-bound content hosts on major pages.
+- Consistent vertical stacking with generous spacing.
+- `ItemsRepeater` for repeated content where nested `ListView` scrolling would be a liability.
 
-Shared primitives matter because the shell must look intentional and consistent even as later phases add services, networking, logs, and configuration editors.
+### Typography
 
----
+- Page titles use the system title styles.
+- Secondary and tertiary text use shared theme-aware text styles.
+- Monospace text is reserved for paths, config content, and raw diagnostic output.
+
+### Semantic states
+
+- Small status pills communicate running state and diagnostic severity.
+- Accent color highlights primary entry points such as `Open terminal` or `WSL Settings`.
+- Caution and critical colors are reserved for warning and error states.
+
+### Chrome and backdrop
+
+- The window uses a slim custom title region with native caption buttons.
+- Mica is intentionally disabled in the current design because the text-clarity pass prioritized opaque surfaces and ClearType rendering.
 
 ## Dashboard
 
 ### Purpose
 
-The Dashboard answers:
+The dashboard answers four questions quickly:
 
-- Is WSL healthy enough to use?
-- Which distros exist and which are running?
+- Is WSL available?
+- What distros exist?
 - Which distro is the default?
-- Are there urgent warnings?
-- What are the safest quick actions right now?
+- What safe global actions are available right now?
 
-### Distro Layout
+### Dashboard composition
+
+The page is built in this order:
 
 ```text
-+--------------------------------------------------------------+
-| Page header + Refresh                                        |
-+--------------------------------------------------------------+
-| Hero status card                                             |
-+--------------------------------------------------------------+
-| Quick actions                                                |
-+--------------------------------------------------------------+
-| Distro tiles                                                 |
-+--------------------------------------------------------------+
-| Health summary                                               |
-+--------------------------------------------------------------+
+Header
+Last refreshed text
+Hero status card
+Action status text
+Quick actions
+Distro section heading
+Optional empty-state card
+Distro tiles
 ```
 
-### Hero Status Card
+### Hero status card
 
-Displays:
+The hero card combines:
 
-- WSL installed, unavailable, or error state
-- WSL version
-- kernel version
-- default WSL version
-- plain-language summary of the current environment
-- warning or next-step guidance when applicable
+- availability label.
+- plain-language summary.
+- optional warning.
+- optional suggested next step.
+- detail grid for WSL version, kernel version, and default WSL version.
 
-### Quick Actions
+### Quick actions
 
-MVP quick actions should emphasize global actions that are safe and common:
+The dashboard keeps only safe, common global actions visible:
 
-- Refresh
-- Open default terminal
-- Shutdown all WSL
+- `Refresh`.
+- `Open default WSL terminal`.
+- `Shutdown all WSL`.
 
-Global actions should not be visually mixed with per-distro actions in the same repeating list.
+Per-distro lifecycle actions are intentionally moved off the dashboard and into the distro detail page.
 
-### Distro Surface
+### Distro tiles
 
-The dashboard should present distros as tiles or simple card rows rather than as a dense table with four inline buttons per row.
+Each tile shows:
 
-Each item should show:
+- distro name.
+- default badge when applicable.
+- system-managed label when applicable.
+- capability message.
+- running or stopped pill.
+- WSL generation label.
 
-- distro name
-- state
-- WSL version
-- default marker
-- system-managed or reduced-capability messaging when applicable
-
-Behavior:
-
-- primary click opens the distro detail page
-- secondary lifecycle actions belong in the detail page or an overflow surface
-- Docker-managed distros omit destructive shortcuts
-
-### Health Summary
-
-The dashboard may show a compact list of the most important warnings. Each summary entry should deep-link into the relevant distro's Diagnostics pivot for full detail.
-
----
+Primary click opens the distro detail page and syncs with the shell selection when possible.
 
 ## Distro Detail
 
-### Layout
+### Page structure
+
+The distro page uses a fixed header plus a pivot body:
 
 ```text
-+--------------------------------------------------------------+
-| Header: name, status, version, default                       |
-+--------------------------------------------------------------+
-| Pivot: Overview | Settings | Diagnostics                    |
-+--------------------------------------------------------------+
-| Active pivot content                                         |
-+--------------------------------------------------------------+
+Header + refresh
+Last refreshed / warning / action status
+Pivot: Overview | Settings | Diagnostics
 ```
+
+The page keeps an explicit empty state when no distro is selected or no matching distro can be resolved.
 
 ### Header
 
-Displays:
+The header shows:
 
-- distro name
-- running or stopped state
-- WSL version
-- default indicator
-- capability notes when the distro is WSL1 or system-managed
+- the `Distros` page title.
+- selected distro name.
+- running-state pill.
+- metadata text summarizing WSL version and default / management state.
+- refresh affordance.
+- warning or action status text when needed.
 
-Primary actions:
+### Overview pivot
 
-- Open terminal
-- Start distro
-- Terminate distro
-- Set default
+The overview pivot is a stack of action cards, one action per card:
 
-Rules:
+- `Open terminal`.
+- `Start`.
+- `Terminate`.
+- `Set as default`.
 
-- Always show the target distro prominently.
-- Disable invalid actions rather than hiding state.
-- Explanations must be visible when an action is unavailable because of WSL1, system-managed handling, or admin-only limits.
+Each card pairs a glyph, a bold title, a short description, and an action button. This keeps lifecycle operations readable and avoids the feel of a cramped tool matrix.
 
-### Overview Pivot
+Terminal launch is intentionally external. The app opens the distro in Windows Terminal when available rather than embedding a terminal surface in the page.
 
-Shows:
+### Settings pivot
 
-- basic distro identity and state
-- capability summary
-- lifecycle actions
-- future health or resource summaries when available
+The settings pivot owns per-distro configuration and is built around a dual representation of `/etc/wsl.conf`.
 
-This pivot should act as the user's primary management surface for safe per-distro actions.
+Current composition:
 
-### Settings Pivot
+- global WSL summary card with `WSL Settings` handoff.
+- action row with `Defaults`, `Revert`, and `Save`.
+- settings header card showing the selected distro and file path.
+- structured settings card rendered from the supported schema.
+- second action row for convenience after the structured editor.
+- raw editor card.
+- validation card shown when edits are pending.
+- restart-required card when the edit implies restart impact.
+- backup-path card after save or restore-defaults flows.
 
-The distro settings pivot owns `/etc/wsl.conf` editing and later structured controls.
+The structured editor and raw editor are two views over the same document. Editing either surface updates the shared model.
 
-It should support:
+### Diagnostics pivot
 
-- raw editor
-- validation hints
-- save and revert actions
-- restart-required messaging
-- future structured controls when supported
+The diagnostics pivot is the only full-detail diagnostics home in the product.
 
-Terminal launch remains available from the Overview pivot through the "Open terminal" action.
+It renders a vertically stacked list of result cards. Each card can show:
 
-### Diagnostics Pivot
+- result title.
+- severity pill.
+- summary.
+- optional detail text.
+- optional next-step text.
+- optional raw command text.
+- optional raw output box.
 
-The per-distro Diagnostics pivot is the single primary home for full diagnostic results. It owns both global checks (rendered with the selected distro as context) and per-distro probes.
+This pivot deliberately mixes global WSL checks with the selected distro's DNS and internet probes so the user gets one coherent troubleshooting surface instead of two competing pages.
 
-It should include:
+## Settings Page
 
-- WSL availability and version checks (`wsl --status`, `wsl --version`)
-- distro inventory and default-distro health
-- DNS checks for the selected distro
-- internet connectivity checks for the selected distro
-- distro-specific notes and host-to-WSL guidance
-- raw command output on demand
+The global Settings page is an expander-based surface with four current groups:
 
-Layout should be organised for triage rather than execution order:
+- `WSL`.
+- `Appearance`.
+- `Behaviour`.
+- `About`.
 
-```text
-+--------------------------------------------------------------+
-| Refresh + last updated                                       |
-+--------------------------------------------------------------+
-| Error group                                                  |
-+--------------------------------------------------------------+
-| Warning group                                                |
-+--------------------------------------------------------------+
-| OK group                                                     |
-+--------------------------------------------------------------+
-```
+### WSL group
 
-Each result should surface title, severity, short summary, expandable details, raw output, and a suggested next step where safe.
+This group shows:
 
-### Future 1.0 Extensions
+- WSL status.
+- default distro.
+- inventory summary.
+- safe global actions.
+- read-only `.wslconfig` state and content.
+- `WSL Settings` handoff.
 
-Version 1.0 may add Services, Filesystem, and Networking as additional pivots or secondary routes, but the primary shell model should stay the same.
+It is intentionally a summary-and-handoff surface, not a full global WSL editor.
 
----
+### Appearance group
 
-## Settings
+This group contains the only currently persisted app preference: theme selection.
 
-Settings is a fixed global destination built in a Windows 11 Settings style.
+The design keeps the disabled `Use Mica backdrop` toggle visible as explanatory UI, but the current product behavior is fixed: Mica stays off to protect text clarity.
 
-Recommended groups:
+### Behaviour group
 
-- WSL
-- Appearance
-- Behavior
-- About
+The behaviour group exists to reserve the long-term settings shape, but its current controls are non-editable placeholders. The page should visually communicate that these controls are not active product behavior yet.
 
-MVP content belongs here:
+### About group
 
-- read-only `.wslconfig` viewer plus official WSL Settings handoff
-- theme selection
-- confirmation behavior
-- command timeout defaults
-- logging behavior
+The About group provides:
 
-Settings content should use settings cards, descriptive copy, and clear restart-required messaging rather than free-form stacked controls.
+- product identity.
+- current version.
+- repository link.
+- issue-report link.
 
-Settings should not duplicate the dedicated Logs route or the per-distro Diagnostics pivot.
+## Logs Page
 
----
+The Logs page is a dedicated metadata viewer for the current app session.
 
-## Secondary Flows
+### Logs composition
 
-### Logs
+- page header.
+- `Clear` and `Refresh` actions.
+- last refreshed text.
+- filter card with level filter, search box, and summary text.
+- empty state when no entries match.
+- repeated list of log rows.
 
-Logs are a fixed global surface backed by the metadata-only app logger.
+### Log row design
 
-The logs surface should support:
+Each row shows:
 
-- filtering
-- copying
-- metadata-first entries by default
-- retention messaging for the 30-day default
+- timestamp.
+- level.
+- area.
+- message.
 
-### Backups and Import/Export
+The page is intentionally plain. It is an inspection surface, not a visual centerpiece.
 
-Import and export are important workflows, but they are secondary to the main navigation model.
+## Interaction Rules
 
-These flows should be launched from:
+### Refresh model
 
-- contextual actions on a distro
-- Settings
-- dedicated dialogs or secondary pages when the workflow is complex enough
+- Major pages provide `F5` refresh.
+- Refresh state is visible through progress rings and last-loaded text.
+- Newer refreshes win over stale completions.
 
-They should not displace Dashboard, Logs, Settings, or the distro rail in the main shell.
+### Confirmation model
 
----
+- Destructive flows must require explicit confirmation.
+- Confirmation copy must name the target and the impact.
 
-## Interaction Design
+### Disabled states
 
-### Confirmation Dialogs
+- Disabled controls should remain visible when they communicate unavailable capability.
+- Reduced capability on WSL1 or system-managed distros should be explained inline.
 
-Dialogs must include:
+### Scrolling model
 
-- operation name
-- affected distro
-- consequences
-- cancel as the default action for dangerous operations
+- Pages use one primary vertical scroll surface.
+- Repeated content prefers `ItemsRepeater` to avoid nested list scroll viewers.
+- Scroll surfaces should not steal focus unnecessarily.
 
-Example:
+## Accessibility and Readability
 
-```text
-Terminate Ubuntu?
+- Major actions carry explicit automation names.
+- Semantic states should not rely on color alone.
+- Text must stay legible on light, dark, and high-contrast themes.
+- Opaque surfaces and theme brushes take precedence over visual effects that soften text.
 
-This will stop all processes in the distro.
+## Future Work
 
-[Cancel] [Terminate]
-```
+Future UX and information-architecture work lives in [EXTRA_FEATURES.md](EXTRA_FEATURES.md).
 
-Strong destructive example:
-
-```text
-Unregister Ubuntu?
-
-This will permanently delete all data.
-
-Type "Ubuntu" to confirm:
-[________]
-
-[Cancel] [Delete]
-```
-
-### Disabled States
-
-Buttons must be disabled when:
-
-- the action is invalid
-- WSL is unavailable
-- the distro is not in the required state
-- the action would require elevation in the current release
-
-Disabled controls must explain why when the target is WSL1, system-managed, or blocked by an admin-only requirement.
-
-### Loading States
-
-Long-running workflows should show:
-
-- spinner or progress bar
-- operation label
-- target distro or global scope
-- cancel affordance where safe
-
-### Error States
-
-Errors should display:
-
-- plain description
-- command executed
-- exit code
-- stderr snippet
-- suggested next step when safe
-
-Avoid raw dumps without explanation, but never hide raw output.
-
-### Keyboard Model
-
-MVP keyboard behavior should preserve existing core shortcuts and reserve room for shell-wide shortcuts later.
-
-- `F5` refreshes the current data surface
-- `Ctrl+Enter` runs the current command
-- `Esc` cancels a running command where safe
-
-Later candidates include `Ctrl+,` for Settings and `Ctrl+K` for a command palette.
-
-### Scrolling Model
-
-Page content should scroll as one coherent surface.
-
-- Avoid nested scroll viewers for primary content lists.
-- Prefer repeaters inside the page scroll surface over nested list controls when selection is not needed.
-- Scroll regions should not become meaningless Tab stops.
-
----
-
-## Visual Design
-
-### Backdrop and Chrome
-
-- Prefer a standard Windows 11 title bar and drag region over tall custom chrome.
-- Use a native backdrop treatment such as Mica when it does not compromise text rendering.
-- App iconography should feel deliberate and Windows-native.
-
-### Cards and Surfaces
-
-- Primary content lives on real cards with opaque fills, 1 px strokes, and rounded corners.
-- Avoid transparent container surfaces that reduce perceived text sharpness.
-- Secondary text should use theme brushes, not opacity on the text element.
-
-### Typography and Spacing
-
-Use a small shared ramp:
-
-- 28 px page title
-- 20 px section header
-- 18 px subsection header
-- 14 px body
-- 12 px caption
-
-Use a shared spacing scale such as 4, 8, 12, 16, 24, and 32.
-
-### Icons and Semantic Color
-
-- Use Fluent-style icons for navigation, actions, and state.
-- Semantic colors are reserved for status and severity.
-- Success, warning, error, and neutral states must remain readable in high contrast.
-
----
-
-## Accessibility
-
-The design must support:
-
-- keyboard navigation
-- screen readers
-- high contrast
-- scalable text
-- strong focus indicators
-- accessible labels that include the affected distro where relevant
-- live announcements for async completion and status changes
-
-The shell should avoid focus traps, dead scroll regions, and visual-only state cues.
-
----
-
-## Responsiveness
-
-The app should:
-
-- adapt to smaller window sizes
-- allow the rail to collapse to icon-only mode
-- keep card layouts readable on narrow widths
-- preserve usable terminal output on smaller windows
-- keep the status bar compact rather than forcing page reflow
-
----
-
-## State Management
-
-UI must handle:
-
-- WSL not installed
-- WSL unavailable
-- partial data availability
-- command failures
-- long-running operations
-- no distros installed
-- reduced capability for WSL1 and system-managed distros
-
-UI must never freeze during command execution.
-
----
-
-## Error UX Principles
-
-- Always explain what failed.
-- Never hide raw output.
-- Provide retry where possible.
-- Do not assume recovery.
-- Keep the failing target explicit.
-
----
-
-## Future Design Considerations
-
-- multi-window support
-- tabbed distro views
-- command palette
-- richer logs surface
-- remote WSL management if the backend model ever expands
-
----
-
-## Summary
-
-The CoolWSL design should:
-
-- center around one Windows 11-native shell
-- treat distros as first-class navigation entities
-- keep diagnostics in one primary home
-- prioritize clarity, safety, and crisp readable content
-- avoid fragile or visually inconsistent UI patterns
-- remain extensible for later services, networking, logs, and configuration work without rethinking the shell
+If a flow is not described here as current behavior, it should not be implied by old roadmap language.
