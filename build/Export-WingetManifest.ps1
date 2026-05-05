@@ -21,6 +21,8 @@ param(
 
     [string]$Description = "CoolWSL is a Windows 11 desktop app for inspecting WSL distro state, viewing diagnostics and logs, and performing common WSL management tasks without memorizing command flags.",
 
+    [string[]]$PackageDependencies = @('Microsoft.DotNet.DesktopRuntime.10'),
+
     [string]$RuntimeIdentifier = "win-x64",
 
     [string]$InstallerPath,
@@ -332,6 +334,20 @@ if (-not [string]::IsNullOrWhiteSpace($installerMetadata.UpgradeCode)) {
 if ($appsAndFeaturesEntryLines.Count -gt 0) {
     $installerMetadataBlockLines += 'AppsAndFeaturesEntries:'
     $installerMetadataBlockLines += $appsAndFeaturesEntryLines
+}
+
+$packageDependencyIdentifiers = @(
+    $PackageDependencies |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+)
+
+if ($packageDependencyIdentifiers.Count -gt 0) {
+    $installerMetadataBlockLines += 'Dependencies:'
+    $installerMetadataBlockLines += '  PackageDependencies:'
+
+    foreach ($packageDependencyIdentifier in $packageDependencyIdentifiers) {
+        $installerMetadataBlockLines += "    - PackageIdentifier: $packageDependencyIdentifier"
+    }
 }
 
 $installerMetadataBlock = ''

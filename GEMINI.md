@@ -71,8 +71,12 @@ Before marking work as done:
 * Keep future work in `EXTRA_FEATURES.md`; keep `REQUIREMENTS.md`, `DESIGN.md`, and `ARCHITECTURE.md` focused on shipped behavior only.
 * WinUI 3 startup can crash in `Microsoft.UI.Xaml.dll` if `App.xaml` omits `XamlControlsResources` while using controls like `NavigationView`; keep the merged dictionary in `App.xaml`.
 * WinUI compiled XAML fails if an element uses `x:Load` without an `x:Name`; on the new Distros and Diagnostics pages, keep deferred elements explicitly named instead of dropping `x:Bind` to work around compiler failures.
+* On `DistroPage`, async selection-driven sections must use live `Visibility` bindings rather than `x:Load`; selection can resolve after navigation, and deferred content can stay stuck on the initial empty state.
+* Do not reuse `x:Double` resources like `SettingsValueControlWidth` for `ColumnDefinition.Width`; WinUI accepts the XAML at build time but throws at runtime because `ColumnDefinition.Width` requires a `GridLength`.
+* For WinUI page centering in this repo, wrap `ScrollViewer` content in a named centered `Grid` host and bind the inner stack width to the host `ActualWidth`; direct max-width `StackPanel` layouts drifted between widths.
 * Redirected host-side `wsl.exe` metadata commands (`--status`, `--version`, `--list --verbose`, and similar non-`--exec` mutations) emit UTF-16LE on this machine; keep explicit Unicode stream encoding on those commands, but do not force that encoding onto in-distro `--exec` commands.
 * CoolWSL supports non-interactive startup verification with `COOLWSL_SMOKE_TEST=1` and an optional `COOLWSL_SMOKE_TEST_FILE` marker path. This is the preferred local smoke-launch check.
+* For WinUI smoke mode, do not close the main window from `Window.Activated`; this can trigger native fail-fast exits (`-1073741189`). Prefer the early `App.OnLaunched` path that writes the smoke marker and calls `Exit()` before creating or activating `MainWindow`.
 * WSL command execution uses `ProcessStartInfo.ArgumentList` so distro names with spaces and shell metacharacters stay as raw arguments instead of shell-interpreted text.
 * `WslListParser` and `WslStatusParser` must degrade safely when WSL output is unsupported, localized, or missing expected fields instead of guessing inventory or environment details.
 * Agent shell commands on this Windows machine should run PowerShell with `login=false` / no profile loading. The user's PowerShell profile writes outside the workspace and probes console/CIM state, which causes sandbox access-denied noise before the intended command runs.
@@ -81,6 +85,19 @@ Before marking work as done:
 * After triggering a release, use one blocking wait command and let it finish before doing anything else: `gh run watch <run_id> --repo tomcoolpxl/CoolWSL --exit-status`.
 * Do not run repeated status polling loops while waiting for release completion. Only check release assets after the blocking wait returns.
 * After the blocking wait completes, verify the release once with `gh release view vX.Y.Z --repo tomcoolpxl/CoolWSL` and confirm MSI/ZIP/checksums assets are present.
+* For unpackaged WinUI smoke verification, `dotnet run --project CoolWSL.App/CoolWSL.App.csproj -c Debug` with `COOLWSL_SMOKE_TEST=1` is more reliable than launching the built `.exe` directly when you need the marker file.
+* Global `%UserProfile%\.wslconfig` is shown read-only in Settings; editing is handed off to the official WSL Settings app per current Microsoft guidance.
+* The local WSL Settings app is launchable via `explorer.exe shell:AppsFolder\{6D809377-6AF0-444B-8957-A3773F02200E}\WSL\wslsettings\wslsettings.exe`; `wslsettings.exe` alone is not reliable on this machine.
+* Theme selection persists through `CoolWSL.App/Services/ThemePreferenceService.cs` and is applied by `MainWindow` via the root `FrameworkElement.RequestedTheme` plus explicit title-bar button colors.
+* .NET SDK repository builds append `SourceRevisionId` to `AssemblyInformationalVersion` by default; keep `IncludeSourceRevisionInInformationalVersion=false` in `Directory.Build.props` so the Settings About version stays user-facing, and use `COOLWSL_VERSION` to stamp newer versions without editing project files.
+* Release packaging is installer-first through `build/Invoke-ReleaseInstaller.ps1`: build `CoolWSL.App` in Release for `win-x64`, package the install-folder layout with WiX MSI, generate a ZIP from that layout, and emit checksums for stable SemVer tags.
+* The repo's CI/release automation is installer-first: GitHub Actions on `windows-latest` uses `actions/setup-dotnet` with `global.json` and publishes `.msi`, `.zip`, and `.checksums.txt` assets from stable `vX.Y.Z` tags.
+* For winget manifests, source both the hash and MSI-derived ARP metadata from the same artifact set; a local `release-*-buildoutput` checksums/MSI pair can differ from the published GitHub Release, so defaulting to live release assets avoids drift in `InstallerSha256`, `ProductCode`, and publisher correlation.
+* Framework-dependent installer releases need a `Dependencies -> PackageDependencies -> Microsoft.DotNet.DesktopRuntime.10` block in generated winget installer manifests; keep `build/Export-WingetManifest.ps1` emitting it so winget reviews do not require a manual follow-up.
+* For installer-first WinUI releases in this repo, package the working `CoolWSL.App/bin/Release/.../win-x64` layout directly; the self-contained `dotnet publish` install-folder output crashed on launch in `Microsoft.UI.Xaml.dll` while the Release build layout launched correctly.
+* Silent MSI upgrade tests on a machine with an existing per-machine install can fail with `1603` or `Error 1730` because `RemoveExistingProducts` needs admin rights; treat that as a local validation limitation, not proof that the rebuilt MSI contents are wrong.
+* WiX MSI packaging for the WinUI release layout can hit `ICE03` on Windows App SDK XAML binaries (`Microsoft.UI.Xaml.dll`, `Microsoft.UI.Xaml.Phone.dll`, and related `.mui` satellites) due to metadata from Microsoft files; keep validation active but suppress `ICE03` specifically in `build/CoolWSL.Installer.wixproj` while preserving other ICE checks.
+* Program-menu cleanup for the installer should be authored via `RemoveFolder Directory="CoolWSLProgramMenuFolder" On="uninstall"` in the component that owns the shortcut to satisfy `ICE64`.
 
 ## 1. Think Before Coding
 
