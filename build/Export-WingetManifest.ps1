@@ -362,7 +362,7 @@ PackageIdentifier: $PackageIdentifier
 PackageVersion: $Version
 InstallerType: wix
 Scope: machine
-ElevationRequirement: elevationRequired
+ElevationRequirement: elevatesSelf
 $installerMetadataBlock
 Installers:
 - Architecture: x64
