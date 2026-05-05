@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="CoolWSL.Bundle.wxs" />
     <Compile Include="$(GeneratedWixFragmentPath)" Condition="'$(GeneratedWixFragmentPath)' != ''" />
   </ItemGroup>
 </Project>

@@ -7,6 +7,8 @@ param(
 
     [string]$InstallerProjectPath = "build/CoolWSL.Installer.wixproj",
 
+    [string]$BundleProjectPath = "build/CoolWSL.Bundle.wixproj",
+
     [string]$OutputDirectory = "artifacts/release",
 
     [string]$RuntimeIdentifier = "win-x64"
@@ -74,6 +76,7 @@ function Get-StableSemanticVersion {
     return [pscustomobject]@{
         ApplicationVersion = $Value
         InstallerVersion   = '{0}.{1}.{2}' -f $major, $minor, $patch
+        BundleVersion      = '{0}.{1}.{2}.0' -f $major, $minor, $patch
     }
 }
 
@@ -328,6 +331,7 @@ function Write-ChecksumsFile {
 
 $resolvedProjectPath = Resolve-RepoPath -Path $ProjectPath
 $resolvedInstallerProjectPath = Resolve-RepoPath -Path $InstallerProjectPath
+$resolvedBundleProjectPath = Resolve-RepoPath -Path $BundleProjectPath
 $resolvedOutputDirectory = Resolve-RepoPath -Path $OutputDirectory
 $resolvedIconPath = Resolve-RepoPath -Path 'CoolWSL.App/Assets/AppIcon.ico'
 $projectDirectory = Split-Path -Parent $resolvedProjectPath
@@ -341,6 +345,10 @@ if (-not (Test-Path -LiteralPath $resolvedInstallerProjectPath -PathType Leaf)) 
     throw "Installer project '$resolvedInstallerProjectPath' was not found."
 }
 
+if (-not (Test-Path -LiteralPath $resolvedBundleProjectPath -PathType Leaf)) {
+    throw "Bundle project '$resolvedBundleProjectPath' was not found."
+}
+
 if (-not (Test-Path -LiteralPath $resolvedIconPath -PathType Leaf)) {
     throw "Installer icon '$resolvedIconPath' was not found."
 }
@@ -349,6 +357,7 @@ $assetBaseName = "CoolWSL-$Version-$RuntimeIdentifier"
 $publishDirectory = Join-Path $resolvedOutputDirectory $assetBaseName
 $zipPath = Join-Path $resolvedOutputDirectory ($assetBaseName + '.zip')
 $msiPath = Join-Path $resolvedOutputDirectory ($assetBaseName + '.msi')
+$bundlePath = Join-Path $resolvedOutputDirectory ($assetBaseName + '-setup.exe')
 $checksumsPath = Join-Path $resolvedOutputDirectory ($assetBaseName + '.checksums.txt')
 
 Remove-Item -LiteralPath $resolvedOutputDirectory -Recurse -Force -ErrorAction SilentlyContinue
@@ -358,8 +367,10 @@ $temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ('coolwsl-inst
 New-Item -ItemType Directory -Path $temporaryDirectory -Force | Out-Null
 
 $generatedFragmentPath = Join-Path $temporaryDirectory 'CoolWSL.Installer.Files.wxs'
-$wixOutputDirectory = Join-Path $temporaryDirectory 'wix-bin'
-$wixIntermediateDirectory = Join-Path $temporaryDirectory 'wix-obj'
+$installerWixOutputDirectory = Join-Path $temporaryDirectory 'wix-installer-bin'
+$installerWixIntermediateDirectory = Join-Path $temporaryDirectory 'wix-installer-obj'
+$bundleWixOutputDirectory = Join-Path $temporaryDirectory 'wix-bundle-bin'
+$bundleWixIntermediateDirectory = Join-Path $temporaryDirectory 'wix-bundle-obj'
 
 try {
     $buildArguments = @(
@@ -369,7 +380,6 @@ try {
         'Release',
         '-r',
         $RuntimeIdentifier,
-        '--no-self-contained',
         '-p:CoolWslDistributionKind=InstallFolder'
     )
 
@@ -425,8 +435,8 @@ try {
         "-p:GeneratedWixFragmentPath=$generatedFragmentPath",
         "-p:CoolWslInstallerVersion=$($resolvedVersion.InstallerVersion)",
         "-p:CoolWslInstallerIconPath=$resolvedIconPath",
-        "-p:OutputPath=$wixOutputDirectory\\",
-        "-p:IntermediateOutputPath=$wixIntermediateDirectory\\"
+        "-p:OutputPath=$installerWixOutputDirectory\\",
+        "-p:IntermediateOutputPath=$installerWixIntermediateDirectory\\"
     )
 
     & dotnet @installerBuildArguments
@@ -434,29 +444,61 @@ try {
         throw "dotnet build failed with exit code $LASTEXITCODE while producing the MSI installer."
     }
 
-    $builtInstaller = Get-ChildItem -LiteralPath $wixOutputDirectory -Recurse -File -Filter '*.msi' |
+    $builtInstaller = Get-ChildItem -LiteralPath $installerWixOutputDirectory -Recurse -File -Filter '*.msi' |
         Sort-Object LastWriteTimeUtc -Descending |
         Select-Object -First 1
 
     if ($null -eq $builtInstaller) {
-        throw "No .msi file was produced under '$wixOutputDirectory'."
+        throw "No .msi file was produced under '$installerWixOutputDirectory'."
     }
 
     Copy-Item -LiteralPath $builtInstaller.FullName -Destination $msiPath -Force
 
-    Write-ChecksumsFile -FilePaths @($msiPath, $zipPath) -OutputPath $checksumsPath
+    $bundleBuildArguments = @(
+        'build',
+        $resolvedBundleProjectPath,
+        '-c',
+        'Release',
+        '-p:AcceptEula=wix7',
+        "-p:CoolWslBundleVersion=$($resolvedVersion.BundleVersion)",
+        "-p:CoolWslInstallerIconPath=$resolvedIconPath",
+        "-p:CoolWslMsiPath=$msiPath",
+        "-p:OutputPath=$bundleWixOutputDirectory\\",
+        "-p:IntermediateOutputPath=$bundleWixIntermediateDirectory\\"
+    )
+
+    & dotnet @bundleBuildArguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "dotnet build failed with exit code $LASTEXITCODE while producing the setup bundle."
+    }
+
+    $builtBundle = Get-ChildItem -LiteralPath $bundleWixOutputDirectory -Recurse -File -Filter '*.exe' |
+        Sort-Object LastWriteTimeUtc -Descending |
+        Select-Object -First 1
+
+    if ($null -eq $builtBundle) {
+        throw "No .exe file was produced under '$bundleWixOutputDirectory'."
+    }
+
+    Copy-Item -LiteralPath $builtBundle.FullName -Destination $bundlePath -Force
+
+    Write-ChecksumsFile -FilePaths @($bundlePath, $msiPath, $zipPath) -OutputPath $checksumsPath
 
     Set-GitHubOutputValue -Name 'app_version' -Value $Version
     Set-GitHubOutputValue -Name 'installer_version' -Value $resolvedVersion.InstallerVersion
+    Set-GitHubOutputValue -Name 'bundle_version' -Value $resolvedVersion.BundleVersion
     Set-GitHubOutputValue -Name 'publish_directory' -Value $publishDirectory
     Set-GitHubOutputValue -Name 'msi_path' -Value $msiPath
+    Set-GitHubOutputValue -Name 'bundle_path' -Value $bundlePath
     Set-GitHubOutputValue -Name 'zip_path' -Value $zipPath
     Set-GitHubOutputValue -Name 'checksums_path' -Value $checksumsPath
     Set-GitHubOutputValue -Name 'output_directory' -Value $resolvedOutputDirectory
 
     Write-Host "App version: $Version"
     Write-Host "Installer version: $($resolvedVersion.InstallerVersion)"
+    Write-Host "Bundle version: $($resolvedVersion.BundleVersion)"
     Write-Host "Install folder: $publishDirectory"
+    Write-Host "Setup EXE: $bundlePath"
     Write-Host "MSI: $msiPath"
     Write-Host "ZIP: $zipPath"
     Write-Host "Checksums: $checksumsPath"

@@ -23,6 +23,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(CoolWslIsInstallFolder)' == 'true'">
+    <SelfContained>true</SelfContained>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
 

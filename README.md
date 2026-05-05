@@ -54,7 +54,7 @@ Run the app locally:
 dotnet run --project .\CoolWSL.App\CoolWSL.App.csproj -c Debug
 ```
 
-Create local installer artifacts (MSI and ZIP):
+Create local installer artifacts (setup EXE, MSI, and ZIP):
 
 ```powershell
 pwsh -NoProfile -File .\build\Invoke-ReleaseInstaller.ps1 -Version 1.0.0 -OutputDirectory artifacts\release-local

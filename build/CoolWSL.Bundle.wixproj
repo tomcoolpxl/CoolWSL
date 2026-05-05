@@ -1,0 +1,17 @@
+<Project Sdk="WixToolset.Sdk/7.0.0">
+  <PropertyGroup>
+    <OutputType>Bundle</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <Cultures>en-us</Cultures>
+    <OutputName>CoolWSL.Bundle</OutputName>
+    <CoolWslBundleVersion Condition="'$(CoolWslBundleVersion)' == ''">0.0.0.0</CoolWslBundleVersion>
+    <CoolWslInstallerIconPath Condition="'$(CoolWslInstallerIconPath)' == ''">$(MSBuildThisFileDirectory)..\CoolWSL.App\Assets\AppIcon.ico</CoolWslInstallerIconPath>
+    <CoolWslMsiPath Condition="'$(CoolWslMsiPath)' == ''">$(MSBuildThisFileDirectory)..\artifacts\release\CoolWSL.msi</CoolWslMsiPath>
+    <DefineConstants>$(DefineConstants);CoolWslBundleVersion=$(CoolWslBundleVersion);CoolWslInstallerIconPath=$(CoolWslInstallerIconPath);CoolWslMsiPath=$(CoolWslMsiPath)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="CoolWSL.Installer.Package.wxs" />
+    <PackageReference Include="WixToolset.BootstrapperApplications.wixext" Version="7.0.0" />
+  </ItemGroup>
+</Project>

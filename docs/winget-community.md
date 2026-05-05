@@ -2,11 +2,12 @@
 
 This repository publishes installer-first GitHub Releases with these assets:
 
+- `CoolWSL-<version>-win-x64-setup.exe`
 - `CoolWSL-<version>-win-x64.msi`
 - `CoolWSL-<version>-win-x64.zip`
 - `CoolWSL-<version>-win-x64.checksums.txt`
 
-Use the MSI asset for the community Winget package.
+Use the setup EXE asset for the community Winget package. It self-elevates and avoids the current non-elevated Winget MSI handoff failure. The manifest generator falls back to the MSI only for older releases that do not publish the setup EXE.
 
 ## One-time setup
 
@@ -29,13 +30,13 @@ pwsh -NoProfile -File .\build\Export-WingetManifest.ps1 `
   -Version 1.0.4
 ```
 
-The script defaults to downloading `CoolWSL-<version>-win-x64.checksums.txt` from the tagged GitHub Release so `InstallerSha256` matches the live MSI asset.
+The script defaults to downloading `CoolWSL-<version>-win-x64.checksums.txt` from the tagged GitHub Release so `InstallerSha256` matches the live release installer asset.
 
-It also reads MSI metadata to populate `Publisher`, `PackageName`, `ProductCode`, and `AppsAndFeaturesEntries`, and validates that the MSI `ProductVersion` matches the requested `-Version`.
+For current releases it prefers the published setup EXE and emits a `burn` manifest with self-elevating installer metadata and no external .NET dependency. For older MSI-only releases it falls back to the MSI, reads MSI metadata to populate `Publisher`, `PackageName`, `ProductCode`, and `AppsAndFeaturesEntries`, and validates that the MSI `ProductVersion` matches the requested `-Version`.
 
 Optional: pass `-ChecksumsFile` to force a specific checksums file.
 
-If you use a local checksums file, keep the matching `CoolWSL-<version>-win-x64.msi` beside it or pass `-InstallerPath` explicitly so the generated ARP correlation metadata comes from the same installer you plan to publish.
+If you use a local checksums file, keep the matching `CoolWSL-<version>-win-x64-setup.exe` beside it for current releases, or pass `-InstallerPath` explicitly. For older MSI-only releases, keep the matching `CoolWSL-<version>-win-x64.msi` beside the checksums file.
 
 This generates files under:
 
@@ -64,10 +65,10 @@ Expected files:
 
 ## Recommended release checklist before opening the PR
 
-1. Confirm the GitHub Release has all three files (`.msi`, `.zip`, `.checksums.txt`).
-2. Confirm the MSI filename matches `CoolWSL-<version>-win-x64.msi`.
-3. Confirm the checksums file contains the MSI hash entry.
-4. Test install from URL locally after merge (or from your branch with a local manifest) from an elevated terminal (Run as Administrator), because this package is machine-scope MSI:
+1. Confirm the GitHub Release has all four files (`.exe`, `.msi`, `.zip`, `.checksums.txt`).
+2. Confirm the setup EXE filename matches `CoolWSL-<version>-win-x64-setup.exe`.
+3. Confirm the checksums file contains the setup EXE hash entry.
+4. Test install from URL locally after merge (or from your branch with a local manifest) from a standard terminal. The setup EXE is machine-scope but self-elevates when needed:
 
   ```powershell
   winget install --manifest .\manifests\t\tomcoolpxl\CoolWSL\1.0.4

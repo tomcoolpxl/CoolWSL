@@ -161,8 +161,9 @@ The repository still contains app-package-capable project settings, but the acti
 
 - `Directory.Build.props` provides shared version metadata and supports release stamping through `COOLWSL_VERSION`.
 - `CoolWSL.App.csproj` supports both packaged and install-folder output modes through `CoolWslDistributionKind`.
-- The active release flow builds an install-folder layout and packages it through WiX.
+- The active release flow builds a self-contained install-folder layout, packages it as an MSI through WiX, and wraps that MSI in a Burn setup EXE for Winget-friendly elevation.
 - `build/Invoke-ReleaseInstaller.ps1` produces the public artifacts:
+        - Setup EXE bootstrapper
   - MSI installer
   - ZIP portable package
   - SHA-256 checksums file

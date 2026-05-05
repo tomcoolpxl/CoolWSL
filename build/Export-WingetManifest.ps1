@@ -21,7 +21,7 @@ param(
 
     [string]$Description = "CoolWSL is a Windows 11 desktop app for inspecting WSL distro state, viewing diagnostics and logs, and performing common WSL management tasks without memorizing command flags.",
 
-    [string[]]$PackageDependencies = @('Microsoft.DotNet.DesktopRuntime.10'),
+    [string[]]$PackageDependencies = @('Microsoft.DotNet.Runtime.10'),
 
     [string]$RuntimeIdentifier = "win-x64",
 
@@ -36,6 +36,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+$bundleUpgradeCode = '{E9B5E2F3-1A35-4E3F-A03C-95E6F4C6D8BF}'
 
 function Resolve-RepoPath {
     param(
@@ -160,6 +161,35 @@ function Get-ReleaseAssetPath {
     }
 }
 
+function TryGet-ReleaseAssetPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Repository,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Tag,
+
+        [Parameter(Mandatory = $true)]
+        [string]$AssetFileName
+    )
+
+    $assetUrl = "https://github.com/$Repository/releases/download/$Tag/$AssetFileName"
+    $assetStem = [System.IO.Path]::GetFileNameWithoutExtension($AssetFileName)
+    $assetExtension = [System.IO.Path]::GetExtension($AssetFileName)
+    $temporaryFileName = "{0}.{1}{2}" -f $assetStem, [Guid]::NewGuid().ToString('N'), $assetExtension
+    $temporaryPath = Join-Path ([System.IO.Path]::GetTempPath()) $temporaryFileName
+
+    try {
+        $ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri $assetUrl -OutFile $temporaryPath
+        return $temporaryPath
+    }
+    catch {
+        Remove-Item -LiteralPath $temporaryPath -Force -ErrorAction SilentlyContinue
+        return $null
+    }
+}
+
 function Get-MsiPropertyValue {
     param(
         [Parameter(Mandatory = $true)]
@@ -228,8 +258,8 @@ Get-StableSemanticVersion -Value $Version
 
 $tag = "v$Version"
 $assetBaseName = "CoolWSL-$Version-$RuntimeIdentifier"
+$bundleFileName = "$assetBaseName-setup.exe"
 $msiFileName = "$assetBaseName.msi"
-$installerUrl = "https://github.com/$Repository/releases/download/$tag/$msiFileName"
 
 if ($Repository -notmatch '^[^/]+/[^/]+$') {
     throw "Repository '$Repository' must be in the format owner/name."
@@ -248,14 +278,38 @@ else {
 }
 
 $temporaryInstallerPath = $null
+$installerFileName = $null
+$installerKind = $null
 if ([string]::IsNullOrWhiteSpace($InstallerPath)) {
-    $candidateInstallerPath = Join-Path (Split-Path -Parent $resolvedChecksumsPath) $msiFileName
-    if (Test-Path -LiteralPath $candidateInstallerPath -PathType Leaf) {
-        $resolvedInstallerPath = $candidateInstallerPath
+    $checksumsDirectory = Split-Path -Parent $resolvedChecksumsPath
+    $candidateBundlePath = Join-Path $checksumsDirectory $bundleFileName
+    $candidateMsiPath = Join-Path $checksumsDirectory $msiFileName
+
+    if (Test-Path -LiteralPath $candidateBundlePath -PathType Leaf) {
+        $resolvedInstallerPath = $candidateBundlePath
+        $installerFileName = $bundleFileName
+        $installerKind = 'burn'
+    }
+    elseif (Test-Path -LiteralPath $candidateMsiPath -PathType Leaf) {
+        $resolvedInstallerPath = $candidateMsiPath
+        $installerFileName = $msiFileName
+        $installerKind = 'wix'
     }
     else {
-        $temporaryInstallerPath = Get-ReleaseAssetPath -Repository $Repository -Tag $tag -AssetFileName $msiFileName -FailureMessage "Failed to download installer '$msiFileName' from '$Repository' tag '$tag'. Provide -InstallerPath explicitly or verify the release asset exists."
-        $resolvedInstallerPath = $temporaryInstallerPath
+        $temporaryBundlePath = TryGet-ReleaseAssetPath -Repository $Repository -Tag $tag -AssetFileName $bundleFileName
+
+        if (-not [string]::IsNullOrWhiteSpace($temporaryBundlePath)) {
+            $temporaryInstallerPath = $temporaryBundlePath
+            $resolvedInstallerPath = $temporaryBundlePath
+            $installerFileName = $bundleFileName
+            $installerKind = 'burn'
+        }
+        else {
+            $temporaryInstallerPath = Get-ReleaseAssetPath -Repository $Repository -Tag $tag -AssetFileName $msiFileName -FailureMessage "Failed to download installer '$bundleFileName' or fallback MSI '$msiFileName' from '$Repository' tag '$tag'. Provide -InstallerPath explicitly or verify the release assets exist."
+            $resolvedInstallerPath = $temporaryInstallerPath
+            $installerFileName = $msiFileName
+            $installerKind = 'wix'
+        }
     }
 }
 else {
@@ -263,11 +317,39 @@ else {
     if (-not (Test-Path -LiteralPath $resolvedInstallerPath -PathType Leaf)) {
         throw "Installer file '$resolvedInstallerPath' was not found."
     }
+
+    switch ([System.IO.Path]::GetExtension($resolvedInstallerPath).ToLowerInvariant()) {
+        '.exe' {
+            $installerFileName = [System.IO.Path]::GetFileName($resolvedInstallerPath)
+            $installerKind = 'burn'
+        }
+        '.msi' {
+            $installerFileName = [System.IO.Path]::GetFileName($resolvedInstallerPath)
+            $installerKind = 'wix'
+        }
+        default {
+            throw "Installer file '$resolvedInstallerPath' must be either a .exe Burn bundle or a .msi package."
+        }
+    }
 }
 
+$installerUrl = "https://github.com/$Repository/releases/download/$tag/$installerFileName"
+
 try {
-    $installerSha256 = Get-ArtifactHashFromChecksums -ChecksumsPath $resolvedChecksumsPath -ArtifactFileName $msiFileName
-    $installerMetadata = Get-MsiMetadata -InstallerFilePath $resolvedInstallerPath
+    $installerSha256 = Get-ArtifactHashFromChecksums -ChecksumsPath $resolvedChecksumsPath -ArtifactFileName $installerFileName
+
+    if ($installerKind -eq 'wix') {
+        $installerMetadata = Get-MsiMetadata -InstallerFilePath $resolvedInstallerPath
+    }
+    else {
+        $installerMetadata = [pscustomobject]@{
+            ProductName = $null
+            Manufacturer = $null
+            ProductVersion = $null
+            ProductCode = $null
+            UpgradeCode = $bundleUpgradeCode
+        }
+    }
 }
 finally {
     if (-not [string]::IsNullOrWhiteSpace($temporaryChecksumsPath) -and (Test-Path -LiteralPath $temporaryChecksumsPath -PathType Leaf)) {
@@ -325,6 +407,10 @@ if (-not [string]::IsNullOrWhiteSpace($PackageName)) {
 if (-not [string]::IsNullOrWhiteSpace($Publisher)) {
     $appsAndFeaturesEntryLines += "  Publisher: $Publisher"
 }
+if ($installerKind -eq 'burn') {
+    $appsAndFeaturesEntryLines += "  DisplayVersion: $Version"
+    $appsAndFeaturesEntryLines += '  InstallerType: burn'
+}
 if (-not [string]::IsNullOrWhiteSpace($installerMetadata.ProductCode)) {
     $appsAndFeaturesEntryLines += "  ProductCode: '$($installerMetadata.ProductCode)'"
 }
@@ -341,7 +427,7 @@ $packageDependencyIdentifiers = @(
         Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 )
 
-if ($packageDependencyIdentifiers.Count -gt 0) {
+if ($installerKind -eq 'wix' -and $packageDependencyIdentifiers.Count -gt 0) {
     $installerMetadataBlockLines += 'Dependencies:'
     $installerMetadataBlockLines += '  PackageDependencies:'
 
@@ -355,14 +441,25 @@ if ($installerMetadataBlockLines.Count -gt 0) {
     $installerMetadataBlock = ([string]::Join("`r`n", $installerMetadataBlockLines)) + "`r`n"
 }
 
+$installModesBlock = ''
+if ($installerKind -eq 'burn') {
+    $installModesBlock = @"
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+"@
+}
+
 $installerManifest = @"
 # yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
 
 PackageIdentifier: $PackageIdentifier
 PackageVersion: $Version
-InstallerType: wix
+InstallerType: $installerKind
 Scope: machine
 ElevationRequirement: elevatesSelf
+$installModesBlock
 $installerMetadataBlock
 Installers:
 - Architecture: x64

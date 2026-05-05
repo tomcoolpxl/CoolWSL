@@ -78,7 +78,7 @@ jobs:
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
           $releaseFiles = Get-ChildItem -Path .\artifacts\release -Recurse -File |
-              Where-Object { $_.Extension -in '.msi', '.zip', '.txt' } |
+              Where-Object { $_.Extension -in '.exe', '.msi', '.zip', '.txt' } |
               Sort-Object Name |
               ForEach-Object FullName
 

@@ -1,0 +1,26 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+  <Bundle
+      Name="CoolWSL"
+      Manufacturer="CoolWSL"
+      Version="$(var.CoolWslBundleVersion)"
+      UpgradeCode="{E9B5E2F3-1A35-4E3F-A03C-95E6F4C6D8BF}"
+      AboutUrl="https://github.com/tomcoolpxl/CoolWSL"
+      HelpUrl="https://github.com/tomcoolpxl/CoolWSL/issues"
+      IconSourceFile="$(var.CoolWslInstallerIconPath)">
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication
+          LicenseUrl=""
+          SuppressOptionsUI="yes"
+          Theme="hyperlinkLicense" />
+    </BootstrapperApplication>
+
+    <Chain>
+      <MsiPackage
+          SourceFile="$(var.CoolWslMsiPath)"
+          ForcePerMachine="yes"
+          Visible="no"
+          bal:PrimaryPackageType="default" />
+    </Chain>
+  </Bundle>
+</Wix>

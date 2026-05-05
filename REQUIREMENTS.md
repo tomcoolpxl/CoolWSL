@@ -17,7 +17,7 @@ Its job is to give users a safe, distro-first view of local WSL state, expose su
 - x64 only.
 - WinUI 3 desktop app on .NET 10.
 - Windows App SDK 2.0.x.
-- Installer-first release delivery using MSI, ZIP, and checksums assets.
+- Installer-first release delivery using setup EXE, MSI, ZIP, and checksums assets.
 - App-owned data stored under `%LocalAppData%\CoolWSL\`.
 
 ## Product Scope
