@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Validate .NET SDK
         shell: pwsh
@@ -71,11 +73,20 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Generate release notes
+        shell: pwsh
+        run: |
+          .\build\Get-ReleaseNotes.ps1 `
+            -Tag '${{ steps.version.outputs.tag }}' `
+            -Repository '${{ github.repository }}' `
+            -OutputPath 'artifacts/release-notes.md'
+
       - name: Create GitHub Release
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_NOTES_PATH: artifacts/release-notes.md
         run: |
           $releaseFiles = Get-ChildItem -Path .\artifacts\release -Recurse -File |
               Where-Object { $_.Extension -in '.exe', '.msi', '.zip', '.txt' } |
@@ -86,12 +97,17 @@ jobs:
               throw 'No release files were found in artifacts/release.'
           }
 
+          if (-not (Test-Path -Path $env:RELEASE_NOTES_PATH)) {
+              throw "Release notes file '$env:RELEASE_NOTES_PATH' was not generated."
+          }
+
           gh release view $env:RELEASE_TAG *> $null
           if ($LASTEXITCODE -eq 0) {
               gh release upload $env:RELEASE_TAG $releaseFiles --clobber
+              gh release edit $env:RELEASE_TAG --notes-file $env:RELEASE_NOTES_PATH
           }
           else {
-              gh release create $env:RELEASE_TAG $releaseFiles --verify-tag --generate-notes
+              gh release create $env:RELEASE_TAG $releaseFiles --verify-tag --notes-file $env:RELEASE_NOTES_PATH
           }
 
       - name: Generate Winget manifests from published release assets
